@@ -1,6 +1,6 @@
 import {WebSerial} from './src/serial/serialstream'
 import {BLEClient} from './src/ble/ble_client'
-import {Router, DOMService, WorkerService, gsworker, ServiceMessage, proxyWorkerRoutes, workerCanvasRoutes} from '../GraphServiceRouter/index'
+import {Router, DOMService, WorkerService, gsworker, ServiceMessage, proxyWorkerRoutes, workerCanvasRoutes} from '../GraphServiceRouter/index' //'graphscript'
 import { ElementInfo, ElementProps } from 'graphscript/dist/services/dom/types/element';
 
 /**
@@ -47,9 +47,10 @@ decoderworker.request(
     {
         route:'setRoute', 
         args:[
-            function decode(value:any){ //to be overwritten when we want to swap decoders
+            function (value:any) { //to be overwritten when we want to swap decoders
                 return value; //ping pong
-            }.toString()
+            }.toString(),
+            'decode'
         ]
     } as ServiceMessage //use service messages to communicate with disconnected service graphs
 ).then(console.log);
@@ -68,9 +69,11 @@ decoderworker.request(
         route:'setRoute',
         args:[
             function setupSerial(self) {
+                console.log('setting up Serial', self.graph)
                 self.graph.Serial = new self.graph.WebSerial() as WebSerial; 
                 return true;
-            }.toString()
+            }.toString(),
+            'setupSerial'
         ]
     } as ServiceMessage
 ).then(console.log);

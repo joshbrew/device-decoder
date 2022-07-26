@@ -10,7 +10,8 @@ const config = {
         bundleTypes: false, //create .d.ts files, the entry point must be a typescript file! (ts, tsx, etc)
         bundleNode: false, //create node platform plain js build, specify platform:'node' to do the rest of the files 
         bundleHTML: false, //wrap the first entry point file as a plain js script in a boilerplate html file, frontend scripts can be run standalone like a .exe! Server serves this as start page if set to true.
-        minify: true,
+        //minify: false, //https://esbuild.github.io/api/#minify
+        minifyWhitespace:true,
         sourcemap: false
         //globalThis:null //'mymodule'
         //globals:{'index.js':['Graph']}
