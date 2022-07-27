@@ -86,13 +86,13 @@ decoderworker.request({route:'setupSerial'}).then(console.log); //now make sure 
 //alternatively, implement this all in a single web component
 const domtree = {
     'debugger': {
-        template:()=>{return '';},//`<div>Test</div>`;},
+        template:()=>{return '';},//`<div>Test</div>`;}, //`<div>Test</div>`
         tagName:'device-debugger',
-        // styles:`
-        // div {
-        //     background-color: gray;
-        // }
-        // `,
+        styles:`
+        div {
+            background-color: gray;
+        }
+        `,
         children:{
             'header':{
                 tagName:'div',
