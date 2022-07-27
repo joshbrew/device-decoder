@@ -87,6 +87,7 @@ decoderworker.request({route:'setupSerial'}).then(console.log); //now make sure 
 const domtree = {
     'debugger': {
         template:()=>{return '';},//`<div>Test</div>`;},
+        tagName:'device-debugger',
         // styles:`
         // div {
         //     background-color: gray;
