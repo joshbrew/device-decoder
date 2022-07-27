@@ -86,7 +86,10 @@ decoderworker.request({route:'setupSerial'}).then(console.log); //now make sure 
 //alternatively, implement this all in a single web component
 const domtree = {
     'debugger': {
-        tagName:'div',
+        template:()=>{return '';},//`<div>Test</div>`;},
+        // styles:`
+        // div {
+        // `,
         children:{
             'header':{
                 tagName:'div',
@@ -277,14 +280,6 @@ const domtree = {
                                             document.getElementById('serialconfigcontainer').style.display = 'none';
                                             document.getElementById('serialconfigdropdown').innerText = '++'
                                         }
-                                        // console.log(ev)
-                                        // let node = ev.target.node;
-                                        // for(const key in node.children) {
-                                        //     if(node.children[key].element) {
-                                        //         if(!node.children[key].element.style.display) node.children[key].element.style.display = 'none';
-                                        //         else node.children[key].element.style.display = '';
-                                        //     }
-                                        // }
                                     }
                                 }
                             },
@@ -471,27 +466,31 @@ const domtree = {
                     } as ElementProps
                 }
             } as ElementProps,
-            'console':{
+            'connections':{
+                tagName:'div'
+            },
+            'output':{
                 tagName:'div',
                 style:{
-                    width:'100%',
+                    display:'flex',
                     height:'300px',
                     color:'white',
                     backgroundColor:'black',
                     fontSize:'10px',
-                    fontFamily:'Consolas, monaco, monospace'
+                    fontFamily:'Consolas, monaco, monospace',
+                    overflowY:'scroll'
                 }
             } as ElementProps,
-            'footer':{
+            'console':{
                 tagName:'div',
-                children:{
-                    'decoder':{
-                        tagName:'div'
-                    } as ElementProps,
-                    'linebreak':{
-                        tagName:'div',
-                        children:{}
-                    } as ElementProps
+                style:{
+                    display:'flex',
+                    height:'300px',
+                    color:'white',
+                    backgroundColor:'black',
+                    fontSize:'10px',
+                    fontFamily:'Consolas, monaco, monospace',
+                    overflowY:'scroll'
                 }
             } as ElementProps
         }
