@@ -106,6 +106,7 @@ const domtree = {
                     } as ElementProps,
                     'bleconfig':{
                         tagName:'div',
+                        innerHTML:'dropdown<br/>',
                         style:{
                             fontSize:'10px',
                             textAlign:'right'
@@ -132,8 +133,7 @@ const domtree = {
                                     'deviceId':{
                                         tagName:'input',
                                         attributes:{
-                                            type:'text',
-                                            placeholder:'e.g. ESP32',
+                                            type:'text'
                                         }
                                     } as ElementProps,
                                 }
@@ -206,6 +206,7 @@ const domtree = {
                     } as ElementProps,
                     'serialconfig':{ //need labels
                         tagName:'div',
+                        innerHTML:'dropdown<br/>',
                         style:{
                             fontSize:'10px',
                             textAlign:'right'
