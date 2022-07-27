@@ -2,6 +2,7 @@ import {WebSerial} from './src/serial/serialstream'
 import {BLEClient} from './src/ble/ble_client'
 import {Router, DOMService, WorkerService, gsworker, ServiceMessage, proxyWorkerRoutes, workerCanvasRoutes} from '../GraphServiceRouter/index' //'graphscript'
 import { ElementInfo, ElementProps } from 'graphscript/dist/services/dom/types/element';
+import { DOMElementProps } from 'graphscript/dist/services/dom/types/component';
 
 /**
     <Debugger window component>
@@ -103,10 +104,10 @@ const domtree = {
                         oncreate:(self: HTMLElement, info?: ElementInfo)=>{
                             self.onclick = () => {
                                 let service = (document.getElementById('serviceuuid') as HTMLInputElement).value;
-                                if(!service) service = '0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000';
+                                if(!service) service = '0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase();
                                 BLE.setup({
                                     services:{
-                                        [(document.getElementById('serviceuuid') as HTMLInputElement).value.toLowerCase()]:{
+                                        [service]:{
 
                                         }
                                     }
@@ -114,8 +115,13 @@ const domtree = {
                                     console.log(info)
                                     BLE.client.getServices(info.device.deviceId).then((services) => {
                                         console.log('services', services)
-                                        let html = services.map((s) => {return `${JSON.stringify(s)}`;})
-                                        document.getElementById('services').innerHTML = html.join('<br/>');
+                                        let template = `<tr><th>UUID</th><th>Notify</th><th>Read</th><th>Write</th><th>Broadcast</th><th>Indicate</th></tr>`
+                                        services.forEach((s) => {     
+                                            s.characteristics.forEach((c) => { 
+                                                template += `<tr><td>${c.uuid}</td><td>${c.properties.notify}</td><td>${c.properties.read}</td><td>${c.properties.write}</td><td>${c.properties.broadcast}</td><td>${c.properties.indicate}</td></tr>`;
+                                            }); 
+                                        });
+                                        document.getElementById('services').innerHTML = template;
                                     })
                                 }); //set options in bleconfig
                             }
@@ -202,9 +208,10 @@ const domtree = {
                                         innerText:'Services Config ',
                                         children:{
                                             'services':{ //need to configure options for multiple services and multiple characteristics per service in like a table
-                                                tagName:'div',
+                                                tagName:'table',
                                                 style:{
-                                                    border:'1px solid black'
+                                                    border:'1px solid black',
+                                                    display:'flex'
                                                 },
                                                 children:{
                                                 }
@@ -497,7 +504,7 @@ const domtree = {
                 }
             } as ElementProps
         }
-    } as ElementProps
+    } as DOMElementProps
 };
 
 
