@@ -22,13 +22,18 @@ import { DOMElementProps } from 'graphscript/dist/services/dom/types/component';
                 <baudRate>
                 <bufferSize>
 
+            Show several active connections in their own sub windows with selective disconnecting and decoding etc.
+
             Console mode (toggle one):
             <Latest> (only the most recent samples in raw text)
             <Scrolling> (up to 1000 samples in raw text)
             <Charting> (if debugger output matches a given format - use arduino output format?)
             <Blocks> (for ble services)
+
+            Create a window for active serial connections with selective disconnecting and decoding etc.
         <------------------------------------------>
             <Console window> - takes up most of the screen
+            Create a console for each active connection
         <------------------------------------------>
             <Connection Info> - expands
             <Decoder options> - expands (default text and raw byte outputs, plus write-your-own with a simple callback to return modified results, incl a set format that can be charted arbitrarily)
