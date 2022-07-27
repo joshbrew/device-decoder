@@ -105,7 +105,9 @@ const domtree = {
                                         }
                                     }
                                 }).then((info)=>{
+                                    console.log(info)
                                     BLE.client.getServices(info.device.deviceId).then((services) => {
+                                        console.log('services', services)
                                         let html = services.map((s) => {return `${JSON.stringify(s)}`;})
                                         document.getElementById('services').innerHTML = html.join('<br/>');
                                     })
@@ -115,68 +117,96 @@ const domtree = {
                     } as ElementProps,
                     'bleconfig':{
                         tagName:'div',
-                        innerHTML:'dropdown<br/>',
                         style:{
                             fontSize:'10px',
                             textAlign:'right'
                         },
                         children:{
-                            'namePrefixLabel':{
-                                tagName:'label',
-                                innerText:'BLE Device Name',
-                                children:{
-                                    'namePrefix':{
-                                        tagName:'input',
-                                        attributes:{
-                                            type:'text',
-                                            placeholder:'e.g. ESP32',
+                            'bleconfigdropdown':{
+                                tagName:'button',
+                                innerText:'--',
+                                attributes:{
+                                    onclick:(ev)=>{
+                                        if(document.getElementById('bleconfigcontainer').style.display === 'none') {
+                                            document.getElementById('bleconfigcontainer').style.display = '';
+                                            document.getElementById('bleconfigdropdown').innerText = '--'
                                         }
-                                    } as ElementProps,
-                                }
-                            } as ElementProps,
-                            'ln':{template:'<br/>'},
-                            'deviceIdLabel':{
-                                tagName:'label',
-                                innerText:'BLE Device ID (direct connect)',
-                                children:{
-                                    'deviceId':{
-                                        tagName:'input',
-                                        attributes:{
-                                            type:'text'
+                                        else {
+                                            document.getElementById('bleconfigcontainer').style.display = 'none';
+                                            document.getElementById('bleconfigdropdown').innerText = '++'
                                         }
-                                    } as ElementProps,
+                                        // console.log(ev)
+                                        // let node = ev.target.node;
+                                        // for(const key in node.children) {
+                                        //     if(node.children[key].element) {
+                                        //         if(!node.children[key].element.style.display) node.children[key].element.style.display = 'none';
+                                        //         else node.children[key].element.style.display = '';
+                                        //     }
+                                        // }
+                                    }
                                 }
-                            } as ElementProps,
-                            'ln2':{template:'<br/>'},
-                            'serviceuuidLabel':{
-                                tagName:'label',
-                                innerText:'Primary Service UUID',
+                            },
+                            'bleconfigcontainer':{
+                                tagName:'div',
                                 children:{
-                                    'serviceuuid':{
-                                        tagName:'input',
-                                        attributes:{
-                                            type:'text',
-                                            value:'0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase(),
-                                            placeholder:'0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase()
-                                        }
-                                    } as ElementProps,
-                                }
-                            } as ElementProps,
-                            'ln3':{template:'<br/>'},
-                            'servicesLabel':{
-                                tagName:'label',
-                                innerText:'Services Config ',
-                                children:{
-                                    'services':{ //need to configure options for multiple services and multiple characteristics per service in like a table
-                                        tagName:'div',
-                                        style:{
-                                            border:'1px solid black'
-                                        },
+                                    'namePrefixLabel':{
+                                        tagName:'label',
+                                        innerText:'BLE Device Name',
                                         children:{
+                                            'namePrefix':{
+                                                tagName:'input',
+                                                attributes:{
+                                                    type:'text',
+                                                    placeholder:'e.g. ESP32',
+                                                }
+                                            } as ElementProps,
                                         }
-                                    } as ElementProps
+                                    } as ElementProps,
+                                    'ln':{template:'<br/>'},
+                                    'deviceIdLabel':{
+                                        tagName:'label',
+                                        innerText:'BLE Device ID (direct connect)',
+                                        children:{
+                                            'deviceId':{
+                                                tagName:'input',
+                                                attributes:{
+                                                    type:'text'
+                                                }
+                                            } as ElementProps,
+                                        }
+                                    } as ElementProps,
+                                    'ln2':{template:'<br/>'},
+                                    'serviceuuidLabel':{
+                                        tagName:'label',
+                                        innerText:'Primary Service UUID',
+                                        children:{
+                                            'serviceuuid':{
+                                                tagName:'input',
+                                                attributes:{
+                                                    type:'text',
+                                                    value:'0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase(),
+                                                    placeholder:'0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase()
+                                                }
+                                            } as ElementProps,
+                                        }
+                                    } as ElementProps,
+                                    'ln3':{template:'<br/>'},
+                                    'servicesLabel':{
+                                        tagName:'label',
+                                        innerText:'Services Config ',
+                                        children:{
+                                            'services':{ //need to configure options for multiple services and multiple characteristics per service in like a table
+                                                tagName:'div',
+                                                style:{
+                                                    border:'1px solid black'
+                                                },
+                                                children:{
+                                                }
+                                            } as ElementProps
+                                        }
+                                    }
                                 }
-                            }
+                            } as ElementProps,
                         } as ElementProps,
                     } as ElementProps,
                     'serialconnect':{
@@ -229,182 +259,210 @@ const domtree = {
                     } as ElementProps,
                     'serialconfig':{ //need labels
                         tagName:'div',
-                        innerHTML:'dropdown<br/>',
                         style:{
                             fontSize:'10px',
                             textAlign:'right'
                         },
                         children:{
-                            'baudRateLabel':{
-                                tagName:'label',
-                                innerText:'Baud Rate (bps)',
-                                children:{
-                                    'baudRate':{
-                                        tagName:'input',
-                                        attributes:{
-                                            type:'number',
-                                            placeholder:115200,
-                                            value:115200,
-                                            min:1, //anything below 9600 is unlikely
-                                            max:10000000 //10M baud I think is highest web serial supports... might only be 921600
+                            'serialconfigdropdown':{
+                                tagName:'button',
+                                innerText:'--',
+                                attributes:{
+                                    onclick:(ev)=>{
+                                        if(document.getElementById('serialconfigcontainer').style.display === 'none') {
+                                            document.getElementById('serialconfigcontainer').style.display = '';
+                                            document.getElementById('serialconfigdropdown').innerText = '--'
                                         }
-                                    } as ElementProps
-                                }
-                            } as ElementProps,
-                            'ln':{template:'<br/>'},
-                            'bufferSizeLabel':{
-                                tagName:'label',
-                                innerText:'Read/Write buffer size (bytes)',
-                                children:{
-                                    'bufferSize':{
-                                        tagName:'input',
-                                        attributes:{
-                                            type:'number',
-                                            placeholder:255,
-                                            value:255,
-                                            min:1,
-                                            max:10000000 
+                                        else {
+                                            document.getElementById('serialconfigcontainer').style.display = 'none';
+                                            document.getElementById('serialconfigdropdown').innerText = '++'
                                         }
-                                    } as ElementProps,
+                                        // console.log(ev)
+                                        // let node = ev.target.node;
+                                        // for(const key in node.children) {
+                                        //     if(node.children[key].element) {
+                                        //         if(!node.children[key].element.style.display) node.children[key].element.style.display = 'none';
+                                        //         else node.children[key].element.style.display = '';
+                                        //     }
+                                        // }
+                                    }
                                 }
-                            } as ElementProps,
-                            'ln2':{template:'<br/>'},
-                            'parityLabel':{
-                                tagName:'label',
-                                innerText:'Parity',
+                            },
+                            'serialconfigcontainer':{
+                                tagName:'div',
                                 children:{
-                                    'parity':{
-                                        tagName:'select',
+                                    'baudRateLabel':{
+                                        tagName:'label',
+                                        innerText:'Baud Rate (bps)',
                                         children:{
-                                            'none':{
-                                                tagName:'option',
+                                            'baudRate':{
+                                                tagName:'input',
                                                 attributes:{
-                                                    value:'none',
-                                                    selected:true,
-                                                    innerText:'none'
+                                                    type:'number',
+                                                    placeholder:115200,
+                                                    value:115200,
+                                                    min:1, //anything below 9600 is unlikely
+                                                    max:10000000 //10M baud I think is highest web serial supports... might only be 921600
                                                 }
-                                            },
-                                            'even':{
-                                                tagName:'option',
-                                                attributes:{
-                                                    value:'even',
-                                                    innerText:'even'
-                                                }
-                                            },
-                                            'odd':{
-                                                tagName:'option',
-                                                attributes:{
-                                                    value:'odd',
-                                                    innerText:'odd'
-                                                }
-                                            }
+                                            } as ElementProps
                                         }
                                     } as ElementProps,
-                                }
-                            } as ElementProps,
-                            'ln3':{template:'<br/>'},
-                            'dataBitsLabel':{
-                                tagName:'label',
-                                innerText:'Data bits (7 or 8)',
-                                children:{
-                                    'dataBits':{
-                                        tagName:'input',
-                                        attributes:{
-                                            type:'number',
-                                            placeholder:8,
-                                            value:8,
-                                            min:7, 
-                                            max:8 
-                                        }
-                                    } as ElementProps,
-                                }
-                            } as ElementProps,
-                            'ln4':{template:'<br/>'},
-                            'stopBitsLabel':{
-                                tagName:'label',
-                                innerText:'Stop bits (1 or 2)',
-                                children:{
-                                    'stopBits':{
-                                        tagName:'input',
-                                        attributes:{
-                                            type:'number',
-                                            placeholder:1,
-                                            value:1,
-                                            min:1, 
-                                            max:2 
-                                        }
-                                    } as ElementProps,
-                                }
-                            } as ElementProps,
-                            'ln5':{template:'<br/>'},
-                            'flowControlLabel':{
-                                tagName:'label',
-                                innerText:'Flow control (hardware?)',
-                                children:{
-                                    'flowControl':{
-                                        tagName:'select',
+                                    'ln':{template:'<br/>'},
+                                    'bufferSizeLabel':{
+                                        tagName:'label',
+                                        innerText:'Read/Write buffer size (bytes)',
                                         children:{
-                                            'none':{
-                                                tagName:'option',
+                                            'bufferSize':{
+                                                tagName:'input',
                                                 attributes:{
-                                                    value:'none',
-                                                    selected:true,
-                                                    innerText:'none'
+                                                    type:'number',
+                                                    placeholder:255,
+                                                    value:255,
+                                                    min:1,
+                                                    max:10000000 
                                                 }
-                                            },
-                                            'hardware':{
-                                                tagName:'option',
+                                            } as ElementProps,
+                                        }
+                                    } as ElementProps,
+                                    'ln2':{template:'<br/>'},
+                                    'parityLabel':{
+                                        tagName:'label',
+                                        innerText:'Parity',
+                                        children:{
+                                            'parity':{
+                                                tagName:'select',
+                                                children:{
+                                                    'none':{
+                                                        tagName:'option',
+                                                        attributes:{
+                                                            value:'none',
+                                                            selected:true,
+                                                            innerText:'none'
+                                                        }
+                                                    },
+                                                    'even':{
+                                                        tagName:'option',
+                                                        attributes:{
+                                                            value:'even',
+                                                            innerText:'even'
+                                                        }
+                                                    },
+                                                    'odd':{
+                                                        tagName:'option',
+                                                        attributes:{
+                                                            value:'odd',
+                                                            innerText:'odd'
+                                                        }
+                                                    }
+                                                }
+                                            } as ElementProps,
+                                        }
+                                    } as ElementProps,
+                                    'ln3':{template:'<br/>'},
+                                    'dataBitsLabel':{
+                                        tagName:'label',
+                                        innerText:'Data bits (7 or 8)',
+                                        children:{
+                                            'dataBits':{
+                                                tagName:'input',
                                                 attributes:{
-                                                    value:'hardware',
-                                                    innerText:'hardware'
+                                                    type:'number',
+                                                    placeholder:8,
+                                                    value:8,
+                                                    min:7, 
+                                                    max:8 
                                                 }
-                                            },
+                                            } as ElementProps,
                                         }
                                     } as ElementProps,
-                                }
-                            } as ElementProps,
-                            'ln6':{template:'<br/>'},
-                            'usbVendorIdLabel':{
-                                tagName:'label',
-                                innerText:'Vendor ID Filter? (hexadecimal)',
-                                children:{
-                                    'usbVendorId':{
-                                        tagName:'input',
-                                        attributes:{
-                                            type:'text',
-                                            placeholder:'0xabcd',
+                                    'ln4':{template:'<br/>'},
+                                    'stopBitsLabel':{
+                                        tagName:'label',
+                                        innerText:'Stop bits (1 or 2)',
+                                        children:{
+                                            'stopBits':{
+                                                tagName:'input',
+                                                attributes:{
+                                                    type:'number',
+                                                    placeholder:1,
+                                                    value:1,
+                                                    min:1, 
+                                                    max:2 
+                                                }
+                                            } as ElementProps,
                                         }
                                     } as ElementProps,
-                                }
-                            } as ElementProps,
-                            'ln7':{template:'<br/>'},
-                            'usbProductIdLabel':{
-                                tagName:'label',
-                                innerText:'Product ID Filter? (hexadecimal)',
-                                children:{
-                                    'usbProductId':{
-                                        tagName:'input',
-                                        attributes:{
-                                            type:'text',
-                                            placeholder:'0xefgh',
+                                    'ln5':{template:'<br/>'},
+                                    'flowControlLabel':{
+                                        tagName:'label',
+                                        innerText:'Flow control (hardware?)',
+                                        children:{
+                                            'flowControl':{
+                                                tagName:'select',
+                                                children:{
+                                                    'none':{
+                                                        tagName:'option',
+                                                        attributes:{
+                                                            value:'none',
+                                                            selected:true,
+                                                            innerText:'none'
+                                                        }
+                                                    },
+                                                    'hardware':{
+                                                        tagName:'option',
+                                                        attributes:{
+                                                            value:'hardware',
+                                                            innerText:'hardware'
+                                                        }
+                                                    },
+                                                }
+                                            } as ElementProps,
                                         }
                                     } as ElementProps,
-                                }
-                            } as ElementProps,
-                            'ln8':{template:'<br/>'},
-                            'frequencyLabel':{
-                                tagName:'label',
-                                innerText:'Read frequency? (ms)',
-                                children:{
-                                    'frequency':{
-                                        tagName:'input',
-                                        attributes:{
-                                            type:'number',
-                                            placeholder:10,
-                                            value:10,
-                                            min:0.001,
-                                            max:10000000,
-                                            step:0.001
+                                    'ln6':{template:'<br/>'},
+                                    'usbVendorIdLabel':{
+                                        tagName:'label',
+                                        innerText:'Vendor ID Filter? (hexadecimal)',
+                                        children:{
+                                            'usbVendorId':{
+                                                tagName:'input',
+                                                attributes:{
+                                                    type:'text',
+                                                    placeholder:'0xabcd',
+                                                }
+                                            } as ElementProps,
+                                        }
+                                    } as ElementProps,
+                                    'ln7':{template:'<br/>'},
+                                    'usbProductIdLabel':{
+                                        tagName:'label',
+                                        innerText:'Product ID Filter? (hexadecimal)',
+                                        children:{
+                                            'usbProductId':{
+                                                tagName:'input',
+                                                attributes:{
+                                                    type:'text',
+                                                    placeholder:'0xefgh',
+                                                }
+                                            } as ElementProps,
+                                        }
+                                    } as ElementProps,
+                                    'ln8':{template:'<br/>'},
+                                    'frequencyLabel':{
+                                        tagName:'label',
+                                        innerText:'Read frequency? (ms)',
+                                        children:{
+                                            'frequency':{
+                                                tagName:'input',
+                                                attributes:{
+                                                    type:'number',
+                                                    placeholder:10,
+                                                    value:10,
+                                                    min:0.001,
+                                                    max:10000000,
+                                                    step:0.001
+                                                }
+                                            } as ElementProps
                                         }
                                     } as ElementProps
                                 }
