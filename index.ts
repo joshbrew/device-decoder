@@ -195,6 +195,9 @@ const domtree = {
                     } as ElementProps,
                     'serialconfig':{ //need labels
                         tagName:'div',
+                        style:{
+                            fontSize:'10px'
+                        },
                         children:{
                             'baudRateLabel':{
                                 tagName:'label',
@@ -212,6 +215,7 @@ const domtree = {
                                     } as ElementProps
                                 }
                             } as ElementProps,
+                            'ln':{template:'<br/>'},
                             'bufferSizeLabel':{
                                 tagName:'label',
                                 innerText:'Read/Write buffer size (bytes)',
@@ -228,6 +232,7 @@ const domtree = {
                                     } as ElementProps,
                                 }
                             } as ElementProps,
+                            'ln2':{template:'<br/>'},
                             'parityLabel':{
                                 tagName:'label',
                                 innerText:'Parity',
@@ -261,6 +266,7 @@ const domtree = {
                                     } as ElementProps,
                                 }
                             } as ElementProps,
+                            'ln3':{template:'<br/>'},
                             'dataBitsLabel':{
                                 tagName:'label',
                                 innerText:'Data bits (7 or 8)',
@@ -277,6 +283,7 @@ const domtree = {
                                     } as ElementProps,
                                 }
                             } as ElementProps,
+                            'ln4':{template:'<br/>'},
                             'stopBitsLabel':{
                                 tagName:'label',
                                 innerText:'Stop bits (1 or 2)',
@@ -293,6 +300,7 @@ const domtree = {
                                     } as ElementProps,
                                 }
                             } as ElementProps,
+                            'ln5':{template:'<br/>'},
                             'flowControlLabel':{
                                 tagName:'label',
                                 innerText:'Flow control (hardware?)',
@@ -319,6 +327,7 @@ const domtree = {
                                     } as ElementProps,
                                 }
                             } as ElementProps,
+                            'ln6':{template:'<br/>'},
                             'usbVendorIdLabel':{
                                 tagName:'label',
                                 innerText:'Vendor ID Filter? (hexadecimal)',
@@ -332,6 +341,7 @@ const domtree = {
                                     } as ElementProps,
                                 }
                             } as ElementProps,
+                            'ln7':{template:'<br/>'},
                             'usbProductIdLabel':{
                                 tagName:'label',
                                 innerText:'Product ID Filter? (hexadecimal)',
@@ -345,6 +355,7 @@ const domtree = {
                                     } as ElementProps,
                                 }
                             } as ElementProps,
+                            'ln8':{template:'<br/>'},
                             'frequencyLabel':{
                                 tagName:'label',
                                 innerText:'Read frequency? (ms)',
