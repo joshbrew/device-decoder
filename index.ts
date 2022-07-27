@@ -59,7 +59,7 @@ decoderworker.request(
 decoderworker.request(
     {
         route:'receiveClass',
-        args:WebSerial.toString() 
+        args:[WebSerial.toString(),'WebSerial'] 
     } as ServiceMessage
 ).then(console.log);
 
@@ -69,8 +69,10 @@ decoderworker.request(
         route:'setRoute',
         args:[
             function setupSerial(self) {
-                console.log('setting up Serial', self.graph)
                 self.graph.Serial = new self.graph.WebSerial() as WebSerial; 
+                console.log('setting up Serial', self.graph.Serial)
+
+                self.graph.Serial.getPorts().then(console.log)
                 return true;
             }.toString(),
             'setupSerial'
