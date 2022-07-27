@@ -89,6 +89,8 @@ const domtree = {
         template:()=>{return '';},//`<div>Test</div>`;},
         // styles:`
         // div {
+        //     background-color: gray;
+        // }
         // `,
         children:{
             'header':{
