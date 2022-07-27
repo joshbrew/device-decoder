@@ -33,7 +33,7 @@ import { DOMElementProps } from 'graphscript/dist/services/dom/types/component';
             Create a window for active serial connections with selective disconnecting and decoding etc.
         <------------------------------------------>
             <Console window> - takes up most of the screen
-            Create a console for each active connection
+            Create a console for each active usb connection/ble characteristic (read/write/notify)
         <------------------------------------------>
             <Connection Info> - expands
             <Decoder options> - expands (default text and raw byte outputs, plus write-your-own with a simple callback to return modified results, incl a set format that can be charted arbitrarily)
