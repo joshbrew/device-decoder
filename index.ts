@@ -96,9 +96,11 @@ const domtree = {
                         innerText:'BLE Device',
                         oncreate:(self: HTMLElement, info?: ElementInfo)=>{
                             self.onclick = () => {
+                                let service = (document.getElementById('serviceuuid') as HTMLInputElement).value;
+                                if(!service) service = '0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000';
                                 BLE.setup({
                                     services:{
-                                        ['0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase()]:{
+                                        [(document.getElementById('serviceuuid') as HTMLInputElement).value.toLowerCase()]:{
 
                                         }
                                     }
@@ -146,6 +148,21 @@ const domtree = {
                                 }
                             } as ElementProps,
                             'ln2':{template:'<br/>'},
+                            'serviceuuidLabel':{
+                                tagName:'label',
+                                innerText:'Primary Service UUID',
+                                children:{
+                                    'serviceuuid':{
+                                        tagName:'input',
+                                        attributes:{
+                                            type:'text',
+                                            value:'0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase(),
+                                            placeholder:'0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase()
+                                        }
+                                    } as ElementProps,
+                                }
+                            } as ElementProps,
+                            'ln3':{template:'<br/>'},
                             'servicesLabel':{
                                 tagName:'label',
                                 innerText:'Services Config ',
