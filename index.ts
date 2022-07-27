@@ -97,9 +97,16 @@ const domtree = {
                         oncreate:(self: HTMLElement, info?: ElementInfo)=>{
                             self.onclick = () => {
                                 BLE.setup({
+                                    services:{
+                                        ['0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase()]:{
 
+                                        }
+                                    }
                                 }).then((info)=>{
-
+                                    BLE.client.getServices(info.device.deviceId).then((services) => {
+                                        let html = services.map((s) => {return `${JSON.stringify(s)}`;})
+                                        document.getElementById('services').innerHTML = html.join('<br/>');
+                                    })
                                 }); //set options in bleconfig
                             }
                         }
@@ -149,7 +156,6 @@ const domtree = {
                                             border:'1px solid black'
                                         },
                                         children:{
-                                            'ln':{template:'<br/>'}
                                         }
                                     } as ElementProps
                                 }

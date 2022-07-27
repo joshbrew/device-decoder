@@ -81,21 +81,22 @@ export class BLEClient {
             } else {
                 if(options) {
                     let deviceRequest:any = {
-                        services,
+                        filters:[{services}],
                         optionalServices:services
                     };
-                    if(options?.namePrefix) deviceRequest.namePrefix = options.namePrefix;
+                    if(options?.namePrefix) deviceRequest.filters[0].namePrefix = options.namePrefix;
                 
                     this.client.requestDevice(deviceRequest)
                         .then((device) => {
                             res(this.setupDevice(device, options));
                         });
                 }
-                
-                this.client.requestDevice()
-                    .then((device) => {
-                        res(this.setupDevice(device, options));
-                    });
+                else {
+                    this.client.requestDevice()
+                        .then((device) => {
+                            res(this.setupDevice(device, options));
+                        });
+                }
             }
             
         })
