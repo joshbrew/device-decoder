@@ -106,6 +106,10 @@ const domtree = {
                     } as ElementProps,
                     'bleconfig':{
                         tagName:'div',
+                        style:{
+                            fontSize:'10px',
+                            textAlign:'right'
+                        },
                         children:{
                             'namePrefixLabel':{
                                 tagName:'label',
@@ -120,6 +124,7 @@ const domtree = {
                                     } as ElementProps,
                                 }
                             } as ElementProps,
+                            'ln':{template:'<br/>'},
                             'deviceIdLabel':{
                                 tagName:'label',
                                 innerText:'BLE Device ID (direct connect)',
@@ -133,13 +138,19 @@ const domtree = {
                                     } as ElementProps,
                                 }
                             } as ElementProps,
+                            'ln2':{template:'<br/>'},
                             'servicesLabel':{
                                 tagName:'label',
-                                innerText:'Service Config',
+                                innerText:'Services Config ',
                                 children:{
                                     'services':{ //need to configure options for multiple services and multiple characteristics per service in like a table
                                         tagName:'div',
-                                        children:{}
+                                        style:{
+                                            border:'1px solid black'
+                                        },
+                                        children:{
+                                            'ln':{template:'<br/>'}
+                                        }
                                     } as ElementProps
                                 }
                             }
@@ -196,7 +207,8 @@ const domtree = {
                     'serialconfig':{ //need labels
                         tagName:'div',
                         style:{
-                            fontSize:'10px'
+                            fontSize:'10px',
+                            textAlign:'right'
                         },
                         children:{
                             'baudRateLabel':{
