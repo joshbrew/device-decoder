@@ -315,6 +315,9 @@ const domtree = {
                                     ConnectionTemplate.addElement(`${id}-info`);
                                     let elm = document.createElement(`${id}-info`);
                                     document.getElementById('connections').appendChild(elm);
+
+                                    //let debuggers = document.querySelectorAll('device-debugger');
+                                    //debuggers.forEach((d) => {if(d.querySelector(id+'-info)) { d.querySelector('#connections').appendChild(elm);  }}) //pure html based modularity ex
                                     
                                 }); //set options in bleconfig
                             }
