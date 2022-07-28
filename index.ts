@@ -188,8 +188,8 @@ const domtree = {
                                             //spawn a graph based prototype hierarchy for the connection info?
                                             //e.g. to show the additional modularity off
     
-                                            let c = document.getElementById(this.stream.deviceId+'console');
-                                            let outputmode = document.getElementById(this.stream.deviceId+'outputmode') as HTMLInputElement;
+                                            let c = self.querySelector('#'+this.stream.deviceId+'console') as HTMLElement;
+                                            let outputmode = self.querySelector('#'+this.stream.deviceId+'outputmode') as HTMLInputElement;
     
                                             this.anim = () => { 
     
@@ -205,7 +205,7 @@ const domtree = {
                                                 }
                                             }
 
-                                            document.getElementById(this.stream.deviceId).style.display = '';
+                                            (self.querySelector('#'+this.stream.deviceId) as HTMLElement).style.display = '';
 
                                             const xconnectEvent = (ev) => {
                                                 BLE.disconnect(this.stream.device).then(() => {
@@ -224,14 +224,14 @@ const domtree = {
                                             (self.querySelector('#'+this.stream.deviceId+'x') as HTMLButtonElement).onclick = () => {
                                                 BLE.disconnect(this.stream.device);
                                                 this.delete();
-                                                document.getElementById(this.stream.deviceId+'console').remove(); //remove the adjacent output console
+                                                self.querySelector('#'+this.stream.deviceId+'console').remove(); //remove the adjacent output console
                                             }
                                         
                                             // (self.querySelector('#'+this.stream.deviceId+'decoder') as HTMLInputElement).onchange = (ev) => {
                                             //     this.decoder = decoders[(self.querySelector('#'+this.stream.deviceId+'decoder') as HTMLInputElement).value];
                                             // }
 
-                                            let rssielm = document.getElementById(this.stream.device.deviceId + 'rssi');
+                                            let rssielm = self.querySelector('#'+this.stream.device.deviceId + 'rssi') as HTMLElement;
 
                                             let rssiFinder = () => {
                                                 if(BLE.devices[this.stream.device.deviceId]) {
@@ -247,12 +247,12 @@ const domtree = {
 
                                             BLE.client.getServices(this.stream.device.deviceId).then((svcs) => {
                                                 console.log('services', svcs)
-                                                document.getElementById(this.stream.deviceId+'info').innerHTML = `<tr><th>UUID</th><th>Notify</th><th>Read</th><th>Write</th><th>Broadcast</th><th>Indicate</th></tr>`
+                                                self.querySelector('#'+this.stream.deviceId+'info').innerHTML = `<tr><th>UUID</th><th>Notify</th><th>Read</th><th>Write</th><th>Broadcast</th><th>Indicate</th></tr>`
                                                 svcs.forEach((s) => {    
-                                                    document.getElementById(this.stream.deviceId+'info').insertAdjacentHTML('beforeend', `<tr colSpan=6><th>${s.uuid}</th></tr>`)
+                                                    self.querySelector('#'+this.stream.deviceId+'info').insertAdjacentHTML('beforeend', `<tr colSpan=6><th>${s.uuid}</th></tr>`)
                                                     s.characteristics.forEach((c) => { 
                                                         //build interactivity/subscriptions for each available service characteristic based on readable/writable/notify properties
-                                                        document.getElementById(this.stream.deviceId+'info').insertAdjacentHTML(
+                                                        self.querySelector('#'+this.stream.deviceId+'info').insertAdjacentHTML(
                                                             'beforeend', 
                                                             `<tr>
                                                                 <td id='${c.uuid}'>${c.uuid}</td>
@@ -265,9 +265,9 @@ const domtree = {
                                                         );
 
                                                         if(c.properties.notify) {
-                                                            let decoderselect = document.getElementById(c.uuid+'notifydecoder') as HTMLInputElement;
-                                                            let debugmessage = `${c.uuid} notify:`
-                                                            document.getElementById(c.uuid+'notifybutton').onclick = () => {
+                                                            let decoderselect = self.querySelector('#'+c.uuid+'notifydecoder') as HTMLInputElement;
+                                                            let debugmessage = `${c.uuid} notify:`;
+                                                            (self.querySelector('#'+c.uuid+'notifybutton') as HTMLButtonElement).onclick = () => {
                                                                 BLE.subscribe(this.stream.device, s.uuid, c.uuid, (result:DataView) => {
                                                                     this.output = decoders[decoderselect.value](result.buffer,debugmessage);
 
@@ -277,9 +277,9 @@ const domtree = {
                                                             }
                                                         }
                                                         if(c.properties.read) {
-                                                            let decoderselect = document.getElementById(c.uuid+'readdecoder') as HTMLInputElement;
-                                                            let debugmessage = `${c.uuid} read:`
-                                                            document.getElementById(c.uuid+'readbutton').onclick = () => { 
+                                                            let decoderselect = self.querySelector('#'+c.uuid+'readdecoder') as HTMLInputElement;
+                                                            let debugmessage = `${c.uuid} read:`;
+                                                            (self.querySelector('#'+c.uuid+'readbutton') as HTMLButtonElement).onclick = () => { 
                                                                 BLE.read(this.stream.device, s.uuid, c.uuid, (result:DataView) => {
                                                                     this.output = decoders[decoderselect.value](result.buffer,debugmessage);
 
@@ -289,8 +289,8 @@ const domtree = {
                                                             }
                                                         }
                                                         if(c.properties.write) {
-                                                            let writeinput = document.getElementById(c.uuid+'writeinput') as HTMLInputElement;
-                                                            document.getElementById(c.uuid+'writebutton').onclick = () => { 
+                                                            let writeinput = self.querySelector('#'+c.uuid+'writeinput') as HTMLInputElement;
+                                                            (self.querySelector('#'+c.uuid+'writebutton') as HTMLButtonElement).onclick = () => { 
                                                                 let value:any = writeinput.value;
                                                                 if(parseInt(value)) value = parseInt(value);
                                                                 BLE.write(this.stream.device, s.uuid, c.uuid, BLEClient.toDataView(value), () => {
@@ -521,9 +521,9 @@ const domtree = {
                                             //spawn a graph based prototype hierarchy for the connection info?
                                             //e.g. to show the additional modularity off
     
-                                            let c = document.getElementById(this.stream._id+'console');
-                                            let outputmode = document.getElementById(this.stream._id+'outputmode') as HTMLInputElement;
-                                            let readrate = document.getElementById(this.stream._id+'readrate');
+                                            let c = self.querySelector('#'+this.stream._id+'console') as HTMLElement;
+                                            let outputmode = self.querySelector('#'+'outputmode') as HTMLInputElement;
+                                            let readrate = self.querySelector('#'+this.stream._id+'readrate') as HTMLElement;
     
                                             this.settings.anim = () => { 
 
@@ -544,14 +544,14 @@ const domtree = {
                                             Serial.openPort(port, this.settings).then(()=>{
 
                                                 (self.querySelector('#'+this.stream._id+'send') as HTMLButtonElement).onclick = () => {
-                                                    let value = (document.getElementById(this.stream._id+'input') as HTMLButtonElement).value;
+                                                    let value = (self.querySelector('#'+this.stream._id+'input') as HTMLButtonElement).value;
                                                     if(parseInt(value)) {
                                                         Serial.writePort(port,WebSerial.toDataView(parseInt(value)));
                                                     } else Serial.writePort(port,WebSerial.toDataView((value)));
                                                 }
 
                                                 Serial.readStream(this.stream);
-                                                document.getElementById(this.stream._id).style.display = '';
+                                                (self.querySelector('#'+this.stream._id) as HTMLElement).style.display = '';
 
                                                 const xconnectEvent = (ev) => {
                                                     Serial.closeStream(this.stream).then(() => {
@@ -593,7 +593,7 @@ const domtree = {
                                                         
                                                     }).catch(er=>console.error(er));
                                                     this.delete();
-                                                        document.getElementById(this.stream._id+'console').remove(); //remove the adjacent output console
+                                                    self.querySelector('#'+this.stream._id+'console').remove(); //remove the adjacent output console
                                                 }
                                             
                                                 (self.querySelector('#'+this.stream._id+'decoder') as HTMLInputElement).onchange = (ev) => {
@@ -841,6 +841,7 @@ const domtree = {
                             type:'text',
                             value:'[24,52,230,125,243,112,0,0,10,2,30]',
                             onchange:(ev:Event)=>{
+                                let elm = (ev.target as HTMLInputElement);
                                 let value = (ev.target as HTMLInputElement).value;
                                 if(value.includes(',') && !value.includes('[')) {
                                     value = `[${value}]`;
@@ -848,19 +849,19 @@ const domtree = {
                                 try {
                                     value = JSON.parse(value);   
                                     if(Array.isArray(value)) {
-                                        let testfunction = (document.getElementById('testfunction') as HTMLInputElement).value;
+                                        let testfunction = (elm.parentNode.querySelector('#testfunction') as HTMLInputElement).value;
                                         try {
                                             let fn = eval(testfunction);
                                             if(typeof fn === 'function') {
-                                                document.getElementById('testoutput').innerText = fn(value);
+                                                (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = fn(value);
         
                                             }
                                         } catch (er) {
-                                            document.getElementById('testoutput').innerText = er;
+                                            (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
                                         }
                                     }
                                 } catch(er) {
-                                    document.getElementById('testoutput').innerText = er;
+                                    (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
                                 }
                             }
                         }
@@ -876,23 +877,24 @@ const domtree = {
                                 }
                             `,
                             onchange:(ev:Event) => { //when you click away
+                                let elm = (ev.target as HTMLInputElement);
                                 let value = (ev.target as HTMLInputElement).value;
                                 try {
                                     let fn = eval(value);
                                     if(typeof fn === 'function') {
-                                        let testvalue = (document.getElementById('testvalue') as HTMLInputElement).value;
+                                        let testvalue = (elm.parentNode.querySelector('#testvalue') as HTMLInputElement).value;
                                         if(testvalue.includes(',') && !testvalue.includes('[')) {
                                             testvalue = `[${testvalue}]`;
                                         }
                                         try {
                                             testvalue = JSON.parse(testvalue);  
-                                            document.getElementById('testoutput').innerText = fn(testvalue);
+                                            (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = fn(testvalue);
                                         } catch(er) {
-                                            document.getElementById('testoutput').innerText = er;
+                                            (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
                                         } 
                                     }
                                 } catch (er) {
-                                    document.getElementById('testoutput').innerText = er;
+                                    (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
                                 }
                             }
                         }
@@ -923,18 +925,19 @@ const domtree = {
                         innerText:'Test & Set',
                         attributes:{
                             onclick:(ev)=>{
+                                let elm = (ev.target as HTMLInputElement);
                                 let value = (ev.target as HTMLInputElement).value;
                                 try {
                                     let fn = eval(value);
                                     if(typeof fn === 'function') {
-                                        let testvalue = (document.getElementById('testvalue') as HTMLInputElement).value;
+                                        let testvalue = (elm.parentNode.querySelector('#testvalue') as HTMLInputElement).value;
                                         if(testvalue.includes(',') && !testvalue.includes('[')) {
                                             testvalue = `[${testvalue}]`;
                                         }
                                         try {
                                             testvalue = JSON.parse(testvalue);  
-                                            document.getElementById('testoutput').innerText = fn(testvalue);
-                                            let name = (document.getElementById('decodername') as HTMLInputElement).value;
+                                            (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = fn(testvalue);
+                                            let name = (elm.parentNode.querySelector('#decodername') as HTMLInputElement).value;
                                             if(!name) name = 'mydecoder';
                                             decoders[name] = fn; //set the decoder since it was successful
 
@@ -946,11 +949,11 @@ const domtree = {
                                             })
 
                                         } catch(er) {
-                                            document.getElementById('testoutput').innerText = er;
+                                            (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
                                         } 
                                     }
                                 } catch (er) {
-                                    document.getElementById('testoutput').innerText = er;
+                                    (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
                                 }
                             }
                         }
