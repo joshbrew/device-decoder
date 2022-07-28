@@ -209,8 +209,8 @@ const domtree = {
 
                                             const xconnectEvent = (ev) => {
                                                 BLE.disconnect(this.stream.device).then(() => {
-                                                    (self.querySelector(this.stream.deviceId+'xconnect') as HTMLButtonElement).innerHTML = 'Reconnect';
-                                                    (self.querySelector(this.stream.deviceId+'xconnect') as HTMLButtonElement).onclick = (ev) => {  
+                                                    (self.querySelector('#'+this.stream.deviceId+'xconnect') as HTMLButtonElement).innerHTML = 'Reconnect';
+                                                    (self.querySelector('#'+this.stream.deviceId+'xconnect') as HTMLButtonElement).onclick = (ev) => {  
                                                         BLE.reconnect(this.stream.deviceId).then((device) => {
                                                             this.output = 'Reconnected to ' + device.deviceId;
                                                             //self.render(); //re-render, will trigger oncreate again to reset this button and update the template 
@@ -219,16 +219,16 @@ const domtree = {
                                                 });
                                             }
 
-                                            (self.querySelector(this.stream.deviceId+'xconnect') as HTMLButtonElement).onclick = xconnectEvent;
+                                            (self.querySelector('#'+this.stream.deviceId+'xconnect') as HTMLButtonElement).onclick = xconnectEvent;
 
-                                            (self.querySelector(this.stream.deviceId+'x') as HTMLButtonElement).onclick = () => {
+                                            (self.querySelector('#'+this.stream.deviceId+'x') as HTMLButtonElement).onclick = () => {
                                                 BLE.disconnect(this.stream.device);
                                                 this.delete();
                                                 document.getElementById(this.stream.deviceId+'console').remove(); //remove the adjacent output console
                                             }
                                         
-                                            // (self.querySelector(this.stream.deviceId+'decoder') as HTMLInputElement).onchange = (ev) => {
-                                            //     this.decoder = decoders[(self.querySelector(this.stream.deviceId+'decoder') as HTMLInputElement).value];
+                                            // (self.querySelector('#'+this.stream.deviceId+'decoder') as HTMLInputElement).onchange = (ev) => {
+                                            //     this.decoder = decoders[(self.querySelector('#'+this.stream.deviceId+'decoder') as HTMLInputElement).value];
                                             // }
 
                                             let rssielm = document.getElementById(this.stream.device.deviceId + 'rssi');
@@ -332,13 +332,14 @@ const domtree = {
                                 innerText:'--',
                                 attributes:{
                                     onclick:(ev)=>{
-                                        if(document.getElementById('bleconfigcontainer').style.display === 'none') {
-                                            document.getElementById('bleconfigcontainer').style.display = '';
-                                            document.getElementById('bleconfigdropdown').innerText = '--'
+                                        //to make this more modular to select the adjacent node, ev.target.parentNode.querySelector('#bleconfigcontainer')
+                                        if( ev.target.parentNode.querySelector('#bleconfigcontainer').style.display === 'none') {
+                                            ev.target.parentNode.querySelector('#bleconfigcontainer').style.display = '';
+                                            ev.target.innerText = '--'
                                         }
                                         else {
-                                            document.getElementById('bleconfigcontainer').style.display = 'none';
-                                            document.getElementById('bleconfigdropdown').innerText = '++'
+                                            ev.target.parentNode.querySelector('#bleconfigcontainer').style.display = 'none';
+                                            ev.target.innerText = '++'
                                         }
                                         // console.log(ev)
                                         // let node = ev.target.node;
@@ -542,7 +543,7 @@ const domtree = {
 
                                             Serial.openPort(port, this.settings).then(()=>{
 
-                                                (self.querySelector(this.stream._id+'send') as HTMLButtonElement).onclick = () => {
+                                                (self.querySelector('#'+this.stream._id+'send') as HTMLButtonElement).onclick = () => {
                                                     let value = (document.getElementById(this.stream._id+'input') as HTMLButtonElement).value;
                                                     if(parseInt(value)) {
                                                         Serial.writePort(port,WebSerial.toDataView(parseInt(value)));
@@ -554,8 +555,8 @@ const domtree = {
 
                                                 const xconnectEvent = (ev) => {
                                                     Serial.closeStream(this.stream).then(() => {
-                                                        (self.querySelector(this.stream._id+'xconnect') as HTMLButtonElement).innerHTML = 'Reconnect';
-                                                        (self.querySelector(this.stream._id+'xconnect') as HTMLButtonElement).onclick = (ev) => {
+                                                        (self.querySelector('#'+this.stream._id+'xconnect') as HTMLButtonElement).innerHTML = 'Reconnect';
+                                                        (self.querySelector('#'+this.stream._id+'xconnect') as HTMLButtonElement).onclick = (ev) => {
                                                             Serial.getPorts().then((ports) => { //check previously permitted ports for auto reconnect
                                                                 for(let i = 0; i<ports.length; i++) {
                                                                     if(ports[i].getInfo().usbVendorId === this.stream.info.usbVendorId && ports[i].getInfo().usbProductId === this.stream.info.usbProductId) {
@@ -585,9 +586,9 @@ const domtree = {
                                                     });
                                                 }
 
-                                                (self.querySelector(this.stream._id+'xconnect') as HTMLButtonElement).onclick = xconnectEvent;
+                                                (self.querySelector('#'+this.stream._id+'xconnect') as HTMLButtonElement).onclick = xconnectEvent;
 
-                                                (self.querySelector(this.stream._id+'x') as HTMLButtonElement).onclick = () => {
+                                                (self.querySelector('#'+this.stream._id+'x') as HTMLButtonElement).onclick = () => {
                                                     Serial.closeStream(this.stream,()=>{
                                                         
                                                     }).catch(er=>console.error(er));
@@ -595,7 +596,7 @@ const domtree = {
                                                         document.getElementById(this.stream._id+'console').remove(); //remove the adjacent output console
                                                 }
                                             
-                                                (self.querySelector(this.stream._id+'decoder') as HTMLInputElement).onchange = (ev) => {
+                                                (self.querySelector('#'+this.stream._id+'decoder') as HTMLInputElement).onchange = (ev) => {
                                                     this.settings.decoder = decoders[(self.querySelector(this.stream._id+'decoder') as HTMLInputElement).value];
                                                 }
                                                 
@@ -628,13 +629,13 @@ const domtree = {
                                 innerText:'--',
                                 attributes:{
                                     onclick:(ev)=>{
-                                        if(document.getElementById('serialconfigcontainer').style.display === 'none') {
-                                            document.getElementById('serialconfigcontainer').style.display = '';
-                                            document.getElementById('serialconfigdropdown').innerText = '--'
+                                        if(ev.target.parentNode.querySelector('#serialconfigcontainer').style.display === 'none') {
+                                            ev.target.parentNode.querySelector('#serialconfigcontainer').style.display = '';
+                                            ev.target.innerText = '--'
                                         }
                                         else {
-                                            document.getElementById('serialconfigcontainer').style.display = 'none';
-                                            document.getElementById('serialconfigdropdown').innerText = '++'
+                                            ev.target.parentNode.querySelector('#serialconfigcontainer').style.display = 'none';
+                                            ev.target.innerText = '++'
                                         }
 
                                     }
