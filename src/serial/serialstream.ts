@@ -22,7 +22,8 @@ export type StreamInfo = {
     },
     frequency:number, //read frequency, just a setTimeout after every read finishes to allow coroutines to do their thing as the .read call will await to receive and block the app if not on its own thread
     ondata:(value:any)=>void,
-    running:boolean
+    running:boolean,
+    [key:string]:any
 }
 
 export class WebSerial {
@@ -58,10 +59,10 @@ export class WebSerial {
         port:SerialPort, 
         options?:{
             baudRate?:number,
-            stopBits?:1|2,
-            parity?:'none'|'even'|'odd',
+            stopBits?:1|2|number,
+            parity?:'none'|'even'|'odd'|ParityType,
             bufferSize?:number,
-            flowControl?:'none'|'hardware',
+            flowControl?:'none'|'hardware'|FlowControlType,
             onconnect?:(port:SerialPort)=>void,
             ondisconnect?:(ev)=>void
         }
@@ -194,13 +195,14 @@ export class WebSerial {
         } return undefined;
     }
 
-    endStream(
+    closeStream(
         stream:StreamInfo,
-        onclose:(info:StreamInfo)=>void
+        onclose?:(info:StreamInfo)=>void
     ) {
 
         stream.running = false;
-        setTimeout(async ()=>{
+        return new Promise((res,rej) => {
+            setTimeout(async ()=>{
                 if(stream.port.readable) {
                     try {
                         stream.reader.releaseLock()
@@ -208,19 +210,21 @@ export class WebSerial {
                     } catch(er) {}
                 }
                 if(stream.port.writable) {
-                    try {
+                    try { 
                         stream.writer.releaseLock();
                         await stream.writer.close()
                     } catch(er) {}
                 }
                 try {
-                    await stream.port.close().then(()=>{onclose(this.streams[stream._id])});
-                } catch(er) {}
-            },
-            stream.frequency
-        );
-
-        delete this.streams[stream._id];
+                    await stream.port.close().then(()=>{if(onclose) onclose(this.streams[stream._id])});
+                } catch(er) { rej(er); }
+                delete this.streams[stream._id];
+                res(true);
+                },
+                stream.frequency
+            );
+    
+        })
     }
 
     static setStreamTransforms(

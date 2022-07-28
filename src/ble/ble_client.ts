@@ -33,7 +33,7 @@ export type DeviceOptions = {
     }
 }
 
-export type DeviceInfo = {device:BleDevice, options:DeviceOptions}
+export type DeviceInfo = { device:BleDevice } & DeviceOptions
 
 export class BLEClient {
 
@@ -114,7 +114,7 @@ export class BLEClient {
         return new Promise((res,rej) => {
             this.client.requestDevice(request)
                 .then((device) => {
-                    this.devices[device.deviceId] = {device,options};
+                    this.devices[device.deviceId] = {device,deviceId:device.deviceId,...options};
                     res(device);
                 })
                 .catch(rej);})
@@ -123,7 +123,7 @@ export class BLEClient {
     //connect after requesting using the options
     setupDevice = (device:BleDevice,options?:DeviceOptions):Promise<DeviceInfo> => {
         return new Promise(async (res,rej) => {
-            this.devices[device.deviceId] = {device,options};
+            this.devices[device.deviceId] = {device, deviceId:device.deviceId,...options};
             this.client.connect(device.deviceId,options?.onDisconnect,options?.connectOptions).then(async () => {
                 for(const service in options?.services) {
                     for(const characteristic in options.services[service]) {
@@ -285,7 +285,7 @@ export class BLEClient {
     async distanceFromPhone( //https://github.com/kevindigi/android-iot-samples/blob/7fb4b91eb769a3dba06891286f4f2f3249dab2a6/app/src/main/java/com/digicorp/helper/DistanceManager.java#L48
         device:BleDevice,
         txPower:number, //signal strength at 1 meter, hardware-specific
-        model?:string
+        model?:'nexus5'|'motoX'|'iphone5'
     ) { 
         let x, exp, c;
         if(model) {
