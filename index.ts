@@ -854,7 +854,7 @@ const domtree = {
                                     if(Array.isArray(value)) {
                                         let testfunction = (elm.parentNode.querySelector('#testfunction') as HTMLInputElement).value;
                                         try {
-                                            let fn = eval(testfunction);
+                                            let fn = (0, eval)(testfunction);
                                             if(typeof fn === 'function') {
                                                 (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = fn(value);
         
@@ -883,7 +883,7 @@ const domtree = {
                                 let elm = (ev.target as HTMLInputElement);
                                 let value = (ev.target as HTMLInputElement).value;
                                 try {
-                                    let fn = eval(value);
+                                    let fn = (0, eval)(value);
                                     if(typeof fn === 'function') {
                                         let testvalue = (elm.parentNode.querySelector('#testvalue') as HTMLInputElement).value;
                                         if(testvalue.includes(',') && !testvalue.includes('[')) {
@@ -931,7 +931,7 @@ const domtree = {
                                 let elm = (ev.target as HTMLInputElement);
                                 let value = (ev.target as HTMLInputElement).value;
                                 try {
-                                    let fn = eval(value);
+                                    let fn = (0, eval)(value);
                                     if(typeof fn === 'function') {
                                         let testvalue = (elm.parentNode.querySelector('#testvalue') as HTMLInputElement).value;
                                         if(testvalue.includes(',') && !testvalue.includes('[')) {
