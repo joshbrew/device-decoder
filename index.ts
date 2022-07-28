@@ -225,11 +225,12 @@ const domtree = {
                                             let rssielm = document.getElementById(this.stream.device.deviceId + 'rssi');
 
                                             let rssiFinder = () => {
-                                                if(BLE.devices[this.stream.device.deviceId])    
+                                                if(BLE.devices[this.stream.device.deviceId]) {
                                                     BLE.readRssi(this.stream.device).then((rssi) => {
                                                         rssielm.innerText = `${rssi}`;
-                                                        setTimeout(()=>{rssiFinder();},1000);
+                                                        setTimeout(()=>{rssiFinder();},250);
                                                     }).catch(console.error);
+                                                }
                                             }
 
                                             rssiFinder();
@@ -418,7 +419,9 @@ const domtree = {
                                             
                                         stream:StreamInfo;
                                         settings:any;
-                                        
+                                        lastRead:number = 0;
+                                        readRate:number=0;
+
                                         getSettings = (port:SerialPort) => { //util function on this node
                                             let settings:any = {
                                                 baudRate:(document.getElementById('baudRate') as HTMLInputElement).value ? parseInt((document.getElementById('baudRate') as HTMLInputElement).value) : 115200, //https://lucidar.me/en/serialib/most-used-baud-rates-table/
@@ -447,7 +450,11 @@ const domtree = {
                                                 ondata:(data:ArrayBuffer)=>{
                                                     //pass to console
                                                     this.stream.output = decoders[this.settings.decoder](data);
-                                                    
+
+                                                    let now = performance.now();
+                                                    this.readRate = 1/(0.001*(now - this.lastRead)); //reads per second.
+                                                    this.lastRead = now;
+
                                                     //requestAnimationFrame(this.settings.anim); //throttles animations to refresh rate
                                                     if(this.settings.anim) this.settings.anim();
                                                     //roughly...
@@ -486,6 +493,7 @@ const domtree = {
                                                         </select>
                                                     </label>
                                                 </div>
+                                                <div id='${this.stream._id}connectioninfo'>Read Rate: <span id='${this.stream._id}readrate'></span> updates/sec</div>
                                                 <div id='${this.stream._id}console' style='color:white; background-color:black; font-size:10px; font-family:Consolas,monaco,monospace; overflow-y:scroll;'>
                                                 </div>
                                             </div>`;
@@ -498,8 +506,11 @@ const domtree = {
     
                                             let c = document.getElementById(this.stream._id+'console');
                                             let outputmode = document.getElementById(this.stream._id+'outputmode') as HTMLInputElement;
+                                            let readrate = document.getElementById(this.stream._id+'readrate');
     
                                             this.settings.anim = () => { 
+
+                                                readrate.innerText = this.readRate.toFixed(6);
     
                                                 if(outputmode.value === 'a') 
                                                     c.innerText = `${this.stream.output}`; 
