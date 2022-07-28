@@ -169,12 +169,6 @@ const domtree = {
                                                 </div>
                                                 <div>
                                                     <label>
-                                                        Decoder:
-                                                        <select id='${this.stream.deviceId}decoder'>
-                                                            ${Object.keys(decoders).map((d) => `<option value='${d}'>${d.toUpperCase()}</option>`).join('')}
-                                                        </select>
-                                                    </label>
-                                                    <label>
                                                         Output Mode: <br/>
                                                         <select id='${this.stream.deviceId}outputmode'>
                                                             <option value='b' selected> All </option>
