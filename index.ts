@@ -52,6 +52,8 @@ const BLE = new BLEClient();
 
 
 const workers = new WorkerService(); 
+
+//TODO: Make a worker for each stream & visual, TO THE MAXXX, they will just run in order, too bad we can't force cores to mainline different tasks so device source streams and frontend logic don't compete
 const decoderworker = workers.addWorker({url:gsworker}); //this will handle decoder logic
 const chartworker = workers.addWorker({url:gsworker}); //this will visualize data for us if formats fit
 
@@ -630,6 +632,7 @@ const domtree = {
                                             document.getElementById('serialconfigcontainer').style.display = 'none';
                                             document.getElementById('serialconfigdropdown').innerText = '++'
                                         }
+
                                     }
                                 }
                             },
