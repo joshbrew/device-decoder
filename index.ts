@@ -105,6 +105,9 @@ const decoders = {
     //...custom?
 }
 
+//also incl https://github.com/joshbrew/BiquadFilters.js/blob/main/BiquadFilters.js
+
+
 //alternatively, implement this all in a single web component
 const domtree = {
     'debugger': {
