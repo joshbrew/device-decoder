@@ -94,7 +94,7 @@ let textdecoder = new TextDecoder();
 const decoders = {
     'raw':(data:ArrayBuffer) => { return data; },
     'utf8':(data:ArrayBuffer) => { return textdecoder.decode(data); },
-    'console-f12':(data:ArrayBuffer) => { console.log(data); }
+    'console-f12':(data:ArrayBuffer) => { console.log(data); return data; }
     //ads131m08
     //max3010x
     //mpu6050
@@ -138,10 +138,6 @@ const domtree = {
                                             
                                         stream=stream;
                                         output:any;
-
-                                        constructor() {
-                                            super(); 
-                                        };
 
                                         anim:any;
 
@@ -189,9 +185,9 @@ const domtree = {
                                                             'beforeend', 
                                                             `<tr>
                                                                 <td id='${c.uuid}'>${c.uuid}</td>
-                                                                <td id='${c.uuid}notify'>${c.properties.notify ? `<button id="${c.uuid}notifybutton"></button> Decoder: <select id="${c.uuid}notifyselect">${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}</select>` : ''}</td>
-                                                                <td id='${c.uuid}read'>${c.properties.read ? `<button id="${c.uuid}readbutton"></button> Decoder: <select id="${c.uuid}readselect">${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}</select>` : ''}</td>
-                                                                <td id='${c.uuid}write'>${c.properties.write ? `<input type='text' id="${c.uuid}writeinput"></input><button id="${c.uuid}writebutton"></button>` : ''}</td>
+                                                                <td id='${c.uuid}notify'>${c.properties.notify ? `<button id="${c.uuid}notifybutton">Subscribe</button> Decoder: <select id="${c.uuid}notifyselect">${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}</select>` : ''}</td>
+                                                                <td id='${c.uuid}read'>${c.properties.read ? `<button id="${c.uuid}readbutton">Read</button> Decoder: <select id="${c.uuid}readselect">${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}</select>` : ''}</td>
+                                                                <td id='${c.uuid}write'>${c.properties.write ? `<input type='text' id="${c.uuid}writeinput"></input><button id="${c.uuid}writebutton">Write</button>` : ''}</td>
                                                                 <td id='${c.uuid}broadcast'>${c.properties.broadcast}</td>
                                                                 <td id='${c.uuid}indicate'>${c.properties.indicate}</td>
                                                             </tr>`
