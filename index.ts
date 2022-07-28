@@ -94,13 +94,13 @@ const decoders = {
     'raw':(data:ArrayBuffer) => { return data; },
     'utf8':(data:ArrayBuffer) => { return textdecoder.decode(data); },
     'console-f12':(data:ArrayBuffer) => { console.log(data); return data; }
-    //ads131m08
-    //max3010x
-    //mpu6050
-    //freeeg32
-    //openbcicyton
-    //cognixionBLE
-    //hegduino -- incl check for android (3 outputs only) output
+    //ads131m08:(data:ArrayBuffer) => { return data; },
+    //max3010x:(data:ArrayBuffer) => { return data; },
+    //mpu6050:(data:ArrayBuffer) => { return data; },
+    //freeeg32:(data:ArrayBuffer) => { return data; },
+    //openbcicyton:(data:ArrayBuffer) => { return data; },
+    //cognixionBLE:(data:ArrayBuffer) => { return data; },
+    //hegduino:(data:ArrayBuffer) => { return data; }, // -- incl check for android (3 outputs only) output
     //...custom?
 }
 
