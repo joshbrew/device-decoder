@@ -93,7 +93,8 @@ let textdecoder = new TextDecoder();
 const decoders = {
     'raw':(data:ArrayBuffer) => { return data; },
     'utf8':(data:ArrayBuffer) => { return textdecoder.decode(data); },
-    'console-f12':(data:ArrayBuffer) => { console.log(data); return data; }
+    'console-f12':(data:ArrayBuffer) => { console.log(data); return data; },
+    'debug':(data:ArrayBuffer,debugmessage:string) => { console.log(debugmessage,data); return `${debugmessage} ${JSON.stringify(data)}`; }
     //ads131m08:(data:ArrayBuffer) => { return data; },
     //max3010x:(data:ArrayBuffer) => { return data; },
     //mpu6050:(data:ArrayBuffer) => { return data; },
@@ -180,8 +181,6 @@ const domtree = {
                                         }
 
                                         oncreate = (self:DOMElement,props:any) => {
-
-
                                             //spawn a graph based prototype hierarchy for the connection info?
                                             //e.g. to show the additional modularity off
     
@@ -193,7 +192,9 @@ const domtree = {
                                                 if(outputmode.value === 'a') 
                                                     c.innerText = `${this.output}`; 
                                                 else if (outputmode.value === 'b') {
-                                                    c.innerText += `${this.output}\n`;
+                                                    let outp = `${this.output}`; if(!outp.endsWith('\n')) outp+='\n'; //need endline
+                                                    c.innerText += outp;
+
                                                     if(c.innerText.length > 20000) { //e.g 20K char limit
                                                         c.innerText = c.innerText.substring(c.innerText.length - 20000, c.innerText.length); //trim output
                                                     }
@@ -262,8 +263,9 @@ const domtree = {
                                                         if(c.properties.notify) {
                                                             document.getElementById(c.uuid+'notifybutton').onclick = () => {
                                                                 let decoderselect = document.getElementById(c.uuid+'notifyselect') as HTMLInputElement;
+                                                                let debugmessage = `${s.uuid} notify:`
                                                                 BLE.subscribe(this.stream.device, s.uuid, c.uuid, (result:DataView) => {
-                                                                    this.output = decoders[decoderselect.value](result.buffer);
+                                                                    this.output = decoders[decoderselect.value](result.buffer,debugmessage);
 
                                                                     //requestAnimationFrame(this.anim);
                                                                     this.anim();
@@ -272,9 +274,10 @@ const domtree = {
                                                         }
                                                         if(c.properties.read) {
                                                             let decoderselect = document.getElementById(c.uuid+'readselect') as HTMLInputElement;
+                                                            let debugmessage = `${s.uuid} read:`
                                                             document.getElementById(c.uuid+'readbutton').onclick = () => { 
                                                                 BLE.read(this.stream.device, s.uuid, c.uuid, (result:DataView) => {
-                                                                    this.output = decoders[decoderselect.value](result.buffer);
+                                                                    this.output = decoders[decoderselect.value](result.buffer,debugmessage);
 
                                                                     //requestAnimationFrame(this.anim);
                                                                     this.anim();
@@ -423,8 +426,9 @@ const domtree = {
                                     class ConnectionTemplate extends DOMElement {
                                             
                                         stream:StreamInfo;
+                                        output:any;
                                         settings:any;
-                                        lastRead:number = 0;
+                                        lastRead:number=0;
                                         readRate:number=0;
 
                                         getSettings = (port:SerialPort) => { //util function on this node
@@ -449,12 +453,14 @@ const domtree = {
 
                                             this.settings = this.getSettings(port);
 
+                                            let debugmessage = `serial port ${port.getInfo().usbVendorId}:${port.getInfo().usbProductId} read:`;
+
                                             this.stream = Serial.createStream({
                                                 port,
                                                 frequency:1,
                                                 ondata:(data:ArrayBuffer)=>{
                                                     //pass to console
-                                                    this.stream.output = decoders[this.settings.decoder](data);
+                                                    this.stream.output = decoders[this.settings.decoder](data,debugmessage);
 
                                                     let now = performance.now();
                                                     this.readRate = 1/(0.001*(now - this.lastRead)); //reads per second.
@@ -518,9 +524,11 @@ const domtree = {
                                                 readrate.innerText = this.readRate.toFixed(6);
     
                                                 if(outputmode.value === 'a') 
-                                                    c.innerText = `${this.stream.output}`; 
+                                                    c.innerText = `${this.output}`; 
                                                 else if (outputmode.value === 'b') {
-                                                    c.innerText += `${this.stream.output}\n`;
+                                                    let outp = `${this.output}`; if(!outp.endsWith('\n')) outp+='\n'; //need endline
+                                                    c.innerText += outp;
+
                                                     if(c.innerText.length > 20000) { //e.g 20K char limit
                                                         c.innerText = c.innerText.substring(c.innerText.length - 20000, c.innerText.length); //trim output
                                                     }
@@ -546,7 +554,7 @@ const domtree = {
                                                                                 frequency:1,
                                                                                 ondata:(data:ArrayBuffer)=>{
                                                                                     //pass to console
-                                                                                    this.stream.output = decoders[this.settings.decoder](data);
+                                                                                    this.output = decoders[this.settings.decoder](data);
                                                                                     
                                                                                     requestAnimationFrame(this.settings.anim); //throttles animations to refresh rate
                                                                                     //roughly...
