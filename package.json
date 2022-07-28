@@ -19,7 +19,7 @@
   "keywords": [
     "esbuild"
   ],
-  "author": "",
+  "author": "yorsh yooster",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
     "@capacitor-community/bluetooth-le": "^1.8.3",

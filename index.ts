@@ -138,9 +138,10 @@ const domtree = {
                         oncreate:(self: HTMLElement, info?: ElementInfo)=>{
                             self.onclick = () => {
 
+                                let parent = document.querySelector('device-debugger');
                                 let services:any = {}; //comma separated
                                 let reqlen = '0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.length;
-                                (document.getElementById('serviceuuid') as HTMLInputElement).value.split(',').forEach((uu) => { if(uu.length === reqlen) services[uu.toLowerCase()] = {}; else console.error('uuid format is wonk', uu, 'expected format (e.g.):', '0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase()) }); //todo, set up characteristics on first go
+                                (parent.querySelector('#serviceuuid') as HTMLInputElement).value.split(',').forEach((uu) => { if(uu.length === reqlen) services[uu.toLowerCase()] = {}; else console.error('uuid format is wonk', uu, 'expected format (e.g.):', '0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase()) }); //todo, set up characteristics on first go
                                 if(Object.keys(services).length === 0) services = {['0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase()]:{}};
 
                                 BLE.setup({
@@ -314,8 +315,9 @@ const domtree = {
 
                                     ConnectionTemplate.addElement(`${id}-info`);
                                     let elm = document.createElement(`${id}-info`);
-                                    document.getElementById('connections').appendChild(elm);
+                                    //document.getElementById('connections').appendChild(elm);
 
+                                    document.querySelector('device-debugger').querySelector('#connections').appendChild(elm);
                                     
                                 }); //set options in bleconfig
                             }
@@ -422,14 +424,17 @@ const domtree = {
                         innerText:'USB Device',
                         oncreate:(self: HTMLElement, info?: ElementInfo)=>{
 
+                            let parent = document.querySelector('device-debugger');
+
                             const getSettings = (port:SerialPort) => { 
+
                                 let settings:any = {
-                                    baudRate:(document.getElementById('baudRate') as HTMLInputElement).value ? parseInt((document.getElementById('baudRate') as HTMLInputElement).value) : 115200, //https://lucidar.me/en/serialib/most-used-baud-rates-table/
-                                    bufferSize:(document.getElementById('bufferSize') as HTMLInputElement).value ? parseInt((document.getElementById('bufferSize') as HTMLInputElement).value) : 255,
-                                    parity:(document.getElementById('parity') as HTMLInputElement).value ? (document.getElementById('parity') as HTMLInputElement).value as ParityType : 'none',
-                                    dataBits:(document.getElementById('dataBits') as HTMLInputElement).value ? parseInt((document.getElementById('dataBits') as HTMLInputElement).value) : 8,
-                                    stopBits:(document.getElementById('stopBits') as HTMLInputElement).value ? parseInt((document.getElementById('stopBits') as HTMLInputElement).value) : 1,
-                                    flowControl:(document.getElementById('flowControl') as HTMLInputElement).value ? (document.getElementById('flowControl') as HTMLInputElement).value as FlowControlType : 'none',
+                                    baudRate:(parent.querySelector('#baudRate') as HTMLInputElement).value ? parseInt((parent.querySelector('#baudRate') as HTMLInputElement).value) : 115200, //https://lucidar.me/en/serialib/most-used-baud-rates-table/
+                                    bufferSize:(parent.querySelector('#bufferSize') as HTMLInputElement).value ? parseInt((parent.querySelector('#bufferSize') as HTMLInputElement).value) : 255,
+                                    parity:(parent.querySelector('#parity') as HTMLInputElement).value ? (parent.querySelector('#parity') as HTMLInputElement).value as ParityType : 'none',
+                                    dataBits:(parent.querySelector('#dataBits') as HTMLInputElement).value ? parseInt((parent.querySelector('#dataBits') as HTMLInputElement).value) : 8,
+                                    stopBits:(parent.querySelector('#stopBits') as HTMLInputElement).value ? parseInt((parent.querySelector('#stopBits') as HTMLInputElement).value) : 1,
+                                    flowControl:(parent.querySelector('#flowControl') as HTMLInputElement).value ? (parent.querySelector('#flowControl') as HTMLInputElement).value as FlowControlType : 'none',
                                     onconnect:(ev)=>{ console.log('connected! ', JSON.stringify(port.getInfo())); },
                                     ondisconnect:(ev)=>{ console.log('disconnected! ', JSON.stringify(port.getInfo())); },
                                     decoder:'raw' //default
@@ -441,8 +446,8 @@ const domtree = {
                             self.onclick = () => {
                                 //TODO: do this on a thread instead...
                                 Serial.requestPort(
-                                    (document.getElementById('usbVendorId') as HTMLInputElement).value ? parseInt((document.getElementById('usbVendorId') as HTMLInputElement).value) : undefined,
-                                    (document.getElementById('usbProductId') as HTMLInputElement).value ? parseInt((document.getElementById('usbProductId') as HTMLInputElement).value) : undefined
+                                    (parent.querySelector('#usbVendorId') as HTMLInputElement).value ? parseInt((parent.querySelector('#usbVendorId') as HTMLInputElement).value) : undefined,
+                                    (parent.querySelector('#usbProductId') as HTMLInputElement).value ? parseInt((parent.querySelector('#usbProductId') as HTMLInputElement).value) : undefined
                                 ).then((port)=>{
 
                                     class ConnectionTemplate extends DOMElement {
@@ -610,8 +615,9 @@ const domtree = {
 
                                     ConnectionTemplate.addElement(`${id}-info`);
                                     let elm = document.createElement(`${id}-info`);
-                                    document.getElementById('connections').appendChild(elm);
+                                    //document.getElementById('connections').appendChild(elm);
                                     
+                                    document.querySelector('device-debugger').querySelector('#connections').appendChild(elm);
                                 });
 
     
