@@ -4,6 +4,8 @@ import {Router, DOMService, WorkerService, gsworker, ServiceMessage, proxyWorker
 import { ElementInfo, ElementProps } from 'graphscript/dist/services/dom/types/element';
 import { DOMElementProps } from 'graphscript/dist/services/dom/types/component';
 
+import beautify_js from './src/beautify.min'
+
 /**
     <Debugger window component>
         <------------------------------------------>
@@ -132,695 +134,722 @@ const domtree = {
             'header':{
                 tagName:'div',
                 children:{
-                    'bleconnect':{
-                        tagName:'button',
-                        innerText:'BLE Device',
-                        oncreate:(self: HTMLElement, info?: ElementInfo)=>{
-                            self.onclick = () => {
-
-                                let parent = document.querySelector('device-debugger');
-                                let services:any = {}; //comma separated
-                                let reqlen = '0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.length;
-                                (parent.querySelector('#serviceuuid') as HTMLInputElement).value.split(',').forEach((uu) => { if(uu.length === reqlen) services[uu.toLowerCase()] = {}; else console.error('uuid format is wonk', uu, 'expected format (e.g.):', '0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase()) }); //todo, set up characteristics on first go
-                                if(Object.keys(services).length === 0) services = {['0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase()]:{}};
-
-                                BLE.setup({
-                                    services
-                                }).then((stream)=>{
-                                    console.log(stream)
-
-                                    class ConnectionTemplate extends DOMElement {
-                                            
-                                        stream=stream;
-                                        output:any;
-
-                                        anim:any;
-
-                                        template = ()=>{ return `
-                                            <div id='${this.stream.deviceId}' style='display:none;'>
-                                                BLE Connection
-                                                <div>
-                                                    <span>BLE Device Name:</span><span>${this.stream.device.name}</span><span>BLE Device ID:</span><span>${this.stream.deviceId}</span>
-                                                </div>
-                                                <table id='${this.stream.deviceId}info'>
-                                                </table>
-                                                <div>
-                                                    <button id='${this.stream.deviceId}xconnect'>Disconnect</button>
-                                                    <button id='${this.stream.deviceId}x'>Remove</button>
-                                                </div>
-                                                <div>
-                                                    <label>
-                                                        Output Mode: <br/>
-                                                        <select id='${this.stream.deviceId}outputmode'>
-                                                            <option value='b' selected> All </option>
-                                                            <option value='a'> Latest </option>
-                                                        </select>
-                                                    </label>
-                                                </div>
-                                                <div id='${this.stream.deviceId}connectioninfo'>RSSI: <span id='${this.stream.deviceId}rssi'></span></div>
-                                                <div 
-                                                    id='${this.stream.deviceId}console' 
-                                                    style='color:white; background-color:black; font-size:10px; font-family:Consolas,monaco,monospace; overflow-y:scroll;'>
-                                                </div>
-                                            </div>`;
-                                        }
-
-                                        oncreate = (self:DOMElement,props:any) => {
-                                            //spawn a graph based prototype hierarchy for the connection info?
-                                            //e.g. to show the additional modularity off
-    
-                                            let c = self.querySelector('#'+this.stream.deviceId+'console') as HTMLElement;
-                                            let outputmode = self.querySelector('#'+this.stream.deviceId+'outputmode') as HTMLInputElement;
-    
-                                            this.anim = () => { 
-    
-                                                if(outputmode.value === 'a') 
-                                                    c.innerText = `${this.output}`; 
-                                                else if (outputmode.value === 'b') {
-                                                    let outp = `${this.output}`; if(!outp.endsWith('\n')) outp+='\n'; //need endline
-                                                    c.innerText += outp;
-
-                                                    if(c.innerText.length > 20000) { //e.g 20K char limit
-                                                        c.innerText = c.innerText.substring(c.innerText.length - 20000, c.innerText.length); //trim output
-                                                    }
-                                                }
-                                            }
-
-                                            (self.querySelector('#'+this.stream.deviceId) as HTMLElement).style.display = '';
-
-                                            const xconnectEvent = (ev) => {
-                                                BLE.disconnect(this.stream.device).then(() => {
-                                                    (self.querySelector('#'+this.stream.deviceId+'xconnect') as HTMLButtonElement).innerHTML = 'Reconnect';
-                                                    (self.querySelector('#'+this.stream.deviceId+'xconnect') as HTMLButtonElement).onclick = (ev) => {  
-                                                        BLE.reconnect(this.stream.deviceId).then((device) => {
-                                                            this.output = 'Reconnected to ' + device.deviceId;
-                                                            //self.render(); //re-render, will trigger oncreate again to reset this button and update the template 
-                                                        })
-                                                    }
-                                                });
-                                            }
-
-                                            (self.querySelector('#'+this.stream.deviceId+'xconnect') as HTMLButtonElement).onclick = xconnectEvent;
-
-                                            (self.querySelector('#'+this.stream.deviceId+'x') as HTMLButtonElement).onclick = () => {
-                                                BLE.disconnect(this.stream.device);
-                                                this.delete();
-                                                self.querySelector('#'+this.stream.deviceId+'console').remove(); //remove the adjacent output console
-                                            }
-                                        
-                                            // (self.querySelector('#'+this.stream.deviceId+'decoder') as HTMLInputElement).onchange = (ev) => {
-                                            //     this.decoder = decoders[(self.querySelector('#'+this.stream.deviceId+'decoder') as HTMLInputElement).value];
-                                            // }
-
-                                            let rssielm = self.querySelector('#'+this.stream.device.deviceId + 'rssi') as HTMLElement;
-
-                                            let rssiFinder = () => {
-                                                if(BLE.devices[this.stream.device.deviceId]) {
-                                                    BLE.readRssi(this.stream.device).then((rssi) => {
-                                                        rssielm.innerText = `${rssi}`;
-                                                        setTimeout(()=>{rssiFinder();},250);
-                                                    }).catch(console.error);
-                                                }
-                                            }
-
-                                            rssiFinder();
-
-
-                                            BLE.client.getServices(this.stream.device.deviceId).then((svcs) => {
-                                                console.log('services', svcs)
-                                                self.querySelector('#'+this.stream.deviceId+'info').innerHTML = `<tr><th>UUID</th><th>Notify</th><th>Read</th><th>Write</th><th>Broadcast</th><th>Indicate</th></tr>`
-                                                svcs.forEach((s) => {    
-                                                    self.querySelector('#'+this.stream.deviceId+'info').insertAdjacentHTML('beforeend', `<tr colSpan=6><th>${s.uuid}</th></tr>`)
-                                                    s.characteristics.forEach((c) => { 
-                                                        //build interactivity/subscriptions for each available service characteristic based on readable/writable/notify properties
-                                                        self.querySelector('#'+this.stream.deviceId+'info').insertAdjacentHTML(
-                                                            'beforeend', 
-                                                            `<tr>
-                                                                <td id='${c.uuid}'>${c.uuid}</td>
-                                                                <td id='${c.uuid}notify'>${c.properties.notify ? `<button id="${c.uuid}notifybutton">Subscribe</button> Decoder: <select id="${c.uuid}notifydecoder">${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}</select>` : ''}</td>
-                                                                <td id='${c.uuid}read'>${c.properties.read ? `<button id="${c.uuid}readbutton">Read</button> Decoder: <select id="${c.uuid}readdecoder">${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}</select>` : ''}</td>
-                                                                <td id='${c.uuid}write'>${c.properties.write ? `<input type='text' id="${c.uuid}writeinput"></input><button id="${c.uuid}writebutton">Write</button>` : ''}</td>
-                                                                <td id='${c.uuid}broadcast'>${c.properties.broadcast}</td>
-                                                                <td id='${c.uuid}indicate'>${c.properties.indicate}</td>
-                                                            </tr>`
-                                                        );
-
-                                                        if(c.properties.notify) {
-                                                            let decoderselect = self.querySelector('#'+c.uuid+'notifydecoder') as HTMLInputElement;
-                                                            let debugmessage = `${c.uuid} notify:`;
-                                                            (self.querySelector('#'+c.uuid+'notifybutton') as HTMLButtonElement).onclick = () => {
-                                                                BLE.subscribe(this.stream.device, s.uuid, c.uuid, (result:DataView) => {
-                                                                    this.output = decoders[decoderselect.value](result.buffer,debugmessage);
-
-                                                                    //requestAnimationFrame(this.anim);
-                                                                    this.anim();
-                                                                })
-                                                            }
-                                                        }
-                                                        if(c.properties.read) {
-                                                            let decoderselect = self.querySelector('#'+c.uuid+'readdecoder') as HTMLInputElement;
-                                                            let debugmessage = `${c.uuid} read:`;
-                                                            (self.querySelector('#'+c.uuid+'readbutton') as HTMLButtonElement).onclick = () => { 
-                                                                BLE.read(this.stream.device, s.uuid, c.uuid, (result:DataView) => {
-                                                                    this.output = decoders[decoderselect.value](result.buffer,debugmessage);
-
-                                                                    //requestAnimationFrame(this.anim);
-                                                                    this.anim();
-                                                                })
-                                                            }
-                                                        }
-                                                        if(c.properties.write) {
-                                                            let writeinput = self.querySelector('#'+c.uuid+'writeinput') as HTMLInputElement;
-                                                            (self.querySelector('#'+c.uuid+'writebutton') as HTMLButtonElement).onclick = () => { 
-                                                                let value:any = writeinput.value;
-                                                                if(parseInt(value)) value = parseInt(value);
-                                                                BLE.write(this.stream.device, s.uuid, c.uuid, BLEClient.toDataView(value), () => {
-                                                                    this.output = 'Wrote ' + value + 'to '+ c.uuid;
-
-                                                                    //requestAnimationFrame(this.anim);
-                                                                    this.anim();
-                                                                })
-                                                            }
-                                                        }
-                                                    }); 
-                                                });
-                                            })
-
-                                                
-                                        }
-
-                                    }
-
-                                    let id = `port${Math.floor(Math.random()*1000000000000000)}`;
-
-                                    ConnectionTemplate.addElement(`${id}-info`);
-                                    let elm = document.createElement(`${id}-info`);
-                                    //document.getElementById('connections').appendChild(elm);
-
-                                    document.querySelector('device-debugger').querySelector('#connections').appendChild(elm);
-                                    
-                                }); //set options in bleconfig
-                            }
-                        }
-                    } as ElementProps,
-                    'bleconfig':{
+                    'connectionopts':{
                         tagName:'div',
                         style:{
-                            fontSize:'10px',
-                            textAlign:'right'
+                            display:'flex' 
                         },
                         children:{
-                            'bleconfigdropdown':{
-                                tagName:'button',
-                                innerText:'--',
-                                attributes:{
-                                    onclick:(ev)=>{
-                                        //to make this more modular to select the adjacent node, ev.target.parentNode.querySelector('#bleconfigcontainer')
-                                        if( ev.target.parentNode.querySelector('#bleconfigcontainer').style.display === 'none') {
-                                            ev.target.parentNode.querySelector('#bleconfigcontainer').style.display = '';
-                                            ev.target.innerText = '--'
-                                        }
-                                        else {
-                                            ev.target.parentNode.querySelector('#bleconfigcontainer').style.display = 'none';
-                                            ev.target.innerText = '++'
-                                        }
-                                        // console.log(ev)
-                                        // let node = ev.target.node;
-                                        // for(const key in node.children) {
-                                        //     if(node.children[key].element) {
-                                        //         if(!node.children[key].element.style.display) node.children[key].element.style.display = 'none';
-                                        //         else node.children[key].element.style.display = '';
-                                        //     }
-                                        // }
-                                    }
-                                }
-                            },
-                            'bleconfigcontainer':{
-                                tagName:'div',
-                                children:{
-                                    'namePrefixLabel':{
-                                        tagName:'label',
-                                        innerText:'BLE Device Name',
-                                        children:{
-                                            'namePrefix':{
-                                                tagName:'input',
-                                                attributes:{
-                                                    type:'text',
-                                                    placeholder:'e.g. ESP32',
-                                                }
-                                            } as ElementProps,
-                                        }
-                                    } as ElementProps,
-                                    'ln':{template:'<br/>'},
-                                    'deviceIdLabel':{
-                                        tagName:'label',
-                                        innerText:'BLE Device ID (direct connect)',
-                                        children:{
-                                            'deviceId':{
-                                                tagName:'input',
-                                                attributes:{
-                                                    type:'text'
-                                                }
-                                            } as ElementProps,
-                                        }
-                                    } as ElementProps,
-                                    'ln2':{template:'<br/>'},
-                                    'serviceuuidLabel':{
-                                        tagName:'label',
-                                        innerText:'Primary Service UUID',
-                                        children:{
-                                            'serviceuuid':{
-                                                tagName:'input',
-                                                attributes:{
-                                                    type:'text',
-                                                    value:'0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase(),
-                                                    placeholder:'0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase()
-                                                }
-                                            } as ElementProps,
-                                        }
-                                    } as ElementProps,
-                                    'ln3':{template:'<br/>'},
-                                    'servicesLabel':{
-                                        tagName:'label',
-                                        innerText:'Services Config ',
-                                        children:{
-                                            'services':{ //need to configure options for multiple services and multiple characteristics per service in like a table
-                                                tagName:'table',
-                                                style:{
-                                                    border:'1px solid black',
-                                                    display:'flex'
-                                                },
-                                                children:{
-                                                }
-                                            } as ElementProps
-                                        }
-                                    }
-                                }
-                            } as ElementProps,
-                        } as ElementProps,
-                    } as ElementProps,
-                    'serialconnect':{
-                        tagName:'button',
-                        innerText:'USB Device',
-                        oncreate:(self: HTMLElement, info?: ElementInfo)=>{
+                            'bleopts':{
+                                tagName:'span',
+                                style:{
+                                    width:'50%'
+                                },
+                                children:{                
+                                    'bleconnect':{
+                                        tagName:'button',
+                                        innerText:'BLE Device',
+                                        oncreate:(self: HTMLElement, info?: ElementInfo)=>{
+                                            self.onclick = () => {
 
-                            let parent = document.querySelector('device-debugger');
+                                                let parent = document.querySelector('device-debugger');
+                                                let services:any = {}; //comma separated
+                                                let reqlen = '0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.length;
+                                                (parent.querySelector('#serviceuuid') as HTMLInputElement).value.split(',').forEach((uu) => { if(uu.length === reqlen) services[uu.toLowerCase()] = {}; else console.error('uuid format is wonk', uu, 'expected format (e.g.):', '0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase()) }); //todo, set up characteristics on first go
+                                                if(Object.keys(services).length === 0) services = {['0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase()]:{}};
 
-                            const getSettings = (port:SerialPort) => { 
+                                                BLE.setup({
+                                                    services
+                                                }).then((stream)=>{
+                                                    console.log(stream)
 
-                                let settings:any = {
-                                    baudRate:(parent.querySelector('#baudRate') as HTMLInputElement).value ? parseInt((parent.querySelector('#baudRate') as HTMLInputElement).value) : 115200, //https://lucidar.me/en/serialib/most-used-baud-rates-table/
-                                    bufferSize:(parent.querySelector('#bufferSize') as HTMLInputElement).value ? parseInt((parent.querySelector('#bufferSize') as HTMLInputElement).value) : 255,
-                                    parity:(parent.querySelector('#parity') as HTMLInputElement).value ? (parent.querySelector('#parity') as HTMLInputElement).value as ParityType : 'none',
-                                    dataBits:(parent.querySelector('#dataBits') as HTMLInputElement).value ? parseInt((parent.querySelector('#dataBits') as HTMLInputElement).value) : 8,
-                                    stopBits:(parent.querySelector('#stopBits') as HTMLInputElement).value ? parseInt((parent.querySelector('#stopBits') as HTMLInputElement).value) : 1,
-                                    flowControl:(parent.querySelector('#flowControl') as HTMLInputElement).value ? (parent.querySelector('#flowControl') as HTMLInputElement).value as FlowControlType : 'none',
-                                    onconnect:(ev)=>{ console.log('connected! ', JSON.stringify(port.getInfo())); },
-                                    ondisconnect:(ev)=>{ console.log('disconnected! ', JSON.stringify(port.getInfo())); },
-                                    decoder:'raw' //default
-                                }
+                                                    class ConnectionTemplate extends DOMElement {
+                                                            
+                                                        stream=stream;
+                                                        output:any;
 
-                                return settings;
-                            }
+                                                        anim:any;
 
-                            self.onclick = () => {
-                                //TODO: do this on a thread instead...
-                                Serial.requestPort(
-                                    (parent.querySelector('#usbVendorId') as HTMLInputElement).value ? parseInt((parent.querySelector('#usbVendorId') as HTMLInputElement).value) : undefined,
-                                    (parent.querySelector('#usbProductId') as HTMLInputElement).value ? parseInt((parent.querySelector('#usbProductId') as HTMLInputElement).value) : undefined
-                                ).then((port)=>{
+                                                        template = ()=>{ return `
+                                                            <div id='${this.stream.deviceId}' style='display:none;'>
+                                                                BLE Connection
+                                                                <div>
+                                                                    <span>BLE Device Name:</span><span>${this.stream.device.name}</span><span>BLE Device ID:</span><span>${this.stream.deviceId}</span>
+                                                                </div>
+                                                                <table id='${this.stream.deviceId}info'>
+                                                                </table>
+                                                                <div>
+                                                                    <button id='${this.stream.deviceId}xconnect'>Disconnect</button>
+                                                                    <button id='${this.stream.deviceId}x'>Remove</button>
+                                                                </div>
+                                                                <div>
+                                                                    <label>
+                                                                        Output Mode: <br/>
+                                                                        <select id='${this.stream.deviceId}outputmode'>
+                                                                            <option value='b' selected> All </option>
+                                                                            <option value='a'> Latest </option>
+                                                                        </select>
+                                                                    </label>
+                                                                </div>
+                                                                <div id='${this.stream.deviceId}connectioninfo'>RSSI: <span id='${this.stream.deviceId}rssi'></span></div>
+                                                                <div 
+                                                                    id='${this.stream.deviceId}console' 
+                                                                    style='color:white; background-color:black; font-size:10px; font-family:Consolas,monaco,monospace; overflow-y:scroll;'>
+                                                                </div>
+                                                            </div>`;
+                                                        }
 
-                                    class ConnectionTemplate extends DOMElement {
-                                            
-                                        stream:StreamInfo;
-                                        output:any;
-                                        settings:any;
-                                        lastRead:number=0;
-                                        readRate:number=0;
+                                                        oncreate = (self:DOMElement,props:any) => {
+                                                            //spawn a graph based prototype hierarchy for the connection info?
+                                                            //e.g. to show the additional modularity off
+                    
+                                                            let c = self.querySelector('#'+this.stream.deviceId+'console') as HTMLElement;
+                                                            let outputmode = self.querySelector('#'+this.stream.deviceId+'outputmode') as HTMLInputElement;
+                    
+                                                            this.anim = () => { 
+                    
+                                                                if(outputmode.value === 'a') 
+                                                                    c.innerText = `${this.output}`; 
+                                                                else if (outputmode.value === 'b') {
+                                                                    let outp = `${this.output}`; if(!outp.endsWith('\n')) outp+='\n'; //need endline
+                                                                    c.innerText += outp;
 
-                                        constructor() {
-                                            super(); 
-
-                                            this.settings = getSettings(port);
-
-                                            let debugmessage = `serial port ${port.getInfo().usbVendorId}:${port.getInfo().usbProductId} read:`;
-
-                                            this.stream = Serial.createStream({
-                                                port,
-                                                frequency:1,
-                                                ondata:(data:ArrayBuffer)=>{
-                                                    //pass to console
-                                                    this.stream.output = decoders[this.settings.decoder](data,debugmessage);
-
-                                                    let now = performance.now();
-                                                    this.readRate = 1/(0.001*(now - this.lastRead)); //reads per second.
-                                                    this.lastRead = now;
-
-                                                    //requestAnimationFrame(this.settings.anim); //throttles animations to refresh rate
-                                                    if(this.settings.anim) this.settings.anim();
-                                                    //roughly...
-                                                    //decoderworker.request({route:'decode',args:data},[data]).then((value) => {document.getElementById('console').innerText = `${value}`;} )
-                                                }
-                                            });
-        
-                                        };
-
-                                        template = ()=>{ return `
-                                            <div id='${this.stream._id}' style='display:none;'>
-                                                Serial Connection
-                                                <div>
-                                                    <span>USB Vendor ID:</span><span>${this.stream.info.usbVendorId}</span><span>USB Product ID:</span><span>${this.stream.info.usbProductId}</span>
-                                                </div>
-                                                <table id='${this.stream._id}info'>
-                                                    <tr><th>Baud Rate</th><th>Buffer Size</th><th>Parity</th><th>Data Bits</th><th>Stop Bits</th><th>Flow Control</th></tr>
-                                                    <tr><td>${this.stream.settings.baudRate}</td><td>${this.stream.settings.bufferSize}</td><td>${this.stream.settings.parity}</td><td>${this.stream.settings.dataBits}</td><td>${this.stream.settings.stopBits}</td><td>${this.stream.settings.flowControl}</td></tr>
-                                                </table>
-                                                <div>
-                                                    <input id='${this.stream._id}input' type='text' value='0x01'></input>
-                                                    <button id='${this.stream._id}send'>Send</button>
-                                                    <button id='${this.stream._id}xconnect'>Disconnect</button>
-                                                    <button id='${this.stream._id}x'>Remove</button>
-                                                </div>
-                                                <div>
-                                                    <label>
-                                                        Decoder:
-                                                        <select id='${this.stream._id}decoder'>
-                                                            ${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}
-                                                        </select>
-                                                    </label>
-                                                    <label>
-                                                        Output Mode: <br/>
-                                                        <select id='${this.stream._id}outputmode'>
-                                                            <option value='b' selected> All </option>
-                                                            <option value='a'> Latest </option>
-                                                        </select>
-                                                    </label>
-                                                </div>
-                                                <div id='${this.stream._id}connectioninfo'>Read Rate: <span id='${this.stream._id}readrate'></span> updates/sec</div>
-                                                <div id='${this.stream._id}console' style='color:white; background-color:black; font-size:10px; font-family:Consolas,monaco,monospace; overflow-y:scroll;'>
-                                                </div>
-                                            </div>`;
-                                        }
-
-                                        oncreate = (self:DOMElement,props:any) => {
-
-                                            //spawn a graph based prototype hierarchy for the connection info?
-                                            //e.g. to show the additional modularity off
-    
-                                            let c = self.querySelector('#'+this.stream._id+'console') as HTMLElement;
-                                            let outputmode = self.querySelector('#'+'outputmode') as HTMLInputElement;
-                                            let readrate = self.querySelector('#'+this.stream._id+'readrate') as HTMLElement;
-    
-                                            this.settings.anim = () => { 
-
-                                                readrate.innerText = this.readRate.toFixed(6);
-    
-                                                if(outputmode.value === 'a') 
-                                                    c.innerText = `${this.output}`; 
-                                                else if (outputmode.value === 'b') {
-                                                    let outp = `${this.output}`; if(!outp.endsWith('\n')) outp+='\n'; //need endline
-                                                    c.innerText += outp;
-
-                                                    if(c.innerText.length > 20000) { //e.g 20K char limit
-                                                        c.innerText = c.innerText.substring(c.innerText.length - 20000, c.innerText.length); //trim output
-                                                    }
-                                                }
-                                            }
-
-                                            Serial.openPort(port, this.settings).then(()=>{
-
-                                                (self.querySelector('#'+this.stream._id+'send') as HTMLButtonElement).onclick = () => {
-                                                    let value = (self.querySelector('#'+this.stream._id+'input') as HTMLButtonElement).value;
-                                                    if(parseInt(value)) {
-                                                        Serial.writePort(port,WebSerial.toDataView(parseInt(value)));
-                                                    } else Serial.writePort(port,WebSerial.toDataView((value)));
-                                                }
-
-                                                Serial.readStream(this.stream);
-                                                (self.querySelector('#'+this.stream._id) as HTMLElement).style.display = '';
-
-                                                const xconnectEvent = (ev) => {
-                                                    Serial.closeStream(this.stream).then(() => {
-                                                        (self.querySelector('#'+this.stream._id+'xconnect') as HTMLButtonElement).innerHTML = 'Reconnect';
-                                                        (self.querySelector('#'+this.stream._id+'xconnect') as HTMLButtonElement).onclick = (ev) => {
-                                                            Serial.getPorts().then((ports) => { //check previously permitted ports for auto reconnect
-                                                                for(let i = 0; i<ports.length; i++) {
-                                                                    if(ports[i].getInfo().usbVendorId === this.stream.info.usbVendorId && ports[i].getInfo().usbProductId === this.stream.info.usbProductId) {
-                                                                        let settings = getSettings(ports[i]);
-                                                                        Serial.openPort(ports[i], settings).then(()=>{
-                                                                            let debugmessage = `serial port ${ports[i].getInfo().usbVendorId}:${ports[i].getInfo().usbProductId} read:`;
-                                                                            this.stream = Serial.createStream({
-                                                                                port:ports[i],
-                                                                                frequency:1,
-                                                                                ondata:(data:ArrayBuffer)=>{
-                                                                                    //pass to console
-                                                                                    this.output = decoders[this.settings.decoder](data, debugmessage);
-                                                                                    
-                                                                                    requestAnimationFrame(this.settings.anim); //throttles animations to refresh rate
-                                                                                    //roughly...
-                                                                                    //decoderworker.request({route:'decode',args:data},[data]).then((value) => {document.getElementById('console').innerText = `${value}`;} )
-                                                                                }
-                                                                            });
-                                                                            this.settings = settings;
-                                                                            self.render(); //re-render, will trigger oncreate again to reset this button and update the template 
-                                                                        });
-                                                                        break;
+                                                                    if(c.innerText.length > 20000) { //e.g 20K char limit
+                                                                        c.innerText = c.innerText.substring(c.innerText.length - 20000, c.innerText.length); //trim output
                                                                     }
                                                                 }
+                                                            }
+
+                                                            (self.querySelector('#'+this.stream.deviceId) as HTMLElement).style.display = '';
+
+                                                            const xconnectEvent = (ev) => {
+                                                                BLE.disconnect(this.stream.device).then(() => {
+                                                                    (self.querySelector('#'+this.stream.deviceId+'xconnect') as HTMLButtonElement).innerHTML = 'Reconnect';
+                                                                    (self.querySelector('#'+this.stream.deviceId+'xconnect') as HTMLButtonElement).onclick = (ev) => {  
+                                                                        BLE.reconnect(this.stream.deviceId).then((device) => {
+                                                                            this.output = 'Reconnected to ' + device.deviceId;
+                                                                            //self.render(); //re-render, will trigger oncreate again to reset this button and update the template 
+                                                                        })
+                                                                    }
+                                                                });
+                                                            }
+
+                                                            (self.querySelector('#'+this.stream.deviceId+'xconnect') as HTMLButtonElement).onclick = xconnectEvent;
+
+                                                            (self.querySelector('#'+this.stream.deviceId+'x') as HTMLButtonElement).onclick = () => {
+                                                                BLE.disconnect(this.stream.device);
+                                                                this.delete();
+                                                                self.querySelector('#'+this.stream.deviceId+'console').remove(); //remove the adjacent output console
+                                                            }
+                                                        
+                                                            // (self.querySelector('#'+this.stream.deviceId+'decoder') as HTMLInputElement).onchange = (ev) => {
+                                                            //     this.decoder = decoders[(self.querySelector('#'+this.stream.deviceId+'decoder') as HTMLInputElement).value];
+                                                            // }
+
+                                                            let rssielm = self.querySelector('#'+this.stream.device.deviceId + 'rssi') as HTMLElement;
+
+                                                            let rssiFinder = () => {
+                                                                if(BLE.devices[this.stream.device.deviceId]) {
+                                                                    BLE.readRssi(this.stream.device).then((rssi) => {
+                                                                        rssielm.innerText = `${rssi}`;
+                                                                        setTimeout(()=>{rssiFinder();},250);
+                                                                    }).catch(console.error);
+                                                                }
+                                                            }
+
+                                                            rssiFinder();
+
+
+                                                            BLE.client.getServices(this.stream.device.deviceId).then((svcs) => {
+                                                                console.log('services', svcs)
+                                                                self.querySelector('#'+this.stream.deviceId+'info').innerHTML = `<tr><th>UUID</th><th>Notify</th><th>Read</th><th>Write</th><th>Broadcast</th><th>Indicate</th></tr>`
+                                                                svcs.forEach((s) => {    
+                                                                    self.querySelector('#'+this.stream.deviceId+'info').insertAdjacentHTML('beforeend', `<tr colSpan=6><th>${s.uuid}</th></tr>`)
+                                                                    s.characteristics.forEach((c) => { 
+                                                                        //build interactivity/subscriptions for each available service characteristic based on readable/writable/notify properties
+                                                                        self.querySelector('#'+this.stream.deviceId+'info').insertAdjacentHTML(
+                                                                            'beforeend', 
+                                                                            `<tr>
+                                                                                <td id='${c.uuid}'>${c.uuid}</td>
+                                                                                <td id='${c.uuid}notify'>${c.properties.notify ? `<button id="${c.uuid}notifybutton">Subscribe</button> Decoder: <select id="${c.uuid}notifydecoder">${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}</select>` : ''}</td>
+                                                                                <td id='${c.uuid}read'>${c.properties.read ? `<button id="${c.uuid}readbutton">Read</button> Decoder: <select id="${c.uuid}readdecoder">${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}</select>` : ''}</td>
+                                                                                <td id='${c.uuid}write'>${c.properties.write ? `<input type='text' id="${c.uuid}writeinput"></input><button id="${c.uuid}writebutton">Write</button>` : ''}</td>
+                                                                                <td id='${c.uuid}broadcast'>${c.properties.broadcast}</td>
+                                                                                <td id='${c.uuid}indicate'>${c.properties.indicate}</td>
+                                                                            </tr>`
+                                                                        );
+
+                                                                        if(c.properties.notify) {
+                                                                            let decoderselect = self.querySelector('#'+c.uuid+'notifydecoder') as HTMLInputElement;
+                                                                            let debugmessage = `${c.uuid} notify:`;
+                                                                            (self.querySelector('#'+c.uuid+'notifybutton') as HTMLButtonElement).onclick = () => {
+                                                                                BLE.subscribe(this.stream.device, s.uuid, c.uuid, (result:DataView) => {
+                                                                                    this.output = decoders[decoderselect.value](result.buffer,debugmessage);
+
+                                                                                    //requestAnimationFrame(this.anim);
+                                                                                    this.anim();
+                                                                                })
+                                                                            }
+                                                                        }
+                                                                        if(c.properties.read) {
+                                                                            let decoderselect = self.querySelector('#'+c.uuid+'readdecoder') as HTMLInputElement;
+                                                                            let debugmessage = `${c.uuid} read:`;
+                                                                            (self.querySelector('#'+c.uuid+'readbutton') as HTMLButtonElement).onclick = () => { 
+                                                                                BLE.read(this.stream.device, s.uuid, c.uuid, (result:DataView) => {
+                                                                                    this.output = decoders[decoderselect.value](result.buffer,debugmessage);
+
+                                                                                    //requestAnimationFrame(this.anim);
+                                                                                    this.anim();
+                                                                                })
+                                                                            }
+                                                                        }
+                                                                        if(c.properties.write) {
+                                                                            let writeinput = self.querySelector('#'+c.uuid+'writeinput') as HTMLInputElement;
+                                                                            (self.querySelector('#'+c.uuid+'writebutton') as HTMLButtonElement).onclick = () => { 
+                                                                                let value:any = writeinput.value;
+                                                                                if(parseInt(value)) value = parseInt(value);
+                                                                                BLE.write(this.stream.device, s.uuid, c.uuid, BLEClient.toDataView(value), () => {
+                                                                                    this.output = 'Wrote ' + value + 'to '+ c.uuid;
+
+                                                                                    //requestAnimationFrame(this.anim);
+                                                                                    this.anim();
+                                                                                })
+                                                                            }
+                                                                        }
+                                                                    }); 
+                                                                });
+                                                            })
+
+                                                                
+                                                        }
+
+                                                    }
+
+                                                    let id = `port${Math.floor(Math.random()*1000000000000000)}`;
+
+                                                    ConnectionTemplate.addElement(`${id}-info`);
+                                                    let elm = document.createElement(`${id}-info`);
+                                                    //document.getElementById('connections').appendChild(elm);
+
+                                                    document.querySelector('device-debugger').querySelector('#connections').appendChild(elm);
+                                                    
+                                                }); //set options in bleconfig
+                                            }
+                                        }
+                                    } as ElementProps,
+                                    'bleconfigdropdown':{
+                                        tagName:'button',
+                                        innerText:'--',
+                                        attributes:{
+                                            onclick:(ev)=>{
+                                                //to make this more modular to select the adjacent node, ev.target.parentNode.querySelector('#bleconfigcontainer')
+                                                if( ev.target.parentNode.querySelector('#bleconfigcontainer').style.display === 'none') {
+                                                    ev.target.parentNode.querySelector('#bleconfigcontainer').style.display = '';
+                                                    ev.target.innerText = '--'
+                                                }
+                                                else {
+                                                    ev.target.parentNode.querySelector('#bleconfigcontainer').style.display = 'none';
+                                                    ev.target.innerText = '++'
+                                                }
+                                                // console.log(ev)
+                                                // let node = ev.target.node;
+                                                // for(const key in node.children) {
+                                                //     if(node.children[key].element) {
+                                                //         if(!node.children[key].element.style.display) node.children[key].element.style.display = 'none';
+                                                //         else node.children[key].element.style.display = '';
+                                                //     }
+                                                // }
+                                            }
+                                        }
+                                    },
+                                    'bleconfig':{
+                                        tagName:'div',
+                                        style:{
+                                            fontSize:'10px',
+                                            textAlign:'right'
+                                        },
+                                        children:{
+                                            'bleconfigcontainer':{
+                                                tagName:'div',
+                                                children:{
+                                                    'namePrefixLabel':{
+                                                        tagName:'label',
+                                                        innerText:'BLE Device Name',
+                                                        children:{
+                                                            'namePrefix':{
+                                                                tagName:'input',
+                                                                attributes:{
+                                                                    type:'text',
+                                                                    placeholder:'e.g. ESP32',
+                                                                }
+                                                            } as ElementProps,
+                                                        }
+                                                    } as ElementProps,
+                                                    'ln':{template:'<br/>'},
+                                                    'deviceIdLabel':{
+                                                        tagName:'label',
+                                                        innerText:'BLE Device ID (direct connect)',
+                                                        children:{
+                                                            'deviceId':{
+                                                                tagName:'input',
+                                                                attributes:{
+                                                                    type:'text'
+                                                                }
+                                                            } as ElementProps,
+                                                        }
+                                                    } as ElementProps,
+                                                    'ln2':{template:'<br/>'},
+                                                    'serviceuuidLabel':{
+                                                        tagName:'label',
+                                                        innerText:'Primary Service UUID',
+                                                        children:{
+                                                            'serviceuuid':{
+                                                                tagName:'input',
+                                                                attributes:{
+                                                                    type:'text',
+                                                                    value:'0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase(),
+                                                                    placeholder:'0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase()
+                                                                }
+                                                            } as ElementProps,
+                                                        }
+                                                    } as ElementProps,
+                                                    // 'ln3':{template:'<br/>'},
+                                                    // 'servicesLabel':{
+                                                    //     tagName:'label',
+                                                    //     innerText:'Services Config ',
+                                                    //     children:{
+                                                    //         'services':{ //need to configure options for multiple services and multiple characteristics per service in like a table
+                                                    //             tagName:'table',
+                                                    //             style:{
+                                                    //                 border:'1px solid black',
+                                                    //                 display:'flex'
+                                                    //             },
+                                                    //             children:{
+                                                    //             }
+                                                    //         } as ElementProps
+                                                    //     }
+                                                    // }
+                                                }
+                                            } as ElementProps,
+                                        } as ElementProps,
+                                    } as ElementProps,
+                                }
+                            } as ElementProps,
+                            'serialopts':{
+                                tagName:'span',
+                                style:{
+                                    width:'50%'
+                                },
+                                children:{
+                                    'serialconnect':{
+                                        tagName:'button',
+                                        innerText:'USB Device',
+                                        oncreate:(self: HTMLElement, info?: ElementInfo)=>{
+        
+                                            let parent = document.querySelector('device-debugger');
+        
+                                            const getSettings = (port:SerialPort) => { 
+        
+                                                let settings:any = {
+                                                    baudRate:(parent.querySelector('#baudRate') as HTMLInputElement).value ? parseInt((parent.querySelector('#baudRate') as HTMLInputElement).value) : 115200, //https://lucidar.me/en/serialib/most-used-baud-rates-table/
+                                                    bufferSize:(parent.querySelector('#bufferSize') as HTMLInputElement).value ? parseInt((parent.querySelector('#bufferSize') as HTMLInputElement).value) : 255,
+                                                    parity:(parent.querySelector('#parity') as HTMLInputElement).value ? (parent.querySelector('#parity') as HTMLInputElement).value as ParityType : 'none',
+                                                    dataBits:(parent.querySelector('#dataBits') as HTMLInputElement).value ? parseInt((parent.querySelector('#dataBits') as HTMLInputElement).value) : 8,
+                                                    stopBits:(parent.querySelector('#stopBits') as HTMLInputElement).value ? parseInt((parent.querySelector('#stopBits') as HTMLInputElement).value) : 1,
+                                                    flowControl:(parent.querySelector('#flowControl') as HTMLInputElement).value ? (parent.querySelector('#flowControl') as HTMLInputElement).value as FlowControlType : 'none',
+                                                    onconnect:(ev)=>{ console.log('connected! ', JSON.stringify(port.getInfo())); },
+                                                    ondisconnect:(ev)=>{ console.log('disconnected! ', JSON.stringify(port.getInfo())); },
+                                                    decoder:'raw' //default
+                                                }
+        
+                                                return settings;
+                                            }
+        
+                                            self.onclick = () => {
+                                                //TODO: do this on a thread instead...
+                                                Serial.requestPort(
+                                                    (parent.querySelector('#usbVendorId') as HTMLInputElement).value ? parseInt((parent.querySelector('#usbVendorId') as HTMLInputElement).value) : undefined,
+                                                    (parent.querySelector('#usbProductId') as HTMLInputElement).value ? parseInt((parent.querySelector('#usbProductId') as HTMLInputElement).value) : undefined
+                                                ).then((port)=>{
+        
+                                                    class ConnectionTemplate extends DOMElement {
+                                                            
+                                                        stream:StreamInfo;
+                                                        output:any;
+                                                        settings:any;
+                                                        lastRead:number=0;
+                                                        readRate:number=0;
+        
+                                                        constructor() {
+                                                            super(); 
+        
+                                                            this.settings = getSettings(port);
+        
+                                                            let debugmessage = `serial port ${port.getInfo().usbVendorId}:${port.getInfo().usbProductId} read:`;
+        
+                                                            this.stream = Serial.createStream({
+                                                                port,
+                                                                frequency:1,
+                                                                ondata:(data:ArrayBuffer)=>{
+                                                                    //pass to console
+                                                                    this.stream.output = decoders[this.settings.decoder](data,debugmessage);
+        
+                                                                    let now = performance.now();
+                                                                    this.readRate = 1/(0.001*(now - this.lastRead)); //reads per second.
+                                                                    this.lastRead = now;
+        
+                                                                    //requestAnimationFrame(this.settings.anim); //throttles animations to refresh rate
+                                                                    if(this.settings.anim) this.settings.anim();
+                                                                    //roughly...
+                                                                    //decoderworker.request({route:'decode',args:data},[data]).then((value) => {document.getElementById('console').innerText = `${value}`;} )
+                                                                }
+                                                            });
+                        
+                                                        };
+        
+                                                        template = ()=>{ return `
+                                                            <div id='${this.stream._id}' style='display:none;'>
+                                                                Serial Connection
+                                                                <div>
+                                                                    <span>USB Vendor ID:</span><span>${this.stream.info.usbVendorId}</span><span>USB Product ID:</span><span>${this.stream.info.usbProductId}</span>
+                                                                </div>
+                                                                <table id='${this.stream._id}info'>
+                                                                    <tr><th>Baud Rate</th><th>Buffer Size</th><th>Parity</th><th>Data Bits</th><th>Stop Bits</th><th>Flow Control</th></tr>
+                                                                    <tr><td>${this.stream.settings.baudRate}</td><td>${this.stream.settings.bufferSize}</td><td>${this.stream.settings.parity}</td><td>${this.stream.settings.dataBits}</td><td>${this.stream.settings.stopBits}</td><td>${this.stream.settings.flowControl}</td></tr>
+                                                                </table>
+                                                                <div>
+                                                                    <input id='${this.stream._id}input' type='text' value='0x01'></input>
+                                                                    <button id='${this.stream._id}send'>Send</button>
+                                                                    <button id='${this.stream._id}xconnect'>Disconnect</button>
+                                                                    <button id='${this.stream._id}x'>Remove</button>
+                                                                </div>
+                                                                <div>
+                                                                    <label>
+                                                                        Decoder:
+                                                                        <select id='${this.stream._id}decoder'>
+                                                                            ${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}
+                                                                        </select>
+                                                                    </label>
+                                                                    <label>
+                                                                        Output Mode: <br/>
+                                                                        <select id='${this.stream._id}outputmode'>
+                                                                            <option value='b' selected> All </option>
+                                                                            <option value='a'> Latest </option>
+                                                                        </select>
+                                                                    </label>
+                                                                </div>
+                                                                <div id='${this.stream._id}connectioninfo'>Read Rate: <span id='${this.stream._id}readrate'></span> updates/sec</div>
+                                                                <div id='${this.stream._id}console' style='color:white; background-color:black; font-size:10px; font-family:Consolas,monaco,monospace; overflow-y:scroll;'>
+                                                                </div>
+                                                            </div>`;
+                                                        }
+        
+                                                        oncreate = (self:DOMElement,props:any) => {
+        
+                                                            //spawn a graph based prototype hierarchy for the connection info?
+                                                            //e.g. to show the additional modularity off
+                    
+                                                            let c = self.querySelector('#'+this.stream._id+'console') as HTMLElement;
+                                                            let outputmode = self.querySelector('#'+'outputmode') as HTMLInputElement;
+                                                            let readrate = self.querySelector('#'+this.stream._id+'readrate') as HTMLElement;
+                    
+                                                            this.settings.anim = () => { 
+        
+                                                                readrate.innerText = this.readRate.toFixed(6);
+                    
+                                                                if(outputmode.value === 'a') 
+                                                                    c.innerText = `${this.output}`; 
+                                                                else if (outputmode.value === 'b') {
+                                                                    let outp = `${this.output}`; if(!outp.endsWith('\n')) outp+='\n'; //need endline
+                                                                    c.innerText += outp;
+        
+                                                                    if(c.innerText.length > 20000) { //e.g 20K char limit
+                                                                        c.innerText = c.innerText.substring(c.innerText.length - 20000, c.innerText.length); //trim output
+                                                                    }
+                                                                }
+                                                            }
+        
+                                                            Serial.openPort(port, this.settings).then(()=>{
+        
+                                                                (self.querySelector('#'+this.stream._id+'send') as HTMLButtonElement).onclick = () => {
+                                                                    let value = (self.querySelector('#'+this.stream._id+'input') as HTMLButtonElement).value;
+                                                                    if(parseInt(value)) {
+                                                                        Serial.writePort(port,WebSerial.toDataView(parseInt(value)));
+                                                                    } else Serial.writePort(port,WebSerial.toDataView((value)));
+                                                                }
+        
+                                                                Serial.readStream(this.stream);
+                                                                (self.querySelector('#'+this.stream._id) as HTMLElement).style.display = '';
+        
+                                                                const xconnectEvent = (ev) => {
+                                                                    Serial.closeStream(this.stream).then(() => {
+                                                                        (self.querySelector('#'+this.stream._id+'xconnect') as HTMLButtonElement).innerHTML = 'Reconnect';
+                                                                        (self.querySelector('#'+this.stream._id+'xconnect') as HTMLButtonElement).onclick = (ev) => {
+                                                                            Serial.getPorts().then((ports) => { //check previously permitted ports for auto reconnect
+                                                                                for(let i = 0; i<ports.length; i++) {
+                                                                                    if(ports[i].getInfo().usbVendorId === this.stream.info.usbVendorId && ports[i].getInfo().usbProductId === this.stream.info.usbProductId) {
+                                                                                        let settings = getSettings(ports[i]);
+                                                                                        Serial.openPort(ports[i], settings).then(()=>{
+                                                                                            let debugmessage = `serial port ${ports[i].getInfo().usbVendorId}:${ports[i].getInfo().usbProductId} read:`;
+                                                                                            this.stream = Serial.createStream({
+                                                                                                port:ports[i],
+                                                                                                frequency:1,
+                                                                                                ondata:(data:ArrayBuffer)=>{
+                                                                                                    //pass to console
+                                                                                                    this.output = decoders[this.settings.decoder](data, debugmessage);
+                                                                                                    
+                                                                                                    requestAnimationFrame(this.settings.anim); //throttles animations to refresh rate
+                                                                                                    //roughly...
+                                                                                                    //decoderworker.request({route:'decode',args:data},[data]).then((value) => {document.getElementById('console').innerText = `${value}`;} )
+                                                                                                }
+                                                                                            });
+                                                                                            this.settings = settings;
+                                                                                            self.render(); //re-render, will trigger oncreate again to reset this button and update the template 
+                                                                                        });
+                                                                                        break;
+                                                                                    }
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                    });
+                                                                }
+        
+                                                                (self.querySelector('#'+this.stream._id+'xconnect') as HTMLButtonElement).onclick = xconnectEvent;
+        
+                                                                (self.querySelector('#'+this.stream._id+'x') as HTMLButtonElement).onclick = () => {
+                                                                    Serial.closeStream(this.stream,()=>{
+                                                                        
+                                                                    }).catch(er=>console.error(er));
+                                                                    this.delete();
+                                                                    self.querySelector('#'+this.stream._id+'console').remove(); //remove the adjacent output console
+                                                                }
+                                                            
+                                                                (self.querySelector('#'+this.stream._id+'decoder') as HTMLInputElement).onchange = (ev) => {
+                                                                    this.settings.decoder = decoders[(self.querySelector(this.stream._id+'decoder') as HTMLInputElement).value];
+                                                                }
+                                                                
                                                             });
                                                         }
-                                                    });
-                                                }
-
-                                                (self.querySelector('#'+this.stream._id+'xconnect') as HTMLButtonElement).onclick = xconnectEvent;
-
-                                                (self.querySelector('#'+this.stream._id+'x') as HTMLButtonElement).onclick = () => {
-                                                    Serial.closeStream(this.stream,()=>{
-                                                        
-                                                    }).catch(er=>console.error(er));
-                                                    this.delete();
-                                                    self.querySelector('#'+this.stream._id+'console').remove(); //remove the adjacent output console
-                                                }
-                                            
-                                                (self.querySelector('#'+this.stream._id+'decoder') as HTMLInputElement).onchange = (ev) => {
-                                                    this.settings.decoder = decoders[(self.querySelector(this.stream._id+'decoder') as HTMLInputElement).value];
-                                                }
-                                                
-                                            });
-                                        }
-
-                                    }
-
-                                    let id = `port${Math.floor(Math.random()*1000000000000000)}`;
-
-                                    ConnectionTemplate.addElement(`${id}-info`);
-                                    let elm = document.createElement(`${id}-info`);
-                                    //document.getElementById('connections').appendChild(elm);
-                                    
-                                    document.querySelector('device-debugger').querySelector('#connections').appendChild(elm);
-                                });
-
-    
-                            }
-                        }
-                    } as ElementProps,
-                    'serialconfig':{ //need labels
-                        tagName:'div',
-                        style:{
-                            fontSize:'10px',
-                            textAlign:'right'
-                        },
-                        children:{
-                            'serialconfigdropdown':{
-                                tagName:'button',
-                                innerText:'--',
-                                attributes:{
-                                    onclick:(ev)=>{
-                                        if(ev.target.parentNode.querySelector('#serialconfigcontainer').style.display === 'none') {
-                                            ev.target.parentNode.querySelector('#serialconfigcontainer').style.display = '';
-                                            ev.target.innerText = '--'
-                                        }
-                                        else {
-                                            ev.target.parentNode.querySelector('#serialconfigcontainer').style.display = 'none';
-                                            ev.target.innerText = '++'
-                                        }
-
-                                    }
-                                }
-                            },
-                            'serialconfigcontainer':{
-                                tagName:'div',
-                                children:{
-                                    'baudRateLabel':{
-                                        tagName:'label',
-                                        innerText:'Baud Rate (bps)',
-                                        children:{
-                                            'baudRate':{
-                                                tagName:'input',
-                                                attributes:{
-                                                    type:'number',
-                                                    placeholder:115200,
-                                                    value:115200,
-                                                    min:1, //anything below 9600 is unlikely
-                                                    max:10000000 //10M baud I think is highest web serial supports... might only be 921600
-                                                }
-                                            } as ElementProps
-                                        }
-                                    } as ElementProps,
-                                    'ln':{template:'<br/>'},
-                                    'bufferSizeLabel':{
-                                        tagName:'label',
-                                        innerText:'Read/Write buffer size (bytes)',
-                                        children:{
-                                            'bufferSize':{
-                                                tagName:'input',
-                                                attributes:{
-                                                    type:'number',
-                                                    placeholder:255,
-                                                    value:255,
-                                                    min:1,
-                                                    max:10000000 
-                                                }
-                                            } as ElementProps,
-                                        }
-                                    } as ElementProps,
-                                    'ln2':{template:'<br/>'},
-                                    'parityLabel':{
-                                        tagName:'label',
-                                        innerText:'Parity',
-                                        children:{
-                                            'parity':{
-                                                tagName:'select',
-                                                children:{
-                                                    'none':{
-                                                        tagName:'option',
-                                                        attributes:{
-                                                            value:'none',
-                                                            selected:true,
-                                                            innerText:'none'
-                                                        }
-                                                    },
-                                                    'even':{
-                                                        tagName:'option',
-                                                        attributes:{
-                                                            value:'even',
-                                                            innerText:'even'
-                                                        }
-                                                    },
-                                                    'odd':{
-                                                        tagName:'option',
-                                                        attributes:{
-                                                            value:'odd',
-                                                            innerText:'odd'
-                                                        }
+        
                                                     }
+        
+                                                    let id = `port${Math.floor(Math.random()*1000000000000000)}`;
+        
+                                                    ConnectionTemplate.addElement(`${id}-info`);
+                                                    let elm = document.createElement(`${id}-info`);
+                                                    //document.getElementById('connections').appendChild(elm);
+                                                    
+                                                    document.querySelector('device-debugger').querySelector('#connections').appendChild(elm);
+                                                });
+        
+                            
+                                                    
+                                                    }
+                                                },
+                                            
+                                        
+                                    } as ElementProps,
+                                    'serialconfigdropdown':{
+                                        tagName:'button',
+                                        innerText:'--',
+                                        attributes:{
+                                            onclick:(ev)=>{
+                                                if(ev.target.parentNode.querySelector('#serialconfigcontainer').style.display === 'none') {
+                                                    ev.target.parentNode.querySelector('#serialconfigcontainer').style.display = '';
+                                                    ev.target.innerText = '--'
                                                 }
-                                            } as ElementProps,
+                                                else {
+                                                    ev.target.parentNode.querySelector('#serialconfigcontainer').style.display = 'none';
+                                                    ev.target.innerText = '++'
+                                                }
+        
+                                            }
                                         }
                                     } as ElementProps,
-                                    'ln3':{template:'<br/>'},
-                                    'dataBitsLabel':{
-                                        tagName:'label',
-                                        innerText:'Data bits (7 or 8)',
+                                    'serialconfig':{ //need labels
+                                        tagName:'div',
+                                        style:{
+                                            fontSize:'10px',
+                                            textAlign:'right'
+                                        },
                                         children:{
-                                            'dataBits':{
-                                                tagName:'input',
-                                                attributes:{
-                                                    type:'number',
-                                                    placeholder:8,
-                                                    value:8,
-                                                    min:7, 
-                                                    max:8 
-                                                }
-                                            } as ElementProps,
-                                        }
-                                    } as ElementProps,
-                                    'ln4':{template:'<br/>'},
-                                    'stopBitsLabel':{
-                                        tagName:'label',
-                                        innerText:'Stop bits (1 or 2)',
-                                        children:{
-                                            'stopBits':{
-                                                tagName:'input',
-                                                attributes:{
-                                                    type:'number',
-                                                    placeholder:1,
-                                                    value:1,
-                                                    min:1, 
-                                                    max:2 
-                                                }
-                                            } as ElementProps,
-                                        }
-                                    } as ElementProps,
-                                    'ln5':{template:'<br/>'},
-                                    'flowControlLabel':{
-                                        tagName:'label',
-                                        innerText:'Flow control (hardware?)',
-                                        children:{
-                                            'flowControl':{
-                                                tagName:'select',
+                                            'serialconfigcontainer':{
+                                                tagName:'div',
                                                 children:{
-                                                    'none':{
-                                                        tagName:'option',
-                                                        attributes:{
-                                                            value:'none',
-                                                            selected:true,
-                                                            innerText:'none'
+                                                    'baudRateLabel':{
+                                                        tagName:'label',
+                                                        innerText:'Baud Rate (bps)',
+                                                        children:{
+                                                            'baudRate':{
+                                                                tagName:'input',
+                                                                attributes:{
+                                                                    type:'number',
+                                                                    placeholder:115200,
+                                                                    value:115200,
+                                                                    min:1, //anything below 9600 is unlikely
+                                                                    max:10000000 //10M baud I think is highest web serial supports... might only be 921600
+                                                                }
+                                                            } as ElementProps
                                                         }
-                                                    },
-                                                    'hardware':{
-                                                        tagName:'option',
-                                                        attributes:{
-                                                            value:'hardware',
-                                                            innerText:'hardware'
+                                                    } as ElementProps,
+                                                    'ln':{template:'<br/>'},
+                                                    'bufferSizeLabel':{
+                                                        tagName:'label',
+                                                        innerText:'Read/Write buffer size (bytes)',
+                                                        children:{
+                                                            'bufferSize':{
+                                                                tagName:'input',
+                                                                attributes:{
+                                                                    type:'number',
+                                                                    placeholder:255,
+                                                                    value:255,
+                                                                    min:1,
+                                                                    max:10000000 
+                                                                }
+                                                            } as ElementProps,
                                                         }
-                                                    },
-                                                }
-                                            } as ElementProps,
-                                        }
-                                    } as ElementProps,
-                                    'ln6':{template:'<br/>'},
-                                    'usbVendorIdLabel':{
-                                        tagName:'label',
-                                        innerText:'Vendor ID Filter? (hexadecimal)',
-                                        children:{
-                                            'usbVendorId':{
-                                                tagName:'input',
-                                                attributes:{
-                                                    type:'text',
-                                                    placeholder:'0xabcd',
-                                                }
-                                            } as ElementProps,
-                                        }
-                                    } as ElementProps,
-                                    'ln7':{template:'<br/>'},
-                                    'usbProductIdLabel':{
-                                        tagName:'label',
-                                        innerText:'Product ID Filter? (hexadecimal)',
-                                        children:{
-                                            'usbProductId':{
-                                                tagName:'input',
-                                                attributes:{
-                                                    type:'text',
-                                                    placeholder:'0xefgh',
-                                                }
-                                            } as ElementProps,
-                                        }
-                                    } as ElementProps,
-                                    'ln8':{template:'<br/>'},
-                                    'frequencyLabel':{
-                                        tagName:'label',
-                                        innerText:'Read frequency? (ms)',
-                                        children:{
-                                            'frequency':{
-                                                tagName:'input',
-                                                attributes:{
-                                                    type:'number',
-                                                    placeholder:10,
-                                                    value:10,
-                                                    min:0.001,
-                                                    max:10000000,
-                                                    step:0.001
+                                                    } as ElementProps,
+                                                    'ln2':{template:'<br/>'},
+                                                    'parityLabel':{
+                                                        tagName:'label',
+                                                        innerText:'Parity',
+                                                        children:{
+                                                            'parity':{
+                                                                tagName:'select',
+                                                                children:{
+                                                                    'none':{
+                                                                        tagName:'option',
+                                                                        attributes:{
+                                                                            value:'none',
+                                                                            selected:true,
+                                                                            innerText:'none'
+                                                                        }
+                                                                    },
+                                                                    'even':{
+                                                                        tagName:'option',
+                                                                        attributes:{
+                                                                            value:'even',
+                                                                            innerText:'even'
+                                                                        }
+                                                                    },
+                                                                    'odd':{
+                                                                        tagName:'option',
+                                                                        attributes:{
+                                                                            value:'odd',
+                                                                            innerText:'odd'
+                                                                        }
+                                                                    }
+                                                                }
+                                                            } as ElementProps,
+                                                        }
+                                                    } as ElementProps,
+                                                    'ln3':{template:'<br/>'},
+                                                    'dataBitsLabel':{
+                                                        tagName:'label',
+                                                        innerText:'Data bits (7 or 8)',
+                                                        children:{
+                                                            'dataBits':{
+                                                                tagName:'input',
+                                                                attributes:{
+                                                                    type:'number',
+                                                                    placeholder:8,
+                                                                    value:8,
+                                                                    min:7, 
+                                                                    max:8 
+                                                                }
+                                                            } as ElementProps,
+                                                        }
+                                                    } as ElementProps,
+                                                    'ln4':{template:'<br/>'},
+                                                    'stopBitsLabel':{
+                                                        tagName:'label',
+                                                        innerText:'Stop bits (1 or 2)',
+                                                        children:{
+                                                            'stopBits':{
+                                                                tagName:'input',
+                                                                attributes:{
+                                                                    type:'number',
+                                                                    placeholder:1,
+                                                                    value:1,
+                                                                    min:1, 
+                                                                    max:2 
+                                                                }
+                                                            } as ElementProps,
+                                                        }
+                                                    } as ElementProps,
+                                                    'ln5':{template:'<br/>'},
+                                                    'flowControlLabel':{
+                                                        tagName:'label',
+                                                        innerText:'Flow control (hardware?)',
+                                                        children:{
+                                                            'flowControl':{
+                                                                tagName:'select',
+                                                                children:{
+                                                                    'none':{
+                                                                        tagName:'option',
+                                                                        attributes:{
+                                                                            value:'none',
+                                                                            selected:true,
+                                                                            innerText:'none'
+                                                                        }
+                                                                    },
+                                                                    'hardware':{
+                                                                        tagName:'option',
+                                                                        attributes:{
+                                                                            value:'hardware',
+                                                                            innerText:'hardware'
+                                                                        }
+                                                                    },
+                                                                }
+                                                            } as ElementProps,
+                                                        }
+                                                    } as ElementProps,
+                                                    'ln6':{template:'<br/>'},
+                                                    'usbVendorIdLabel':{
+                                                        tagName:'label',
+                                                        innerText:'Vendor ID Filter? (hexadecimal)',
+                                                        children:{
+                                                            'usbVendorId':{
+                                                                tagName:'input',
+                                                                attributes:{
+                                                                    type:'text',
+                                                                    placeholder:'0xabcd',
+                                                                }
+                                                            } as ElementProps,
+                                                        }
+                                                    } as ElementProps,
+                                                    'ln7':{template:'<br/>'},
+                                                    'usbProductIdLabel':{
+                                                        tagName:'label',
+                                                        innerText:'Product ID Filter? (hexadecimal)',
+                                                        children:{
+                                                            'usbProductId':{
+                                                                tagName:'input',
+                                                                attributes:{
+                                                                    type:'text',
+                                                                    placeholder:'0xefgh',
+                                                                }
+                                                            } as ElementProps,
+                                                        }
+                                                    } as ElementProps,
+                                                    'ln8':{template:'<br/>'},
+                                                    'frequencyLabel':{
+                                                        tagName:'label',
+                                                        innerText:'Read frequency? (ms)',
+                                                        children:{
+                                                            'frequency':{
+                                                                tagName:'input',
+                                                                attributes:{
+                                                                    type:'number',
+                                                                    placeholder:10,
+                                                                    value:10,
+                                                                    min:0.001,
+                                                                    max:10000000,
+                                                                    step:0.001
+                                                                }
+                                                            } as ElementProps
+                                                        }
+                                                    } as ElementProps
                                                 }
                                             } as ElementProps
                                         }
@@ -835,12 +864,16 @@ const domtree = {
                 tagName:'div',
                 style:{
                     height:'300px',
+                    backgroundColor:'black',
                     display:'flex'
                 }
             },
             'customdecoder':{
                 tagName:'div',
                 innerHTML:'Custom Decoder',
+                style:{
+                    display:'flex'
+                },
                 children:{
                     'testinput':{
                         tagName:'input',
@@ -874,9 +907,8 @@ const domtree = {
                         }
                     },
                     'testfunction':{
-                        tagName:'input',
+                        tagName:'textarea',
                         attributes:{
-                            type:'textarea',
                             value:`
                                 //value is an ArrayBuffer
                                 (value) => {
@@ -886,6 +918,7 @@ const domtree = {
                             onchange:(ev:Event) => { //when you click away
                                 let elm = (ev.target as HTMLInputElement);
                                 let value = (ev.target as HTMLInputElement).value;
+                                
                                 try {
                                     let fn = (0, eval)(value);
                                     if(typeof fn === 'function') {
@@ -907,7 +940,12 @@ const domtree = {
                         }
                     },
                     'testoutput':{
-                        tagName:'div'
+                        tagName:'div',
+                        style:{
+                            height:'25px',
+                            minWidth:'50px',
+                            backgroundColor:'black'
+                        }
                     },
                     'suggested':{
                         tagName:'div',
@@ -964,7 +1002,7 @@ const domtree = {
                                 }
                             }
                         }
-                    }
+                    } as ElementProps
                 }
             } as ElementProps
         }
