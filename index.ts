@@ -414,6 +414,7 @@ const domtree = {
                         oncreate:(self: HTMLElement, info?: ElementInfo)=>{
                             self.onclick = () => {
 
+                                //TODO: do this on a thread instead...
                                 Serial.requestPort(
                                     (document.getElementById('usbVendorId') as HTMLInputElement).value ? parseInt((document.getElementById('usbVendorId') as HTMLInputElement).value) : undefined,
                                     (document.getElementById('usbProductId') as HTMLInputElement).value ? parseInt((document.getElementById('usbProductId') as HTMLInputElement).value) : undefined
