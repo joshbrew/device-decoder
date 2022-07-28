@@ -213,7 +213,7 @@ const domtree = {
                                                     (self.querySelector(this.stream.deviceId+'xconnect') as HTMLButtonElement).onclick = (ev) => {  
                                                         BLE.reconnect(this.stream.deviceId).then((device) => {
                                                             this.output = 'Reconnected to ' + device.deviceId;
-                                                            self.render(); //re-render, will trigger oncreate again to reset this button and update the template 
+                                                            //self.render(); //re-render, will trigger oncreate again to reset this button and update the template 
                                                         })
                                                     }
                                                 });
