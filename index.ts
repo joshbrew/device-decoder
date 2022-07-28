@@ -568,12 +568,13 @@ const domtree = {
                                                                     if(ports[i].getInfo().usbVendorId === this.stream.info.usbVendorId && ports[i].getInfo().usbProductId === this.stream.info.usbProductId) {
                                                                         let settings = this.getSettings(ports[i]);
                                                                         Serial.openPort(ports[i], settings).then(()=>{
+                                                                            let debugmessage = `serial port ${ports[i].getInfo().usbVendorId}:${ports[i].getInfo().usbProductId} read:`;
                                                                             this.stream = Serial.createStream({
                                                                                 port:ports[i],
                                                                                 frequency:1,
                                                                                 ondata:(data:ArrayBuffer)=>{
                                                                                     //pass to console
-                                                                                    this.output = decoders[this.settings.decoder](data);
+                                                                                    this.output = decoders[this.settings.decoder](data, debugmessage);
                                                                                     
                                                                                     requestAnimationFrame(this.settings.anim); //throttles animations to refresh rate
                                                                                     //roughly...
