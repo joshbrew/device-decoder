@@ -139,7 +139,8 @@ const domtree = {
                             self.onclick = () => {
 
                                 let services:any = {}; //comma separated
-                                (document.getElementById('serviceuuid') as HTMLInputElement).value.split(',').forEach((uu) => { services[uu] = {}; }); //todo, set up characteristics on first go
+                                let reqlen = '0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.length;
+                                (document.getElementById('serviceuuid') as HTMLInputElement).value.split(',').forEach((uu) => { if(uu.length === reqlen) services[uu.toLowerCase()] = {}; else console.error('uuid format is wonk', uu, 'expected format (e.g.):', '0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase()) }); //todo, set up characteristics on first go
                                 if(Object.keys(services).length === 0) services = {['0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase()]:{}};
 
                                 BLE.setup({
