@@ -419,8 +419,24 @@ const domtree = {
                         tagName:'button',
                         innerText:'USB Device',
                         oncreate:(self: HTMLElement, info?: ElementInfo)=>{
-                            self.onclick = () => {
 
+                            const getSettings = (port:SerialPort) => { 
+                                let settings:any = {
+                                    baudRate:(document.getElementById('baudRate') as HTMLInputElement).value ? parseInt((document.getElementById('baudRate') as HTMLInputElement).value) : 115200, //https://lucidar.me/en/serialib/most-used-baud-rates-table/
+                                    bufferSize:(document.getElementById('bufferSize') as HTMLInputElement).value ? parseInt((document.getElementById('bufferSize') as HTMLInputElement).value) : 255,
+                                    parity:(document.getElementById('parity') as HTMLInputElement).value ? (document.getElementById('parity') as HTMLInputElement).value as ParityType : 'none',
+                                    dataBits:(document.getElementById('dataBits') as HTMLInputElement).value ? parseInt((document.getElementById('dataBits') as HTMLInputElement).value) : 8,
+                                    stopBits:(document.getElementById('stopBits') as HTMLInputElement).value ? parseInt((document.getElementById('stopBits') as HTMLInputElement).value) : 1,
+                                    flowControl:(document.getElementById('flowControl') as HTMLInputElement).value ? (document.getElementById('flowControl') as HTMLInputElement).value as FlowControlType : 'none',
+                                    onconnect:(ev)=>{ console.log('connected! ', JSON.stringify(port.getInfo())); },
+                                    ondisconnect:(ev)=>{ console.log('disconnected! ', JSON.stringify(port.getInfo())); },
+                                    decoder:'raw' //default
+                                }
+
+                                return settings;
+                            }
+
+                            self.onclick = () => {
                                 //TODO: do this on a thread instead...
                                 Serial.requestPort(
                                     (document.getElementById('usbVendorId') as HTMLInputElement).value ? parseInt((document.getElementById('usbVendorId') as HTMLInputElement).value) : undefined,
@@ -435,27 +451,10 @@ const domtree = {
                                         lastRead:number=0;
                                         readRate:number=0;
 
-                                        getSettings = (port:SerialPort) => { //get the settings from the serial config divs, this is technically bad practice for web components but this component is baked in...
-                                            let settings:any = {
-                                                baudRate:(document.getElementById('baudRate') as HTMLInputElement).value ? parseInt((document.getElementById('baudRate') as HTMLInputElement).value) : 115200, //https://lucidar.me/en/serialib/most-used-baud-rates-table/
-                                                bufferSize:(document.getElementById('bufferSize') as HTMLInputElement).value ? parseInt((document.getElementById('bufferSize') as HTMLInputElement).value) : 255,
-                                                parity:(document.getElementById('parity') as HTMLInputElement).value ? (document.getElementById('parity') as HTMLInputElement).value as ParityType : 'none',
-                                                dataBits:(document.getElementById('dataBits') as HTMLInputElement).value ? parseInt((document.getElementById('dataBits') as HTMLInputElement).value) : 8,
-                                                stopBits:(document.getElementById('stopBits') as HTMLInputElement).value ? parseInt((document.getElementById('stopBits') as HTMLInputElement).value) : 1,
-                                                flowControl:(document.getElementById('flowControl') as HTMLInputElement).value ? (document.getElementById('flowControl') as HTMLInputElement).value as FlowControlType : 'none',
-                                                onconnect:(ev)=>{ console.log('connected! ', JSON.stringify(port.getInfo())); },
-                                                ondisconnect:(ev)=>{ console.log('disconnected! ', JSON.stringify(port.getInfo())); },
-                                                decoder:'raw' //default
-                                            }
-
-                                            return settings;
-                                        }
-
-
                                         constructor() {
                                             super(); 
 
-                                            this.settings = this.getSettings(port);
+                                            this.settings = getSettings(port);
 
                                             let debugmessage = `serial port ${port.getInfo().usbVendorId}:${port.getInfo().usbProductId} read:`;
 
@@ -560,7 +559,7 @@ const domtree = {
                                                             Serial.getPorts().then((ports) => { //check previously permitted ports for auto reconnect
                                                                 for(let i = 0; i<ports.length; i++) {
                                                                     if(ports[i].getInfo().usbVendorId === this.stream.info.usbVendorId && ports[i].getInfo().usbProductId === this.stream.info.usbProductId) {
-                                                                        let settings = this.getSettings(ports[i]);
+                                                                        let settings = getSettings(ports[i]);
                                                                         Serial.openPort(ports[i], settings).then(()=>{
                                                                             let debugmessage = `serial port ${ports[i].getInfo().usbVendorId}:${ports[i].getInfo().usbProductId} read:`;
                                                                             this.stream = Serial.createStream({
