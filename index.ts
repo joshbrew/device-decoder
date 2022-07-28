@@ -256,8 +256,8 @@ const domtree = {
                                                             'beforeend', 
                                                             `<tr>
                                                                 <td id='${c.uuid}'>${c.uuid}</td>
-                                                                <td id='${c.uuid}notify'>${c.properties.notify ? `<button id="${c.uuid}notifybutton">Subscribe</button> Decoder: <select id="${c.uuid}notifyselect">${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}</select>` : ''}</td>
-                                                                <td id='${c.uuid}read'>${c.properties.read ? `<button id="${c.uuid}readbutton">Read</button> Decoder: <select id="${c.uuid}readselect">${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}</select>` : ''}</td>
+                                                                <td id='${c.uuid}notify'>${c.properties.notify ? `<button id="${c.uuid}notifybutton">Subscribe</button> Decoder: <select id="${c.uuid}notifydecoder">${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}</select>` : ''}</td>
+                                                                <td id='${c.uuid}read'>${c.properties.read ? `<button id="${c.uuid}readbutton">Read</button> Decoder: <select id="${c.uuid}readdecoder">${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}</select>` : ''}</td>
                                                                 <td id='${c.uuid}write'>${c.properties.write ? `<input type='text' id="${c.uuid}writeinput"></input><button id="${c.uuid}writebutton">Write</button>` : ''}</td>
                                                                 <td id='${c.uuid}broadcast'>${c.properties.broadcast}</td>
                                                                 <td id='${c.uuid}indicate'>${c.properties.indicate}</td>
@@ -265,9 +265,9 @@ const domtree = {
                                                         );
 
                                                         if(c.properties.notify) {
+                                                            let decoderselect = document.getElementById(c.uuid+'notifydecoder') as HTMLInputElement;
+                                                            let debugmessage = `${c.uuid} notify:`
                                                             document.getElementById(c.uuid+'notifybutton').onclick = () => {
-                                                                let decoderselect = document.getElementById(c.uuid+'notifyselect') as HTMLInputElement;
-                                                                let debugmessage = `${s.uuid} notify:`
                                                                 BLE.subscribe(this.stream.device, s.uuid, c.uuid, (result:DataView) => {
                                                                     this.output = decoders[decoderselect.value](result.buffer,debugmessage);
 
@@ -277,8 +277,8 @@ const domtree = {
                                                             }
                                                         }
                                                         if(c.properties.read) {
-                                                            let decoderselect = document.getElementById(c.uuid+'readselect') as HTMLInputElement;
-                                                            let debugmessage = `${s.uuid} read:`
+                                                            let decoderselect = document.getElementById(c.uuid+'readdecoder') as HTMLInputElement;
+                                                            let debugmessage = `${c.uuid} read:`
                                                             document.getElementById(c.uuid+'readbutton').onclick = () => { 
                                                                 BLE.read(this.stream.device, s.uuid, c.uuid, (result:DataView) => {
                                                                     this.output = decoders[decoderselect.value](result.buffer,debugmessage);
@@ -294,7 +294,7 @@ const domtree = {
                                                                 let value:any = writeinput.value;
                                                                 if(parseInt(value)) value = parseInt(value);
                                                                 BLE.write(this.stream.device, s.uuid, c.uuid, BLEClient.toDataView(value), () => {
-                                                                    this.output = 'Wrote ' + value;
+                                                                    this.output = 'Wrote ' + value + 'to '+ c.uuid;
 
                                                                     //requestAnimationFrame(this.anim);
                                                                     this.anim();
@@ -937,6 +937,14 @@ const domtree = {
                                             let name = (document.getElementById('decodername') as HTMLInputElement).value;
                                             if(!name) name = 'mydecoder';
                                             decoders[name] = fn; //set the decoder since it was successful
+
+                                            let option = `<option value='${name}'>${name}</option>`;
+                                            document.querySelectorAll('select').forEach((e) => {
+                                                if(e.id.includes('decoder')) {
+                                                    e.insertAdjacentHTML('beforeend',option);
+                                                } //update existing selectors
+                                            })
+
                                         } catch(er) {
                                             document.getElementById('testoutput').innerText = er;
                                         } 
