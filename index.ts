@@ -97,10 +97,11 @@ const decoders = {
     //ads131m08:(data:ArrayBuffer) => { return data; },
     //max3010x:(data:ArrayBuffer) => { return data; },
     //mpu6050:(data:ArrayBuffer) => { return data; },
-    //freeeg32:(data:ArrayBuffer) => { return data; },
-    //openbcicyton:(data:ArrayBuffer) => { return data; },
-    //cognixionBLE:(data:ArrayBuffer) => { return data; },
-    //hegduino:(data:ArrayBuffer) => { return data; }, // -- incl check for android (3 outputs only) output
+    //freeeg32:(data:ArrayBuffer) => { return data; }, //https://github.com/joshbrew/freeeeg32.js
+    //openbcicyton:(data:ArrayBuffer) => { return data; }, //https://github.com/joshbrew/cyton.js
+    //cognixionBLE:(data:ArrayBuffer) => { return data; }, //see the super secret docs
+    //hegduino:(data:ArrayBuffer) => { return data; }, //https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
+    //peanut:(data:ArrayBuffer) => { return data; } //https://github.com/joshbrew/peanutjs/blob/main/peanut.js
     //...custom?
 }
 
