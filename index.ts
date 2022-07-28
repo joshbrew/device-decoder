@@ -37,6 +37,13 @@ import { DOMElementProps } from 'graphscript/dist/services/dom/types/component';
                 Console
 
                 TODO: more stuff like latencies, callback info, etc.
+        <------------------------------------------>
+            Custom decoder writer:
+            Test input (e.g. copied from above consoles, evaluating any comma separated numbers into an array),
+            Eval a text inputted decoder function
+            Test output, keep editing till it gives a templated response
+
+            then at the bottom e.g. 'suggested output format: "1000,3000,400,5000"' or maybe an object with named keys. and we will take care of timestamping for the charts and csvs
 
 */
 
