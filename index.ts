@@ -822,7 +822,81 @@ const domtree = {
                     height:'300px',
                     display:'flex'
                 }
-            }
+            },
+            'customdecoder':{
+                tagName:'div',
+                children:{
+                    'testinput':{
+                        tagName:'input',
+                        attributes:{
+                            type:'text',
+                            value:'[24,52,230,125,243,112,0,0,10,2,30]',
+                            onchange:(ev:Event)=>{
+                                let value = (ev.target as HTMLInputElement).value;
+                                if(value.includes(',') && !value.includes('[')) {
+                                    value = `[${value}]`;
+                                }
+                                try {
+                                    value = JSON.parse(value);   
+                                    if(Array.isArray(value)) {
+                                        let testfunction = (document.getElementById('testfunction') as HTMLInputElement).value;
+                                        try {
+                                            let fn = eval(testfunction);
+                                            if(typeof fn === 'function') {
+                                                document.getElementById('testoutput').innerText = fn(value);
+        
+                                            }
+                                        } catch (er) {
+                                            document.getElementById('testoutput').innerText = er;
+                                        }
+                                    }
+                                } catch(er) {
+                                    document.getElementById('testoutput').innerText = er;
+                                }
+                            }
+                        }
+                    },
+                    'testfunction':{
+                        tagName:'input',
+                        attributes:{
+                            type:'textarea',
+                            value:`
+                                //value is an ArrayBuffer
+                                (value) => {
+                                    return value;
+                                }
+                            `,
+                            onchange:(ev:Event) => { //when you click away
+                                let value = (ev.target as HTMLInputElement).value;
+                                try {
+                                    let fn = eval(value);
+                                    if(typeof fn === 'function') {
+                                        let testvalue = (document.getElementById('testvalue') as HTMLInputElement).value;
+                                        if(testvalue.includes(',') && !testvalue.includes('[')) {
+                                            testvalue = `[${testvalue}]`;
+                                        }
+                                        try {
+                                            testvalue = JSON.parse(testvalue);  
+                                            document.getElementById('testoutput').innerText = fn(testvalue);
+                                        } catch(er) {
+                                            document.getElementById('testoutput').innerText = er;
+                                        } 
+                                    }
+                                } catch (er) {
+                                    document.getElementById('testoutput').innerText = er;
+                                }
+                            }
+                        }
+                    },
+                    'testoutput':{
+                        tagName:'div'
+                    },
+                    'suggested':{
+                        tagName:'div',
+                        innerHTML:`Recognized chart/csv output format: return {[key:string]:number|number[]} where you are returning an object with key:value pairs for tagged channels and numbers/arrays to be appended`
+                    }
+                }
+            } as ElementProps
         }
     } as DOMElementProps
 };
