@@ -825,6 +825,7 @@ const domtree = {
             },
             'customdecoder':{
                 tagName:'div',
+                innerHTML:'Custom Decoder',
                 children:{
                     'testinput':{
                         tagName:'input',
@@ -894,6 +895,49 @@ const domtree = {
                     'suggested':{
                         tagName:'div',
                         innerHTML:`Recognized chart/csv output format: return {[key:string]:number|number[]} where you are returning an object with key:value pairs for tagged channels and numbers/arrays to be appended`
+                    },
+                    'decodernameLabel':{
+                        tagName:'label',
+                        innerText:'Name Decoder:',
+                        children:{
+                            'decodername':{
+                                tagName:'input',
+                                attributes:{
+                                    type:'text',
+                                    value:'testdecoder',
+                                    placeholder:'mydecoder'
+                                }
+                            }
+                        }
+                    },
+                    'submitdecoder':{
+                        tagName:'button',
+                        innerText:'Test & Set',
+                        attributes:{
+                            onclick:(ev)=>{
+                                let value = (ev.target as HTMLInputElement).value;
+                                try {
+                                    let fn = eval(value);
+                                    if(typeof fn === 'function') {
+                                        let testvalue = (document.getElementById('testvalue') as HTMLInputElement).value;
+                                        if(testvalue.includes(',') && !testvalue.includes('[')) {
+                                            testvalue = `[${testvalue}]`;
+                                        }
+                                        try {
+                                            testvalue = JSON.parse(testvalue);  
+                                            document.getElementById('testoutput').innerText = fn(testvalue);
+                                            let name = (document.getElementById('decodername') as HTMLInputElement).value;
+                                            if(!name) name = 'mydecoder';
+                                            decoders[name] = fn; //set the decoder since it was successful
+                                        } catch(er) {
+                                            document.getElementById('testoutput').innerText = er;
+                                        } 
+                                    }
+                                } catch (er) {
+                                    document.getElementById('testoutput').innerText = er;
+                                }
+                            }
+                        }
                     }
                 }
             } as ElementProps
