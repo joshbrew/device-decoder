@@ -435,7 +435,7 @@ const domtree = {
                                         lastRead:number=0;
                                         readRate:number=0;
 
-                                        getSettings = (port:SerialPort) => { //util function on this node
+                                        getSettings = (port:SerialPort) => { //get the settings from the serial config divs, this is technically bad practice for web components but this component is baked in...
                                             let settings:any = {
                                                 baudRate:(document.getElementById('baudRate') as HTMLInputElement).value ? parseInt((document.getElementById('baudRate') as HTMLInputElement).value) : 115200, //https://lucidar.me/en/serialib/most-used-baud-rates-table/
                                                 bufferSize:(document.getElementById('bufferSize') as HTMLInputElement).value ? parseInt((document.getElementById('bufferSize') as HTMLInputElement).value) : 255,
