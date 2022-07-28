@@ -495,6 +495,8 @@ const domtree = {
                                                     <tr><td>${this.stream.settings.baudRate}</td><td>${this.stream.settings.bufferSize}</td><td>${this.stream.settings.parity}</td><td>${this.stream.settings.dataBits}</td><td>${this.stream.settings.stopBits}</td><td>${this.stream.settings.flowControl}</td></tr>
                                                 </table>
                                                 <div>
+                                                    <input id='${this.stream._id}input' type='text' value='0x01'></input>
+                                                    <button id='${this.stream._id}send'>Send</button>
                                                     <button id='${this.stream._id}xconnect'>Disconnect</button>
                                                     <button id='${this.stream._id}x'>Remove</button>
                                                 </div>
@@ -545,6 +547,13 @@ const domtree = {
                                             }
 
                                             Serial.openPort(port, this.settings).then(()=>{
+
+                                                (self.querySelector(this.stream._id+'send') as HTMLButtonElement).onclick = () => {
+                                                    let value = (document.getElementById(this.stream._id+'input') as HTMLButtonElement).value;
+                                                    if(parseInt(value)) {
+                                                        Serial.writePort(port,WebSerial.toDataView(parseInt(value)));
+                                                    } else Serial.writePort(port,WebSerial.toDataView((value)));
+                                                }
 
                                                 Serial.readStream(this.stream);
                                                 document.getElementById(this.stream._id).style.display = '';
