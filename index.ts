@@ -174,6 +174,52 @@ const domtree = {
                                         }
 
                                         oncreate = (self:DOMElement,props:any) => {
+
+
+                                            //spawn a graph based prototype hierarchy for the connection info?
+                                            //e.g. to show the additional modularity off
+    
+                                            let c = document.getElementById(this.stream.deviceId+'console');
+                                            let outputmode = document.getElementById(this.stream.deviceId+'outputmode') as HTMLInputElement;
+    
+                                            this.anim = () => { 
+    
+                                                if(outputmode.value === 'a') 
+                                                    c.innerText = `${this.output}`; 
+                                                else if (outputmode.value === 'b') {
+                                                    c.innerText += `${this.output}\n`;
+                                                    if(c.innerText.length > 20000) { //e.g 20K char limit
+                                                        c.innerText = c.innerText.substring(c.innerText.length - 20000, c.innerText.length); //trim output
+                                                    }
+                                                }
+                                            }
+
+                                            document.getElementById(this.stream.deviceId).style.display = '';
+
+                                            const xconnectEvent = (ev) => {
+                                                BLE.disconnect(this.stream.device).then(() => {
+                                                    (self.querySelector(this.stream.deviceId+'xconnect') as HTMLButtonElement).innerHTML = 'Reconnect';
+                                                    (self.querySelector(this.stream.deviceId+'xconnect') as HTMLButtonElement).onclick = (ev) => {  
+                                                        BLE.reconnect(this.stream.deviceId).then((device) => {
+                                                            this.output = 'Reconnected to ' + device.deviceId;
+                                                            //self.render(); //re-render, will trigger oncreate again to reset this button and update the template 
+                                                        })
+                                                    }
+                                                });
+                                            }
+
+                                            (self.querySelector(this.stream.deviceId+'xconnect') as HTMLButtonElement).onclick = xconnectEvent;
+
+                                            (self.querySelector(this.stream.deviceId+'x') as HTMLButtonElement).onclick = () => {
+                                                BLE.disconnect(this.stream.device);
+                                                this.delete();
+                                                document.getElementById(this.stream.deviceId+'console').remove(); //remove the adjacent output console
+                                            }
+                                        
+                                            // (self.querySelector(this.stream.deviceId+'decoder') as HTMLInputElement).onchange = (ev) => {
+                                            //     this.decoder = decoders[(self.querySelector(this.stream.deviceId+'decoder') as HTMLInputElement).value];
+                                            // }
+
                                             BLE.client.getServices(this.stream.device.deviceId).then((svcs) => {
                                                 console.log('services', svcs)
                                                 document.getElementById(this.stream.deviceId+'info').innerHTML = `<tr><th>UUID</th><th>Notify</th><th>Read</th><th>Write</th><th>Broadcast</th><th>Indicate</th></tr>`
@@ -234,49 +280,6 @@ const domtree = {
                                                 });
                                             })
 
-                                            //spawn a graph based prototype hierarchy for the connection info?
-                                            //e.g. to show the additional modularity off
-    
-                                            let c = document.getElementById(this.stream.deviceId+'console');
-                                            let outputmode = document.getElementById(this.stream.deviceId+'outputmode') as HTMLInputElement;
-    
-                                            this.anim = () => { 
-    
-                                                if(outputmode.value === 'a') 
-                                                    c.innerText = `${this.output}`; 
-                                                else if (outputmode.value === 'b') {
-                                                    c.innerText += `${this.output}\n`;
-                                                    if(c.innerText.length > 20000) { //e.g 20K char limit
-                                                        c.innerText = c.innerText.substring(c.innerText.length - 20000, c.innerText.length); //trim output
-                                                    }
-                                                }
-                                            }
-
-                                                document.getElementById(this.stream.deviceId).style.display = '';
-
-                                                const xconnectEvent = (ev) => {
-                                                    BLE.disconnect(this.stream.device).then(() => {
-                                                        (self.querySelector(this.stream.deviceId+'xconnect') as HTMLButtonElement).innerHTML = 'Reconnect';
-                                                        (self.querySelector(this.stream.deviceId+'xconnect') as HTMLButtonElement).onclick = (ev) => {  
-                                                            BLE.reconnect(this.stream.deviceId).then((device) => {
-                                                                this.output = 'Reconnected to ' + device.deviceId;
-                                                                //self.render(); //re-render, will trigger oncreate again to reset this button and update the template 
-                                                            })
-                                                        }
-                                                    });
-                                                }
-
-                                                (self.querySelector(this.stream.deviceId+'xconnect') as HTMLButtonElement).onclick = xconnectEvent;
-
-                                                (self.querySelector(this.stream.deviceId+'x') as HTMLButtonElement).onclick = () => {
-                                                    BLE.disconnect(this.stream.device);
-                                                    this.delete();
-                                                    document.getElementById(this.stream.deviceId+'console').remove(); //remove the adjacent output console
-                                                }
-                                            
-                                                // (self.querySelector(this.stream.deviceId+'decoder') as HTMLInputElement).onchange = (ev) => {
-                                                //     this.decoder = decoders[(self.querySelector(this.stream.deviceId+'decoder') as HTMLInputElement).value];
-                                                // }
                                                 
                                         }
 
