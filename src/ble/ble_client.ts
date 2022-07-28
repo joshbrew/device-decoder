@@ -160,6 +160,7 @@ export class BLEClient {
     }
 
     disconnect(device:BleDevice) {
+        delete this.devices[device.deviceId];
         return this.client.disconnect(device.deviceId);
     }
 

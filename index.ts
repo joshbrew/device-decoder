@@ -11,10 +11,6 @@ import { DOMElementProps } from 'graphscript/dist/services/dom/types/component';
             <BLE Config>
                 <device filters> - i.e. the namePrefix 
 
-                When paired:
-                <Toggle services> - each one toggled on should get its own console output 
-                                and visual container like nrf connect, but in the console
-
             Browser only:
             <Serial Button>
             <Serial Config>
@@ -22,22 +18,25 @@ import { DOMElementProps } from 'graphscript/dist/services/dom/types/component';
                 <baudRate>
                 <bufferSize>
 
-            Show several active connections in their own sub windows with selective disconnecting and decoding etc.
-
-            Console mode (toggle one):
-            <Latest> (only the most recent samples in raw text)
-            <Scrolling> (up to 1000 samples in raw text)
-            <Charting> (if debugger output matches a given format - use arduino output format?)
-            <Blocks> (for ble services)
 
             Create a window for active serial connections with selective disconnecting and decoding etc.
         <------------------------------------------>
+            Connections
             <Console window> - takes up most of the screen
-            Create a console for each active usb connection/ble characteristic (read/write/notify)
-        <------------------------------------------>
-            <Connection Info> - expands
-            <Decoder options> - expands (default text and raw byte outputs, plus write-your-own with a simple callback to return modified results, incl a set format that can be charted arbitrarily)
-            <Line break format> - dropdown and custom input (e.g. look for \r\n end stop bytes)
+                Creates a console for each active usb connection/ble characteristic (read/write/notify), just stuff them next to each other with flex boxes.
+                Each console has controls for each connection with a full test suite and selective notification/read/write controls/decoder selection etc..
+
+                Connection Info
+                Decoder Options, Output Modes
+                Console mode (toggle one):
+                <Latest> (only the most recent samples in raw text)
+                <Scrolling> (up to 1000 samples in raw text)
+                <Charting> (if debugger output matches a given format - use arduino output format?)
+                <Blocks> (for ble services)
+
+                Console
+
+                TODO: more stuff like latencies, callback info, etc.
 
 */
 
@@ -168,7 +167,10 @@ const domtree = {
                                                         </select>
                                                     </label>
                                                 </div>
-                                                <div id='${this.stream.deviceId}console' style='color:white; background-color:black; font-size:10px; font-family:Consolas,monaco,monospace; overflow-y:scroll;'>
+                                                <div id='${this.stream.deviceId}connectioninfo'>RSSI: <span id='${this.stream.deviceId}rssi'></span></div>
+                                                <div 
+                                                    id='${this.stream.deviceId}console' 
+                                                    style='color:white; background-color:black; font-size:10px; font-family:Consolas,monaco,monospace; overflow-y:scroll;'>
                                                 </div>
                                             </div>`;
                                         }
@@ -219,6 +221,19 @@ const domtree = {
                                             // (self.querySelector(this.stream.deviceId+'decoder') as HTMLInputElement).onchange = (ev) => {
                                             //     this.decoder = decoders[(self.querySelector(this.stream.deviceId+'decoder') as HTMLInputElement).value];
                                             // }
+
+                                            let rssielm = document.getElementById(this.stream.device.deviceId + 'rssi');
+
+                                            let rssiFinder = () => {
+                                                if(BLE.devices[this.stream.device.deviceId])    
+                                                    BLE.readRssi(this.stream.device).then((rssi) => {
+                                                        rssielm.innerText = `${rssi}`;
+                                                        setTimeout(()=>{rssiFinder();},1000);
+                                                    }).catch(console.error);
+                                            }
+
+                                            rssiFinder();
+
 
                                             BLE.client.getServices(this.stream.device.deviceId).then((svcs) => {
                                                 console.log('services', svcs)
@@ -274,8 +289,6 @@ const domtree = {
                                                                 })
                                                             }
                                                         }
-
-
                                                     }); 
                                                 });
                                             })
