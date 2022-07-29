@@ -218,7 +218,7 @@ const domtree = {
                                             'bleconnect':{
                                                 tagName:'button',
                                                 innerText:'Connect BLE Device',
-                                                oncreate:(self: HTMLElement, info?: ElementInfo)=>{
+                                                onrender:(self: HTMLElement, info?: ElementInfo)=>{
                                                     self.onclick = () => {
 
                                                         let parent = document.querySelector('device-debugger');
@@ -531,7 +531,7 @@ const domtree = {
                                             'serialconnect':{
                                                 tagName:'button',
                                                 innerText:'Connect USB Device',
-                                                oncreate:(self: HTMLElement, info?: ElementInfo)=>{
+                                                onrender:(self: HTMLElement, info?: ElementInfo)=>{
                 
                                                     let parent = document.querySelector('device-debugger');
                 
