@@ -791,8 +791,8 @@ const domtree = {
                                                                         this.stream = Serial.createStream({
                                                                             port,
                                                                             frequency:1,
-                                                                            ondata: (value:ArrayBuffer) => { console.log(value) }
-                                                                         
+                                                                            ondata: (value:ArrayBuffer) => { console.log(value) },
+                                                                            buffering: true //buffer results and look for newlines, default \r\n --> new Uint8Array([0x0D,0x0A])
                                                                         });
                                                                         
                                                                         let debugmessage = `serial port ${port.getInfo().usbVendorId}:${port.getInfo().usbProductId} read:`;

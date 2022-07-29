@@ -21,6 +21,12 @@ export type StreamInfo = {
             streamPipeOptions?:StreamPipeOptions 
         }|TransformStream
     },
+    buffering?:{ //if defined the data will be buffered and a search applied to pass differentiable lines to ondata e.g. \r\n
+        searchBytes?:Uint8Array, //
+        buffer?:any[], //byte buffer
+        locked?:boolean, //locked on to search byte intervals?
+        lockIdx?:number //first found search buffer to lock onto stream
+    }
     frequency:number, //read frequency, just a setTimeout after every read finishes to allow coroutines to do their thing as the .read call will await to receive and block the app if not on its own thread
     ondata:(value:any)=>void,
     running:boolean,
@@ -124,7 +130,13 @@ export class WebSerial extends bitflippin {
                     readableStrategy?:QueuingStrategy<DataView>,
                     streamPipeOptions?:StreamPipeOptions 
                 }|TransformStream
-            }
+            },
+            buffering?:{ //if defined the data will be buffered and a search applied to pass differentiable lines to ondata e.g. \r\n
+                searchBytes?:Uint8Array, //
+                buffer?:any[], //byte buffer
+                locked?:boolean, //locked on to search byte intervals?
+                lockIdx?:number //first found search buffer to lock onto stream
+            }|boolean
         }
     ) => {
 
@@ -158,6 +170,13 @@ export class WebSerial extends bitflippin {
 
         if(stream.reader && !stream.running) {
             let reader = stream.reader;
+            if(stream.buffering) { 
+                if(typeof stream.buffering !== 'object') stream.buffering = {};
+                if(stream.buffering.buffer) {
+                    stream.buffering.buffer = [];
+                    if(!stream.buffering.searchBytes) stream.buffering.searchBytes = new Uint8Array([0x0D,0x0A]); // \r\n default newline
+                }
+            }
 
             let readLoop = () => {
                 if(stream.port.readable && stream.running) {
@@ -165,8 +184,35 @@ export class WebSerial extends bitflippin {
 
                         if(result.done) reader.releaseLock() //enables port closing
                         else {
-                            
-                            stream.ondata(result.value);
+
+                            if(stream.buffering) { //perform a boyer moore search to lock onto newlines or stop codes or whatever pattern buffer provided
+                                stream.buffering.buffer.push(...result.value);
+
+                                var needle = stream.buffering.searchBytes
+                                var haystack = stream.bufferering.buffer;
+                                var search = WebSerial.boyerMoore(needle);
+                                var skip = search.byteLength;
+                                var nextIndex = 0;
+
+                                for (var i = search(haystack); i !== -1; i = search(haystack, i + skip)) {
+                                    if(!stream.buffering.locked && !('lockIdx' in stream.buffering)) stream.buffering.lockIdx = i;
+                                    else {
+                                        nextIndex = i;
+                                        break;
+                                    }
+                                }
+                                if(nextIndex > 0) {
+                                    if(!stream.buffering.locked) {
+                                        stream.ondata(stream.buffering.buffer.splice(stream.buffering.lockIdx+stream.buffering.searchBytes.length,nextIndex+stream.buffering.searchBytes.length)); 
+                                        stream.buffering.buffer.splice(0,stream.buffering.searchBytes.length);
+                                        stream.buffering.locked = true;
+                                    }
+                                    else {
+                                        stream.ondata(stream.buffering.buffer.splice(0,nextIndex));
+                                    }
+                                    
+                                }
+                            } else stream.ondata(result.value);
 
                             setTimeout(()=> {
                                 readLoop();
