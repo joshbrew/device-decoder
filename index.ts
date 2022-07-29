@@ -152,13 +152,23 @@ function transferSerialAPI(worker:WorkerInfo) {
     }
 
     transferFunction(
+        worker,
+        function setActiveDecoder(self, origin, decoderName) {
+            self.graph.decoder = decoderName;
+
+            return true;
+        },
+        'setActiveDecoder'
+    );
+    transferFunction(
         worker, 
         function setupSerial(self) {
-            self.graph.Serial = new self.graph.WebSerial() as WebSerial; 
-            self.graph.decoder = 'raw';
-            console.log('worker: Setting up Serial', self.graph.Serial)
+            const WorkerService = self.graph as WorkerService;
+            WorkerService.Serial = new WorkerService.WebSerial() as WebSerial; 
+            WorkerService.decoder = 'raw';
+            console.log('worker: Setting up Serial', WorkerService.Serial)
 
-            self.graph.Serial.getPorts().then(console.log)
+            WorkerService.Serial.getPorts().then(console.log)
             return true;
         },
         'setupSerial'
@@ -167,10 +177,10 @@ function transferSerialAPI(worker:WorkerInfo) {
         worker,
         function startSerialStream(self, origin, settings:SerialOptions & { usbVendorId:number, usbProductId:number, pipeTo?:string, frequency?:number }) {
 
-            if(!self.graph.Serial) self.graph.run('setupSerial');
-
             const WorkerService = self.graph as WorkerService;
-            const Serial = self.graph.Serial as WebSerial;
+            if(!WorkerService.Serial) WorkerService.run('setupSerial');
+
+            const Serial = WorkerService.Serial as WebSerial;
 
             Serial.requestPort(settings.usbVendorId, settings.usbProductId).then((port) => {
                 Serial.openPort(port, settings).then(() => {
@@ -178,7 +188,7 @@ function transferSerialAPI(worker:WorkerInfo) {
                         port, 
                         frequency:settings.frequency ? settings.frequency : 10,
                         ondata: (value:ArrayBuffer) => { 
-                            if(self.graph.decoder) value = self.graph.run(self.graph.decode, value); 
+                            if(WorkerService.decoder) value = WorkerService.run(WorkerService.decoder, value); //run the decoder if set on this thread, else return the array buffer result raw or pipe to another thread
 
                             if(stream.settings.pipeTo) {
                                 WorkerService.transmit(value, stream.settings.pipeTo, (value instanceof ArrayBuffer || (value as any).constructor?.name.indexOf('Array') > 0) ? [value] as any : undefined);
@@ -223,6 +233,10 @@ function transferSerialAPI(worker:WorkerInfo) {
         'writeStream'
     );
 }
+//make a serial stream worker and a decoder worker separately,
+//workers.establishMessageChannel(worker1, worker2);
+//setup the serial with pipeTo set to the second worker, and the second worker set up with the decoder
+//subscribe the decoder worker to run decoder on worker1's message and then pass result to main thread and/or render thread(s)
 
 
 //also incl https://github.com/joshbrew/BiquadFilters.js/blob/main/BiquadFilters.js
