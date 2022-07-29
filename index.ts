@@ -178,13 +178,13 @@ function transferSerialAPI(worker:WorkerInfo) {
                         port, 
                         frequency:settings.frequency ? settings.frequency : 10,
                         ondata: (value:ArrayBuffer) => { 
-                            let result = self.graph.run(self.graph.decoder ? self.graph.decoder : new Uint8Array(value), value); 
+                            if(self.graph.decoder) value = self.graph.run(self.graph.decode, value); 
 
                             if(stream.settings.pipeTo) {
-                                WorkerService.transmit(result, stream.settings.pipeTo, result.constructor.name.indexOf('Array') > 0 ? [result] as any : undefined);
+                                WorkerService.transmit(value, stream.settings.pipeTo, (value instanceof ArrayBuffer || (value as any).constructor?.name.indexOf('Array') > 0) ? [value] as any : undefined);
                                 //we can subscribe on the other end to this worker output by id
                             } else {
-                                WorkerService.transmit(result, origin, result.constructor.name.indexOf('Array') > 0 ? [result] as any : undefined);
+                                WorkerService.transmit(value, origin, (value instanceof ArrayBuffer || (value as any).constructor?.name.indexOf('Array') > 0) ? [value] as any : undefined);
                                 //we can subscribe on the other end to this worker output by id
                             }
                         }
