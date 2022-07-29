@@ -190,13 +190,13 @@ export class WebSerial extends bitflippin {
                                 const haystack = stream.buffering.buffer;
                                 const search = WebSerial.boyerMoore(needle);
                                 const skip = search.byteLength;
-                                let nextIndex = 0;
+                                let nextIndex = -1;
 
                                 for (var i = search(haystack); i !== -1; i = search(haystack, i + skip)) {
                                     if(!stream.buffering.locked && !('lockIdx' in stream.buffering)) stream.buffering.lockIdx = i;
                                     else {
                                         nextIndex = i;
-                                        if(nextIndex > 0) {
+                                        if(nextIndex > -1) {
                                             if(!stream.buffering.locked) {
                                                 stream.ondata(stream.buffering.buffer.splice(stream.buffering.lockIdx+stream.buffering.searchBytes.length,nextIndex+stream.buffering.searchBytes.length)); 
                                                 stream.buffering.buffer.splice(0,stream.buffering.searchBytes.length); //splice off the front pattern buffer bytes and assume every next section defined by nextIndex is a target section
