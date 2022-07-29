@@ -582,7 +582,7 @@ const domtree = {
                                                                     <div id='${id}' style='display:none;' class='connectiontemplate'>
                                                                         Serial Connection
                                                                         <div>
-                                                                            <span>USB Vendor ID:</span><span>${port.getInfo().usbVendorId}</span><span>USB Product ID:</span><span>${port.getInfo().usbProductId}</span>
+                                                                            <span>USB Vendor ID: </span><span>${port.getInfo().usbVendorId}</span><span> USB Product ID: </span><span>${port.getInfo().usbProductId}</span>
                                                                         </div>
                                                                         <table id='${id}info'>
                                                                             <tr>
