@@ -134,16 +134,31 @@ const domtree = {
         }
 
         label > input {
+            width:35%;
             float:right;
-            font-family:
         }
 
         input {
+            font-family: Consolas,monaco,monospace;
             font-size:10px;
+        }
+        
+        select {
+            font-family: Consolas,monaco,monospace; 
+            font-size: 10px;
+        }
+
+        textarea {
+            font-family: Consolas,monaco,monospace; 
+            font-size: 10px;
         }
 
         label > select {
             float:right;
+        }
+
+        td {
+            border-bottom: 1px solid white;
         }
 
         .debugger {
@@ -174,6 +189,8 @@ const domtree = {
             overflow-y:scroll;
             max-width:100vw;
             height:300px;
+            display:flex;
+            flex-direction: column-reverse;
         }
         `,
         children:{
@@ -301,7 +318,7 @@ const domtree = {
                                                                             BLE.readRssi(this.stream.device).then((rssi) => {
                                                                                 rssielm.innerText = `${rssi}`;
                                                                                 setTimeout(()=>{rssiFinder();},250);
-                                                                            }).catch(console.error);
+                                                                            }).catch((er)=> {rssielm.innerText = er; console.error(er); });
                                                                         }
                                                                     }
 
@@ -319,9 +336,9 @@ const domtree = {
                                                                                     'beforeend', 
                                                                                     `<tr>
                                                                                         <td id='${c.uuid}'>${c.uuid}</td>
-                                                                                        <td id='${c.uuid}notify'>${c.properties.notify ? `<button id="${c.uuid}notifybutton">Subscribe</button> Decoder: <select id="${c.uuid}notifydecoder">${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}</select>` : ''}</td>
-                                                                                        <td id='${c.uuid}read'>${c.properties.read ? `<button id="${c.uuid}readbutton">Read</button> Decoder: <select id="${c.uuid}readdecoder">${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}</select>` : ''}</td>
-                                                                                        <td id='${c.uuid}write'>${c.properties.write ? `<input type='text' id="${c.uuid}writeinput"></input><button id="${c.uuid}writebutton">Write</button>` : ''}</td>
+                                                                                        <td id='${c.uuid}notify'>${c.properties.notify ? `<button id="${c.uuid}notifybutton">Subscribe</button> Decoder: <select id="${c.uuid}notifydecoder">${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}</select>` : 'false'}</td>
+                                                                                        <td id='${c.uuid}read'>${c.properties.read ? `<button id="${c.uuid}readbutton">Read</button> Decoder: <select id="${c.uuid}readdecoder">${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}</select>` : 'false'}</td>
+                                                                                        <td id='${c.uuid}write'>${c.properties.write ? `<input type='text' id="${c.uuid}writeinput"></input><button id="${c.uuid}writebutton">Write</button>` : 'false'}</td>
                                                                                         <td id='${c.uuid}broadcast'>${c.properties.broadcast}</td>
                                                                                         <td id='${c.uuid}indicate'>${c.properties.indicate}</td>
                                                                                     </tr>`
@@ -457,7 +474,7 @@ const domtree = {
                                                             'ln2':{template:'<br/>'},
                                                             'serviceuuidLabel':{
                                                                 tagName:'label',
-                                                                innerText:'Primary Service UUID',
+                                                                innerText:'Primary Service UUID(s), comma separated',
                                                                 children:{
                                                                     'serviceuuid':{
                                                                         tagName:'input',
@@ -539,22 +556,40 @@ const domtree = {
                                                                 lastRead:number=0;
                                                                 readRate:number=0;
                                                                 anim:any;
+                                                                decoder='raw'
                 
                                                                 constructor() {
                                                                     super(); 
                 
                                                                     this.settings = getSettings(port);
+
                                                                 };
                 
-                                                                template = ()=>{ return `
+                                                                template = ()=>{ 
+                                                                    
+                                                                    return `
                                                                     <div id='${id}' style='display:none;' class='connectiontemplate'>
                                                                         Serial Connection
                                                                         <div>
-                                                                            <span>USB Vendor ID:</span><span>${this.stream.info.usbVendorId}</span><span>USB Product ID:</span><span>${this.stream.info.usbProductId}</span>
+                                                                            <span>USB Vendor ID:</span><span>${port.getInfo().usbVendorId}</span><span>USB Product ID:</span><span>${port.getInfo().usbProductId}</span>
                                                                         </div>
                                                                         <table id='${id}info'>
-                                                                            <tr><th>Baud Rate</th><th>Buffer Size</th><th>Parity</th><th>Data Bits</th><th>Stop Bits</th><th>Flow Control</th></tr>
-                                                                            <tr><td>${this.stream.settings.baudRate}</td><td>${this.stream.settings.bufferSize}</td><td>${this.stream.settings.parity}</td><td>${this.stream.settings.dataBits}</td><td>${this.stream.settings.stopBits}</td><td>${this.stream.settings.flowControl}</td></tr>
+                                                                            <tr>
+                                                                                <th>Baud Rate</th>
+                                                                                <th>Buffer Size</th>
+                                                                                <th>Parity</th>
+                                                                                <th>Data Bits</th>
+                                                                                <th>Stop Bits</th>
+                                                                                <th>Flow Control</th>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td>${this.settings.baudRate}</td>
+                                                                                <td>${this.settings.bufferSize}</td>
+                                                                                <td>${this.settings.parity}</td>
+                                                                                <td>${this.settings.dataBits}</td>
+                                                                                <td>${this.settings.stopBits}</td>
+                                                                                <td>${this.settings.flowControl}</td>
+                                                                            </tr>
                                                                         </table>
                                                                         <div>
                                                                             <input id='${id}input' type='text' value='0x01'></input>
@@ -591,30 +626,6 @@ const domtree = {
                                                                     let c = self.querySelector('[id="'+id+'console"]') as HTMLElement;
                                                                     let outputmode = self.querySelector('[id="'+id+'outputmode"]') as HTMLInputElement;
                                                                     let readrate = self.querySelector('[id="'+id+'readrate"]') as HTMLElement;
-                                                                    
-                                                                    let debugmessage = `serial port ${port.getInfo().usbVendorId}:${port.getInfo().usbProductId} read:`;
-                
-                                                                    this.stream = Serial.createStream({
-                                                                        port,
-                                                                        frequency:1,
-                                                                        ondata:(data:ArrayBuffer)=>{
-                                                                            //pass to console
-                                                                            this.output = decoders[this.settings.decoder](data,debugmessage);
-                
-                                                                            let now = performance.now();
-                                                                            this.readRate = 1/(0.001*(now - this.lastRead)); //reads per second.
-                                                                            this.lastRead = now;
-
-                                                                            if(outputmode.value === 'b') {
-                                                                                this.outputText += `${this.output}\n`
-                                                                            }
-
-                                                                            if(this.anim) requestAnimationFrame(this.anim); //throttles animations to refresh rate
-                                                                            //if(this.anim) this.anim();
-                                                                            //roughly...
-                                                                            //decoderworker.request({route:'decode',args:data},[data]).then((value) => {document.getElementById('console').innerText = `${value}`;} )
-                                                                        }
-                                                                    });
 
                                                                     this.anim = () => { 
                 
@@ -629,9 +640,36 @@ const domtree = {
                                                                             c.innerText = this.outputText;
                                                                         }
                                                                     }
-                
+
                                                                     Serial.openPort(port, this.settings).then(()=>{
+
+                                                                        this.stream = Serial.createStream({
+                                                                            port,
+                                                                            frequency:1,
+                                                                            ondata: (value:ArrayBuffer) => { console.log(value) }
+                                                                         
+                                                                        });
+                                                                        
+                                                                        let debugmessage = `serial port ${port.getInfo().usbVendorId}:${port.getInfo().usbProductId} read:`;
+
+                                                                        this.stream.ondata=(data:ArrayBuffer)=>{
+                                                                            //pass to console
+                                                                            this.output = decoders[this.decoder](data,debugmessage);
                 
+                                                                            let now = performance.now();
+                                                                            this.readRate = 1/(0.001*(now - this.lastRead)); //reads per second.
+                                                                            this.lastRead = now;
+
+                                                                            if(outputmode.value === 'b') {
+                                                                                this.outputText += `${this.output}\n`
+                                                                            }
+
+                                                                            if(this.anim) requestAnimationFrame(this.anim); //throttles animations to refresh rate
+                                                                            //if(this.anim) this.anim();
+                                                                            //roughly...
+                                                                            //decoderworker.request({route:'decode',args:data},[data]).then((value) => {document.getElementById('console').innerText = `${value}`;} )
+                                                                        }
+
                                                                         (self.querySelector('[id="'+id+'send"]') as HTMLButtonElement).onclick = () => {
                                                                             let value = (self.querySelector('[id="'+id+'input"]') as HTMLButtonElement).value;
                                                                             if(parseInt(value)) {
@@ -640,40 +678,44 @@ const domtree = {
                                                                         }
                 
                                                                         Serial.readStream(this.stream);
+                                                                        console.log('reading stream', this.stream);
+
                                                                         (self.querySelector('[id="'+id+'"]') as HTMLElement).style.display = '';
                 
                                                                         const xconnectEvent = (ev) => {
                                                                             Serial.closeStream(this.stream).then(() => {
                                                                                 (self.querySelector('[id="'+id+'xconnect"]') as HTMLButtonElement).innerHTML = 'Reconnect';
                                                                                 (self.querySelector('[id="'+id+'xconnect"]') as HTMLButtonElement).onclick = (ev) => {
-                                                                                    Serial.getPorts().then((ports) => { //check previously permitted ports for auto reconnect
-                                                                                        for(let i = 0; i<ports.length; i++) {
-                                                                                            if(ports[i].getInfo().usbVendorId === this.stream.info.usbVendorId && ports[i].getInfo().usbProductId === this.stream.info.usbProductId) {
-                                                                                                let settings = getSettings(ports[i]);
-                                                                                                Serial.openPort(ports[i], settings).then(()=>{
-                                                                                                    let debugmessage = `serial port ${ports[i].getInfo().usbVendorId}:${ports[i].getInfo().usbProductId} read:`;
-                                                                                                    this.stream = Serial.createStream({
-                                                                                                        port:ports[i],
-                                                                                                        frequency:1,
-                                                                                                        ondata:(data:ArrayBuffer)=>{
-                                                                                                            //pass to console
-                                                                                                            this.output = decoders[this.settings.decoder](data, debugmessage);
-                                                                                                            
-                                                                                                            if(outputmode.value === 'b') {
-                                                                                                                this.outputText += `${this.output}\n`
+                                                                                    Serial.closeStream(this.stream,()=>{
+                                                                                        Serial.getPorts().then((ports) => { //check previously permitted ports for auto reconnect
+                                                                                            for(let i = 0; i<ports.length; i++) {
+                                                                                                if(ports[i].getInfo().usbVendorId === this.stream.info.usbVendorId && ports[i].getInfo().usbProductId === this.stream.info.usbProductId) {
+                                                                                                    let settings = getSettings(ports[i]);
+                                                                                                    Serial.openPort(ports[i], settings).then(()=>{
+                                                                                                        let debugmessage = `serial port ${ports[i].getInfo().usbVendorId}:${ports[i].getInfo().usbProductId} read:`;
+                                                                                                        this.stream = Serial.createStream({
+                                                                                                            port:ports[i],
+                                                                                                            frequency:1,
+                                                                                                            ondata:(data:ArrayBuffer)=>{
+                                                                                                                //pass to console
+                                                                                                                this.output = decoders[this.decoder](data, debugmessage);
+                                                                                                                
+                                                                                                                if(outputmode.value === 'b') {
+                                                                                                                    this.outputText += `${this.output}\n`
+                                                                                                                }
+                                                                                                                
+                                                                                                                requestAnimationFrame(this.anim); //throttles animations to refresh rate
+                                                                                                                //roughly...
+                                                                                                                //decoderworker.request({route:'decode',args:data},[data]).then((value) => {document.getElementById('console').innerText = `${value}`;} )
                                                                                                             }
-                                                                                                            
-                                                                                                            requestAnimationFrame(this.anim); //throttles animations to refresh rate
-                                                                                                            //roughly...
-                                                                                                            //decoderworker.request({route:'decode',args:data},[data]).then((value) => {document.getElementById('console').innerText = `${value}`;} )
-                                                                                                        }
+                                                                                                        });
+                                                                                                        this.settings = settings;
+                                                                                                        self.render(); //re-render, will trigger oncreate again to reset this button and update the template 
                                                                                                     });
-                                                                                                    this.settings = settings;
-                                                                                                    self.render(); //re-render, will trigger oncreate again to reset this button and update the template 
-                                                                                                });
-                                                                                                break;
+                                                                                                    break;
+                                                                                                }
                                                                                             }
-                                                                                        }
+                                                                                        });
                                                                                     });
                                                                                 }
                                                                             });
@@ -690,7 +732,7 @@ const domtree = {
                                                                         }
                                                                     
                                                                         (self.querySelector('[id="'+id+'decoder"]') as HTMLInputElement).onchange = (ev) => {
-                                                                            this.settings.decoder = decoders[(self.querySelector('[id="'+id+'decoder"]') as HTMLInputElement).value];
+                                                                            this.decoder = (self.querySelector('[id="'+id+'decoder"]') as HTMLInputElement).value;
                                                                         }
                                                                         
                                                                     });
@@ -898,7 +940,7 @@ const domtree = {
                                                             'ln8':{template:'<br/>'},
                                                             'frequencyLabel':{
                                                                 tagName:'label',
-                                                                innerText:'Read frequency? (ms)',
+                                                                innerText:'Maximum read frequency? (ms)',
                                                                 children:{
                                                                     'frequency':{
                                                                         tagName:'input',
