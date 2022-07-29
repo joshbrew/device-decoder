@@ -11,9 +11,10 @@ Uses the @capacititor-community/ble library which can be dropped right into nati
 TODO:
 - more styling & thorough testing
 - thread the decoders, use threads for each serial device also.
-- use a canvas or something to render outputs more efficiently
-- charting
-- CSVs
+- use a canvas or something to render outputs more efficiently, on threads too because threads
+- charting, threaded...
+- CSVs, threaded...
+- something something threads
 
 
 Features [graphscript](https://github.com/brainsatplay/graphscript) to script the site efficiently.
