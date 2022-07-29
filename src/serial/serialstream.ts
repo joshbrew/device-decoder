@@ -186,7 +186,7 @@ export class WebSerial extends bitflippin {
                         else {
 
                             if(stream.buffering) { //perform a boyer moore search to lock onto newlines or stop codes or whatever pattern buffer provided
-                                stream.buffering.buffer.push(...result.value);
+                                stream.buffering.buffer.push(...result.value); //could be faster to concat typed arrays? else they require fixed sizes so not great for dynamic buffering, but maybe better to limit memory use (need to bench) //https://www.voidcanvas.com/javascript-array-evolution-performance/
 
                                 const needle = stream.buffering.searchBytes
                                 const haystack = stream.buffering.buffer;
