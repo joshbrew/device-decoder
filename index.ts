@@ -1093,10 +1093,10 @@ const domtree = {
                                     }
                                 }
                             } as ElementProps,
-                            'suggested':{
-                                tagName:'div',
-                                innerHTML:`Recognized chart/csv output format: return {[key:string]:number|number[]} where you are returning an object with key:value pairs for tagged channels and numbers/arrays to be appended`
-                            } as ElementProps,
+                            // 'suggested':{
+                            //     tagName:'div',
+                            //     innerHTML:`Recognized chart/csv output format: return {[key:string]:number|number[]} where you are returning an object with key:value pairs for tagged channels and numbers/arrays to be appended`
+                            // } as ElementProps,
                             'decodernameLabel':{
                                 tagName:'label',
                                 innerText:'Name Decoder:',
