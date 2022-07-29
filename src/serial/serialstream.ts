@@ -172,10 +172,8 @@ export class WebSerial extends bitflippin {
             let reader = stream.reader;
             if(stream.buffering) { 
                 if(typeof stream.buffering !== 'object') stream.buffering = {};
-                if(stream.buffering.buffer) {
-                    stream.buffering.buffer = [];
-                    if(!stream.buffering.searchBytes) stream.buffering.searchBytes = new Uint8Array([0x0D,0x0A]); // \r\n default newline
-                }
+                if(!stream.buffering.buffer) { stream.buffering.buffer = []; }
+                if(!stream.buffering.searchBytes) stream.buffering.searchBytes = new Uint8Array([0x0D,0x0A]); // \r\n default newline
             }
 
             let readLoop = () => {
