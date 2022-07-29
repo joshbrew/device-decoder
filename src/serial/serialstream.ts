@@ -189,7 +189,7 @@ export class WebSerial extends bitflippin {
                                 stream.buffering.buffer.push(...result.value);
 
                                 var needle = stream.buffering.searchBytes
-                                var haystack = stream.bufferering.buffer;
+                                var haystack = stream.buffering.buffer;
                                 var search = WebSerial.boyerMoore(needle);
                                 var skip = search.byteLength;
                                 var nextIndex = 0;
