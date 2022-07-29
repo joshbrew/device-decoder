@@ -1399,6 +1399,10 @@ ${F.join("")}}`}case"VariableDeclaration":let N=t.normalizeDeclarations(A).map(a
             display:inline-block;
             vertical-align:top;
         }
+
+        .connectiontemplate {
+           color:white; 
+        }
         
         .console {
             color:white; 

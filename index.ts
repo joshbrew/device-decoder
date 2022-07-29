@@ -157,6 +157,10 @@ const domtree = {
             display:inline-block;
             vertical-align:top;
         }
+
+        .connectiontemplate {
+           color:white; 
+        }
         
         .console {
             color:white; 
