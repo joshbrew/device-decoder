@@ -196,7 +196,7 @@ export class WebSerial extends bitflippin {
                                     if(!stream.buffering.locked && !('lockIdx' in stream.buffering)) stream.buffering.lockIdx = i;
                                     else {
                                         nextIndex = i;
-                                        if(nextIndex > -1) {
+                                        if(nextIndex >= 0) {
                                             if(!stream.buffering.locked) {
                                                 stream.ondata(stream.buffering.buffer.splice(stream.buffering.lockIdx+stream.buffering.searchBytes.length,nextIndex+stream.buffering.searchBytes.length)); 
                                                 stream.buffering.buffer.splice(0,stream.buffering.searchBytes.length); //splice off the front pattern buffer bytes and assume every next section defined by nextIndex is a target section
