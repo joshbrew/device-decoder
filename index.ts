@@ -1006,7 +1006,8 @@ const domtree = {
                                     minHeight:'50px',
                                     minWidth:'50px',
                                     color:'white',
-                                    backgroundColor:'black'
+                                    backgroundColor:'black',
+                                    overflowX:'scroll'
                                 }
                             },
                             'suggested':{
