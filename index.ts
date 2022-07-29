@@ -128,7 +128,24 @@ const domtree = {
         styles:`
         div {
             background-color: gray;
+            font-size:10px; 
+            font-family:Consolas,monaco,monospace; 
         }
+
+        label {
+            display:inline-block;
+            width:100%;
+            border-bottom:1px solid black;
+        }
+
+        label > input {
+            float:right;
+        }
+
+        label > select {
+            float:right;
+        }
+
 
         .console {
             color:white; 
@@ -136,8 +153,8 @@ const domtree = {
             font-size:10px; 
             font-family:Consolas,monaco,monospace; 
             overflow-y:scroll;
-            word-wrap: break-word;
-            max-width:100%;
+            max-width:100vw;
+            height:300px;
         }
         `,
         children:{
@@ -147,7 +164,8 @@ const domtree = {
                     'connectionopts':{
                         tagName:'div',
                         style:{
-                            display:'flex' 
+                            display:'flex', 
+                            width:'100vw'
                         },
                         children:{
                             'bleopts':{
@@ -182,10 +200,10 @@ const domtree = {
                                                         anim:any;
 
                                                         template = ()=>{ return `
-                                                            <div id='${this.stream.deviceId}' style='display:none;'>
-                                                                BLE Connection
+                                                            <div id='${this.stream.deviceId}' style='display:none;' class='connectiontemplate'>
+                                                                BLE Connection 
                                                                 <div>
-                                                                    <span>BLE Device Name:</span><span>${this.stream.device.name}</span><span>BLE Device ID:</span><span>${this.stream.deviceId}</span>
+                                                                    <span> BLE Device Name: </span><span>${this.stream.device.name}</span><span> BLE Device ID: </span><span>${this.stream.deviceId}</span>
                                                                 </div>
                                                                 <table id='${this.stream.deviceId}info'>
                                                                 </table>
@@ -202,7 +220,7 @@ const domtree = {
                                                                         </select>
                                                                     </label>
                                                                 </div>
-                                                                <div id='${this.stream.deviceId}connectioninfo'>RSSI: <span id='${this.stream.deviceId}rssi'></span></div>
+                                                                <div id='${this.stream.deviceId}connectioninfo'> RSSI: <span id='${this.stream.deviceId}rssi'></span></div>
                                                                 <div 
                                                                     id='${this.stream.deviceId}console' 
                                                                     class='console'>
@@ -382,10 +400,6 @@ const domtree = {
                                     },
                                     'bleconfig':{
                                         tagName:'div',
-                                        style:{
-                                            fontSize:'10px',
-                                            textAlign:'right'
-                                        },
                                         children:{
                                             'bleconfigcontainer':{
                                                 tagName:'div',
@@ -509,7 +523,7 @@ const domtree = {
                                                         };
         
                                                         template = ()=>{ return `
-                                                            <div id='${id}' style='display:none;'>
+                                                            <div id='${id}' style='display:none;' class='connectiontemplate'>
                                                                 Serial Connection
                                                                 <div>
                                                                     <span>USB Vendor ID:</span><span>${this.stream.info.usbVendorId}</span><span>USB Product ID:</span><span>${this.stream.info.usbProductId}</span>
@@ -540,7 +554,7 @@ const domtree = {
                                                                     </label>
                                                                 </div>
                                                                 <div id='${id}connectioninfo'>Read Rate: <span id='${id}readrate'></span> updates/sec</div>
-                                                                <div id='${id}console' style='color:white; background-color:black; font-size:10px; font-family:Consolas,monaco,monospace; overflow-y:scroll;'>
+                                                                <div id='${id}console' class='console'>
                                                                 </div>
                                                             </div>`;
                                                         }
@@ -694,10 +708,6 @@ const domtree = {
                                     } as ElementProps,
                                     'serialconfig':{ //need labels
                                         tagName:'div',
-                                        style:{
-                                            fontSize:'10px',
-                                            textAlign:'right'
-                                        },
                                         children:{
                                             'serialconfigcontainer':{
                                                 tagName:'div',
