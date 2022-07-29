@@ -120,6 +120,10 @@ export class BLEClient {
                 .catch(rej);})
     }
 
+    getServices(deviceId:string) {
+        return this.client.getServices(deviceId)
+    }
+
     //connect after requesting using the options
     setupDevice = (device:BleDevice,options?:DeviceOptions):Promise<DeviceInfo> => {
         return new Promise(async (res,rej) => {

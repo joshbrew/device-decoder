@@ -1,8 +1,11 @@
 import {StreamInfo, WebSerial} from './src/serial/serialstream'
 import {BLEClient} from './src/ble/ble_client'
-import {Router, DOMService, WorkerService, gsworker, ServiceMessage, proxyWorkerRoutes, workerCanvasRoutes, DOMElement } from 'graphscript'
+import {Router, DOMService, WorkerService, gsworker, ServiceMessage, proxyWorkerRoutes, workerCanvasRoutes, DOMElement } from '../GraphServiceRouter/index'
 import { ElementInfo, ElementProps } from 'graphscript/dist/services/dom/types/element';
 import { DOMElementProps } from 'graphscript/dist/services/dom/types/component';
+
+
+import CodeMirror from './src/codemirror/codemirror.min.cjs'
 
 //import beautify_js from './src/beautify.min'
 
@@ -325,7 +328,7 @@ const domtree = {
                                                                     rssiFinder(); //mobile only
 
 
-                                                                    BLE.client.getServices(this.stream.device.deviceId).then((svcs) => {
+                                                                    BLE.getServices(this.stream.device.deviceId).then((svcs) => {
                                                                         console.log('services', svcs)
                                                                         self.querySelector('[id="'+this.stream.deviceId+'info"]').innerHTML = `<tr><th>UUID</th><th>Notify</th><th>Read</th><th>Write</th><th>Broadcast</th><th>Indicate</th></tr>`
                                                                         svcs.forEach((s) => {    
@@ -982,7 +985,7 @@ const domtree = {
                             minHeight:'300px',
                             backgroundColor:'black'
                         }
-                    },
+                    } as ElementProps,
                     'customdecoder':{
                         tagName:'div',
                         innerHTML:'Custom Decoder',
@@ -1019,9 +1022,26 @@ const domtree = {
                                         }
                                     }
                                 }
+                            } as ElementProps,
+                            'codemirrorcss':{
+                                tagName:'link',
+                                attributes:{
+                                    href:'./src/codemirror/codemirror.min.css',
+                                    rel:'stylesheet'
+                                }
                             },
                             'testfunction':{
                                 tagName:'textarea',
+                                onrender:(self) => {
+                                    CodeMirror.fromTextArea(self, {
+                                        styleActiveLine: true,
+                                        lineNumbers: true,
+                                        matchBrackets: true
+                                    });
+                                },
+                                style:{
+                                    display:'flex'
+                                },
                                 attributes:{
                                     value:`
                                         //value is an ArrayBuffer
@@ -1052,7 +1072,7 @@ const domtree = {
                                         }
                                     }
                                 }
-                            },
+                            } as ElementProps,
                             'testoutput':{
                                 tagName:'div',
                                 style:{
@@ -1062,11 +1082,11 @@ const domtree = {
                                     backgroundColor:'black',
                                     overflowX:'scroll'
                                 }
-                            },
+                            } as ElementProps,
                             'suggested':{
                                 tagName:'div',
                                 innerHTML:`Recognized chart/csv output format: return {[key:string]:number|number[]} where you are returning an object with key:value pairs for tagged channels and numbers/arrays to be appended`
-                            },
+                            } as ElementProps,
                             'decodernameLabel':{
                                 tagName:'label',
                                 innerText:'Name Decoder:',
@@ -1080,7 +1100,7 @@ const domtree = {
                                         }
                                     }
                                 }
-                            },
+                            } as ElementProps,
                             'submitdecoder':{
                                 tagName:'button',
                                 innerText:'Test & Set',
