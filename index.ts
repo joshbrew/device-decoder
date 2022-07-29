@@ -3,6 +3,7 @@ import {BLEClient} from './src/ble/ble_client'
 import {Router, DOMService, WorkerService, gsworker, ServiceMessage, proxyWorkerRoutes, workerCanvasRoutes, DOMElement } from '../GraphServiceRouter/index'
 import { ElementInfo, ElementProps } from 'graphscript/dist/services/dom/types/element';
 import { DOMElementProps } from 'graphscript/dist/services/dom/types/component';
+import { WorkerInfo } from 'graphscript';
 
 
 //import beautify_js from './src/beautify.min'
@@ -99,6 +100,29 @@ decoderworker.request(
 
 decoderworker.request({route:'setupSerial'}).then(console.log); //now make sure it is ready
 
+//transfer decoders
+function transferFunction(worker:WorkerInfo, fn:any, fnName?:string) {
+    if(!fnName) fnName = fn.name;
+    return worker.request({
+        route:'setRoute',
+        args:[
+            fn.toString(),
+            fnName
+        ]
+    } as ServiceMessage);
+}
+
+function transferClass(worker:WorkerInfo, cls:any, className?:string) {
+    if(!className) className = cls.name;
+    return worker.request({
+        route:'receiveClass',
+        args:[
+            cls.toString(),
+            'WebSerial'
+        ] 
+    } as ServiceMessage);
+}
+
 
 let textdecoder = new TextDecoder();
 
@@ -117,6 +141,89 @@ const decoders = {
     //peanut:(data:ArrayBuffer) => { return data; } //https://github.com/joshbrew/peanutjs/blob/main/peanut.js
     //...custom?
 }
+
+//onclick we will add worker, transfer the api, then call all of the functions in the correct order, passing available arguments
+function transferSerialAPI(worker:WorkerInfo) {
+
+    transferClass(worker, WebSerial, 'WebSerial');
+
+    for(const prop in decoders) { //transfer the decoders by name
+        transferFunction(worker, decoders[prop], prop);
+    }
+
+    transferFunction(
+        worker, 
+        function setupSerial(self) {
+            self.graph.Serial = new self.graph.WebSerial() as WebSerial; 
+            self.graph.decoder = 'raw';
+            console.log('worker: Setting up Serial', self.graph.Serial)
+
+            self.graph.Serial.getPorts().then(console.log)
+            return true;
+        },
+        'setupSerial'
+    );
+    transferFunction(
+        worker,
+        function startSerialStream(self, origin, settings:SerialOptions & { usbVendorId:number, usbProductId:number, pipeTo?:string, frequency?:number }) {
+
+            if(!self.graph.Serial) self.graph.run('setupSerial');
+
+            const WorkerService = self.graph as WorkerService;
+            const Serial = self.graph.Serial as WebSerial;
+
+            Serial.requestPort(settings.usbVendorId, settings.usbProductId).then((port) => {
+                Serial.openPort(port, settings).then(() => {
+                    const stream = Serial.createStream({
+                        port, 
+                        frequency:settings.frequency ? settings.frequency : 10,
+                        ondata: (value:ArrayBuffer) => { 
+                            let result = self.graph.run(self.graph.decoder ? self.graph.decoder : new Uint8Array(value), value); 
+
+                            if(stream.settings.pipeTo) {
+                                WorkerService.transmit(result, stream.settings.pipeTo, result.constructor.name.indexOf('Array') > 0 ? [result] as any : undefined);
+                                //we can subscribe on the other end to this worker output by id
+                            } else {
+                                WorkerService.transmit(result, origin, result.constructor.name.indexOf('Array') > 0 ? [result] as any : undefined);
+                                //we can subscribe on the other end to this worker output by id
+                            }
+                        }
+                    });
+                    stream.settings = settings; //save the settings 
+
+                    Serial.readStream(stream);
+                    
+                });
+            }).catch(console.error);
+        
+            return true;
+        },
+        'startSerialStream'
+    );
+    transferFunction(
+        worker,
+        function closeStream(self, origin, streamId) {
+            const Serial = self.graph.Serial as WebSerial;
+
+            Serial.closeStream(Serial.streams[streamId]);
+
+            return true;
+        },
+        'closeStream'
+    );
+    transferFunction(
+        worker,
+        function writeStream(self, origin, streamId, message:any) {
+            const Serial = self.graph.Serial as WebSerial;
+
+            Serial.writeStream(Serial.streams[streamId], message).then(console.log);
+
+            return true;
+        },
+        'writeStream'
+    );
+}
+
 
 //also incl https://github.com/joshbrew/BiquadFilters.js/blob/main/BiquadFilters.js
 
@@ -696,8 +803,8 @@ const domtree = {
                                                                         (self.querySelector('[id="'+id+'send"]') as HTMLButtonElement).onclick = () => {
                                                                             let value = (self.querySelector('[id="'+id+'input"]') as HTMLButtonElement).value;
                                                                             if(parseInt(value)) {
-                                                                                Serial.writePort(port,WebSerial.toDataView(parseInt(value)));
-                                                                            } else Serial.writePort(port,WebSerial.toDataView((value)));
+                                                                                Serial.writeStream(this.stream,WebSerial.toDataView(parseInt(value)));
+                                                                            } else Serial.writeStream(this.stream,WebSerial.toDataView((value)));
                                                                         }
                 
                                                                         Serial.readStream(this.stream);
