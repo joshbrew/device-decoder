@@ -154,7 +154,10 @@ const domtree = {
         textarea {
             font-family: Consolas,monaco,monospace; 
             font-size: 10px;
+            height: 100px;
+            min-width: 200px;
         }
+        
 
         label > select {
             float:right;
@@ -1023,32 +1026,16 @@ const domtree = {
                                     }
                                 }
                             } as ElementProps,
-                            'codemirrorcss':{
-                                tagName:'link',
-                                attributes:{
-                                    href:'./src/codemirror/codemirror.min.css',
-                                    rel:'stylesheet'
-                                }
-                            },
                             'testfunction':{
                                 tagName:'textarea',
                                 onrender:(self) => {
-                                    CodeMirror.fromTextArea(self, {
-                                        styleActiveLine: true,
-                                        lineNumbers: true,
-                                        matchBrackets: true
-                                    });
-                                },
-                                style:{
-                                    display:'flex'
+                                    
                                 },
                                 attributes:{
-                                    value:`
-                                        //value is an ArrayBuffer
-                                        (value) => {
-                                            return value;
-                                        }
-                                    `,
+                                    value:`//value is an ArrayBuffer
+(value) => {
+    return value;
+}`,
                                     onchange:(ev:Event) => { //when you click away
                                         let elm = (ev.target as HTMLInputElement);
                                         let value = (ev.target as HTMLInputElement).value;
@@ -1083,6 +1070,33 @@ const domtree = {
                                     overflowX:'scroll'
                                 }
                             } as ElementProps,
+                            'testdecoder':{
+                                tagName:'button',
+                                innerText:'Test',
+                                attributes:{
+                                    onclick:(ev)=>{
+                                        let elm = (ev.target as HTMLInputElement);
+                                        let value = (elm.parentNode.querySelector('#testfunction') as HTMLInputElement).value;
+                                        try {
+                                            let fn = (0, eval)(value);
+                                            if(typeof fn === 'function') {
+                                                let testvalue = (elm.parentNode.querySelector('#testinput') as HTMLInputElement).value;
+                                                if(testvalue.includes(',') && !testvalue.includes('[')) {
+                                                    testvalue = `[${testvalue}]`;
+                                                }
+                                                try {
+                                                    testvalue = JSON.parse(testvalue);  
+                                                    (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = fn(testvalue);
+                                                } catch(er) {
+                                                    (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
+                                                } 
+                                            }
+                                        } catch (er) {
+                                            (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
+                                        }
+                                    }
+                                }
+                            } as ElementProps,
                             'suggested':{
                                 tagName:'div',
                                 innerHTML:`Recognized chart/csv output format: return {[key:string]:number|number[]} where you are returning an object with key:value pairs for tagged channels and numbers/arrays to be appended`
@@ -1103,11 +1117,11 @@ const domtree = {
                             } as ElementProps,
                             'submitdecoder':{
                                 tagName:'button',
-                                innerText:'Test & Set',
+                                innerText:'Set',
                                 attributes:{
                                     onclick:(ev)=>{
                                         let elm = (ev.target as HTMLInputElement);
-                                        let value = (ev.target as HTMLInputElement).value;
+                                        let value = (elm.parentNode.querySelector('#testfunction') as HTMLInputElement).value;
                                         try {
                                             let fn = (0, eval)(value);
                                             if(typeof fn === 'function') {
