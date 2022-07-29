@@ -5,8 +5,6 @@ import { ElementInfo, ElementProps } from 'graphscript/dist/services/dom/types/e
 import { DOMElementProps } from 'graphscript/dist/services/dom/types/component';
 
 
-import CodeMirror from './src/codemirror/codemirror.min.cjs'
-
 //import beautify_js from './src/beautify.min'
 
 /**
