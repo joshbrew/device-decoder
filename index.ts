@@ -347,7 +347,8 @@ const domtree = {
                                                                                 if(c.properties.notify) {
                                                                                     let decoderselect = self.querySelector('[id="'+c.uuid+'notifydecoder"]') as HTMLInputElement;
                                                                                     let debugmessage = `${c.uuid} notify:`;
-                                                                                    (self.querySelector('[id="'+c.uuid+'notifybutton"]') as HTMLButtonElement).onclick = () => {
+
+                                                                                    const notifyOnClick = () => {
                                                                                         BLE.subscribe(this.stream.device, s.uuid, c.uuid, (result:DataView) => {
                                                                                             this.output = decoders[decoderselect.value](result.buffer,debugmessage);
                                                                                         
@@ -356,8 +357,18 @@ const domtree = {
                                                                                             }
                                                                                             requestAnimationFrame(this.anim);
                                                                                             //this.anim();
-                                                                                        })
+                                                                                        });
+
+                                                                                        (self.querySelector('[id="'+c.uuid+'notifybutton"]') as HTMLButtonElement).innerText = 'Unsubscribe';
+                                                                                        (self.querySelector('[id="'+c.uuid+'notifybutton"]') as HTMLButtonElement).onclick = ()=> {
+                                                                                            BLE.unsubscribe(this.stream.device, s.uuid, c.uuid);
+                                                                                            
+                                                                                            (self.querySelector('[id="'+c.uuid+'notifybutton"]') as HTMLButtonElement).innerText = 'Subscribe';
+                                                                                            (self.querySelector('[id="'+c.uuid+'notifybutton"]') as HTMLButtonElement).onclick = notifyOnClick;
+                                                                                        }
                                                                                     }
+
+                                                                                    (self.querySelector('[id="'+c.uuid+'notifybutton"]') as HTMLButtonElement).onclick = notifyOnClick;
                                                                                 }
                                                                                 if(c.properties.read) {
                                                                                     let decoderselect = self.querySelector('[id="'+c.uuid+'readdecoder"]') as HTMLInputElement;
