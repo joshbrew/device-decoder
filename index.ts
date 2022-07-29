@@ -153,7 +153,7 @@ const domtree = {
             font-family: Consolas,monaco,monospace; 
             font-size: 10px;
             height: 100px;
-            min-width: 200px;
+            min-width: 150px;
         }
         
 
@@ -407,9 +407,7 @@ const domtree = {
                                                                                 }
                                                                             }); 
                                                                         });
-                                                                    })
-
-                                                                        
+                                                                    })   
                                                                 }
 
                                                             }
