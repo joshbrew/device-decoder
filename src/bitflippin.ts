@@ -46,6 +46,16 @@ module.exports = {
 
 export class bitflippin {
     
+    static codes = { //common codes
+        '\n':0x0A, //newline
+        '\r':0x0D, //carriage return
+        '\t':0x09, //tab
+        '\s':0x20, //space
+        '\b':0x08, //backspace
+        '\f':0x0C, //form feed
+        '\\':0x5C  // backslash
+    }
+
     // convert values to data views if not, with some basic encoding formats
     static toDataView(value:string|number|ArrayBufferLike|DataView|number[]) {
         if(!(value instanceof DataView)) { //dataviews just wrap arraybuffers for sending packets  
