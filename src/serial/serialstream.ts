@@ -188,11 +188,11 @@ export class WebSerial extends bitflippin {
                             if(stream.buffering) { //perform a boyer moore search to lock onto newlines or stop codes or whatever pattern buffer provided
                                 stream.buffering.buffer.push(...result.value);
 
-                                var needle = stream.buffering.searchBytes
-                                var haystack = stream.buffering.buffer;
-                                var search = WebSerial.boyerMoore(needle);
-                                var skip = search.byteLength;
-                                var nextIndex = 0;
+                                const needle = stream.buffering.searchBytes
+                                const haystack = stream.buffering.buffer;
+                                const search = WebSerial.boyerMoore(needle);
+                                const skip = search.byteLength;
+                                let nextIndex = 0;
 
                                 for (var i = search(haystack); i !== -1; i = search(haystack, i + skip)) {
                                     if(!stream.buffering.locked && !('lockIdx' in stream.buffering)) stream.buffering.lockIdx = i;
