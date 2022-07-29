@@ -138,12 +138,16 @@ const domtree = {
             font-family:
         }
 
+        input {
+            font-size:10px;
+        }
+
         label > select {
             float:right;
         }
 
         .debugger {
-            Consolas,monaco,monospace; 
+            font-family: Consolas,monaco,monospace; 
             position:absolute;
             left:0px;
             top:0px;
@@ -934,9 +938,8 @@ const domtree = {
                         },
                         children:{
                             'testinput':{
-                                tagName:'input',
+                                tagName:'textarea',
                                 attributes:{
-                                    type:'text',
                                     value:'[24,52,230,125,243,112,0,0,10,2,30]',
                                     onchange:(ev:Event)=>{
                                         let elm = (ev.target as HTMLInputElement);
