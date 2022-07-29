@@ -1,6 +1,6 @@
 import {StreamInfo, WebSerial} from './src/serial/serialstream'
 import {BLEClient} from './src/ble/ble_client'
-import {Router, DOMService, WorkerService, gsworker, ServiceMessage, proxyWorkerRoutes, workerCanvasRoutes, DOMElement} from '../GraphServiceRouter/index' //'graphscript'
+import {Router, DOMService, WorkerService, gsworker, ServiceMessage, proxyWorkerRoutes, workerCanvasRoutes, DOMElement } from 'graphscript'
 import { ElementInfo, ElementProps } from 'graphscript/dist/services/dom/types/element';
 import { DOMElementProps } from 'graphscript/dist/services/dom/types/component';
 
