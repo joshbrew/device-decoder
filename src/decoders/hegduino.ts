@@ -4,7 +4,7 @@ let textdecoder = new TextDecoder();
 export default function hegduinocodec(value:ArrayBuffer) {
     //hegduino format is utf8
     //Per line: timestamp, red, infrared, ratio, temperature
-    let output = {
+    let output = { //https://github.com/joshbrew/HEG_ESP32_Delobotomizer/blob/main/Firmware/MAX86141_HEG/MAX86141_HEG.h
         timestamp: 0,
         red: 0,
         infrared: 0,
