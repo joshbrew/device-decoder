@@ -33,4 +33,6 @@ export default function ads131m08codec(value:ArrayBuffer) {
         output[6][i] = bitflippin.bytesToInt24(arr[j+18],arr[j+19],arr[j+20]);
         output[7][i] = bitflippin.bytesToInt24(arr[j+21],arr[j+22],arr[j+23]);
     }
+    
+    return output;
 }
