@@ -1,17 +1,14 @@
 import {StreamInfo, WebSerial} from './src/serial/serialstream'
 import {BLEClient} from './src/ble/ble_client'
-import {Router, DOMService, WorkerService, gsworker, ServiceMessage, proxyWorkerRoutes, workerCanvasRoutes, DOMElement } from '../GraphServiceRouter/index'
+import {Router, DOMService, WorkerService, ServiceMessage, proxyWorkerRoutes, workerCanvasRoutes, DOMElement } from '../GraphServiceRouter/index'
 import { ElementInfo, ElementProps } from 'graphscript/dist/services/dom/types/element';
 import { DOMElementProps } from 'graphscript/dist/services/dom/types/component';
 import { WorkerInfo } from 'graphscript';
 
+import gsworker from './src/debugger.worker'
 
 //import beautify_js from './src/beautify.min'
-import ads131m08codec from './src/decoders/ads131m08';
-import freeeeg32codec from './src/decoders/freeeeg32';
-import freeeeg128codec from './src/decoders/freeeeg128';
-import cytoncodec from './src/decoders/cyton';
-import hegduinocodec from './src/decoders/hegduino';
+import { decoders } from './src/decoders/index'
 
 /**
     <Debugger window component>
@@ -66,17 +63,17 @@ const workers = new WorkerService();
 const decoderworker = workers.addWorker({url:gsworker}); //this will handle decoder logic
 const chartworker = workers.addWorker({url:gsworker}); //this will visualize data for us if formats fit
 
-// decoderworker.request( 
-//     {
-//         route:'setRoute', 
-//         args:[
-//             function (value:any) { //to be overwritten when we want to swap decoders
-//                 return value; //ping pong
-//             }.toString(),
-//             'decode'
-//         ]
-//     } as ServiceMessage //use service messages to communicate with disconnected service graphs
-// ).then(console.log);
+decoderworker.request( 
+    {
+        route:'setRoute', 
+        args:[
+            function (value:any) { //to be overwritten when we want to swap decoders
+                return value; //ping pong
+            }.toString(),
+            'decode'
+        ]
+    } as ServiceMessage //use service messages to communicate with disconnected service graphs
+).then(console.log);
 
 // //let's load the serial library in a worker and try to run it there >_>
 // decoderworker.request(
@@ -87,23 +84,23 @@ const chartworker = workers.addWorker({url:gsworker}); //this will visualize dat
 // ).then(console.log);
 
 // //create a callback to setup our transferred class
-// decoderworker.request(
-//     {
-//         route:'setRoute',
-//         args:[
-//             function setupSerial(self) {
-//                 self.graph.Serial = new self.graph.WebSerial() as WebSerial; 
-//                 console.log('worker: Setting up Serial', self.graph.Serial)
+decoderworker.request(
+    {
+        route:'setRoute',
+        args:[
+            function setupSerial(self) {
+                self.graph.Serial = new globalThis.WebSerial() as WebSerial; 
+                console.log('worker: Setting up Serial', self.graph.Serial)
 
-//                 self.graph.Serial.getPorts().then(console.log)
-//                 return true;
-//             }.toString(),
-//             'setupSerial'
-//         ]
-//     } as ServiceMessage
-// ).then(console.log);
+                self.graph.Serial.getPorts().then(console.log)
+                return true;
+            }.toString(),
+            'setupSerial'
+        ]
+    } as ServiceMessage
+).then(console.log);
 
-// decoderworker.request({route:'setupSerial'}).then(console.log); //now make sure it is ready
+decoderworker.request({route:'setupSerial'}).then(console.log); //now make sure it is ready
 
 //transfer decoders
 function transferFunction(worker:WorkerInfo, fn:any, fnName?:string) {
@@ -129,24 +126,6 @@ function transferClass(worker:WorkerInfo, cls:any, className?:string) {
 }
 
 
-let textdecoder = new TextDecoder();
-
-const decoders = {
-    'raw':(data:ArrayBuffer) => { return new Uint8Array(data); },
-    'utf8':(data:ArrayBuffer) => { return textdecoder.decode(data); },
-    'console-f12':(data:ArrayBuffer) => { data = new Uint8Array(data); console.log(data); return data; },
-    'debug':(data:ArrayBuffer,debugmessage:string) => { data = new Uint8Array(data); console.log(debugmessage,data); return `${debugmessage} ${data}`; },
-    'ads131m08':ads131m08codec,
-    //'max3010x':(data:ArrayBuffer) => { return data; },
-    //'mpu6050':(data:ArrayBuffer) => { return data; },
-    'freeeg32':freeeeg32codec, //https://github.com/joshbrew/freeeeg32.js
-    'freeeeg128':freeeeg128codec,
-    'cyton':cytoncodec, //https://github.com/joshbrew/cyton.js
-    //'cognixionBLE':(data:ArrayBuffer) => { return data; }, //see the super secret docs
-    'hegduino':hegduinocodec, //https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
-    //'peanut':(data:ArrayBuffer) => { return data; } //https://github.com/joshbrew/peanutjs/blob/main/peanut.js
-    //...custom?
-}
 
 //onclick we will add worker, transfer the api, then call all of the functions in the correct order, passing available arguments
 function transferSerialAPI(worker:WorkerInfo) {
@@ -170,7 +149,7 @@ function transferSerialAPI(worker:WorkerInfo) {
         worker, 
         function setupSerial(self) {
             const WorkerService = self.graph as WorkerService;
-            WorkerService.Serial = new WorkerService.WebSerial() as WebSerial; 
+            WorkerService.Serial = new globalThis.WebSerial() as WebSerial; 
             WorkerService.decoder = 'raw';
             console.log('worker: Setting up Serial', WorkerService.Serial)
 
