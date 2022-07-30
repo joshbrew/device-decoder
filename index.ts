@@ -484,7 +484,7 @@ const domtree = {
                                                                                             this.output = decoders[decoderselect.value](result.buffer,debugmessage);
                                                                                         
                                                                                             if(outputmode.value === 'b') {
-                                                                                                this.outputText += `${this.output}\n`
+                                                                                                this.outputText += typeof this.output === 'string' ? `${this.output}\n` : `${JSON.stringify(this.output)}\n`
                                                                                             }
                                                                                             requestAnimationFrame(this.anim);
                                                                                             //this.anim();
@@ -811,7 +811,7 @@ const domtree = {
                                                                             this.lastRead = now;
 
                                                                             if(outputmode.value === 'b') {
-                                                                                this.outputText += `${this.output}\n`
+                                                                                this.outputText += typeof this.output === 'string' ? `${this.output}\n` : `${JSON.stringify(this.output)}\n`
                                                                             }
 
                                                                             if(this.anim) requestAnimationFrame(this.anim); //throttles animations to refresh rate
