@@ -9,6 +9,10 @@ import gsworker from './src/debugger.worker'
 
 //import beautify_js from './src/beautify.min'
 import { decoders } from './src/decoders/index'
+import { WebglLinePlotUtils } from 'webgl-plot-utils';
+
+
+
 
 /**
     <Debugger window component>
@@ -59,6 +63,19 @@ const BLE = new BLEClient();
 
 const workers = new WorkerService(); 
 
+const setupChart = (canvas) => {
+    globalThis.chart = new WebglLinePlotUtils(canvas, false);
+}
+
+const updateChartData = (data:{[key:string]:number|number[]},sps:{[key:string]:number}) => {
+    
+}
+
+const updateChart = (data:[number[]]) => {
+    globalThis.chart.updateAllLines(data);
+    globalThis.chart.update();
+}
+
 //TODO: Make a worker for each stream & visual, TO THE MAXXX, they will just run in order, too bad we can't force cores to mainline different tasks so device source streams and frontend logic don't compete
 const decoderworker = workers.addWorker({url:gsworker}); //this will handle decoder logic
 const chartworker = workers.addWorker({url:gsworker}); //this will visualize data for us if formats fit
@@ -89,10 +106,10 @@ decoderworker.request(
         route:'setRoute',
         args:[
             function setupSerial(self) {
-                self.graph.Serial = new globalThis.WebSerial() as WebSerial; 
-                console.log('worker: Setting up Serial', self.graph.Serial)
+                globalThis.Serial = new globalThis.WebSerial() as WebSerial; 
+                console.log('worker: Setting up Serial', globalThis.Serial)
 
-                self.graph.Serial.getPorts().then(console.log)
+                globalThis.Serial.getPorts().then(console.log)
                 return true;
             }.toString(),
             'setupSerial'
@@ -138,8 +155,15 @@ function transferSerialAPI(worker:WorkerInfo) {
 
     transferFunction(
         worker,
-        function setActiveDecoder(self, origin, decoderName) {
-            self.graph.decoder = decoderName;
+        function receiveDecoder(decoder:any, decoderName:string) {
+            globalThis.decoders[decoderName] = (0, eval)('('+decoder+')');
+        },
+        'receiveDecoder'
+    )
+    transferFunction(
+        worker,
+        function setActiveDecoder(decoderName) {
+            globalThis.decoder = decoderName;
 
             return true;
         },
@@ -148,12 +172,11 @@ function transferSerialAPI(worker:WorkerInfo) {
     transferFunction(
         worker, 
         function setupSerial(self) {
-            const WorkerService = self.graph as WorkerService;
-            WorkerService.Serial = new globalThis.WebSerial() as WebSerial; 
-            WorkerService.decoder = 'raw';
-            console.log('worker: Setting up Serial', WorkerService.Serial)
+            globalThis.Serial = new globalThis.WebSerial() as WebSerial; 
+            globalThis.decoder = 'raw';
+            console.log('worker: Setting up Serial', globalThis.Serial)
 
-            WorkerService.Serial.getPorts().then(console.log)
+            globalThis.Serial.getPorts().then(console.log)
             return true;
         },
         'setupSerial'
@@ -163,9 +186,9 @@ function transferSerialAPI(worker:WorkerInfo) {
         function startSerialStream(self, origin, settings:SerialOptions & { usbVendorId:number, usbProductId:number, pipeTo?:string, frequency?:number }) {
 
             const WorkerService = self.graph as WorkerService;
-            if(!WorkerService.Serial) WorkerService.run('setupSerial');
+            if(!globalThis.Serial) WorkerService.run('setupSerial');
 
-            const Serial = WorkerService.Serial as WebSerial;
+            const Serial = globalThis.Serial as WebSerial;
 
             Serial.requestPort(settings.usbVendorId, settings.usbProductId).then((port) => {
                 Serial.openPort(port, settings).then(() => {
@@ -173,7 +196,7 @@ function transferSerialAPI(worker:WorkerInfo) {
                         port, 
                         frequency:settings.frequency ? settings.frequency : 10,
                         ondata: (value:ArrayBuffer) => { 
-                            if(WorkerService.decoder) value = WorkerService.run(WorkerService.decoder, value); //run the decoder if set on this thread, else return the array buffer result raw or pipe to another thread
+                            if(globalThis.decoder) value = WorkerService.run(globalThis.decoder, value); //run the decoder if set on this thread, else return the array buffer result raw or pipe to another thread
 
                             if(stream.settings.pipeTo) {
                                 WorkerService.transmit(value, stream.settings.pipeTo, (value instanceof ArrayBuffer || (value as any).constructor?.name.indexOf('Array') > 0) ? [value] as any : undefined);
@@ -198,7 +221,7 @@ function transferSerialAPI(worker:WorkerInfo) {
     transferFunction(
         worker,
         function closeStream(self, origin, streamId) {
-            const Serial = self.graph.Serial as WebSerial;
+            const Serial = globalThis.Serial as WebSerial;
 
             Serial.closeStream(Serial.streams[streamId]);
 
@@ -209,7 +232,7 @@ function transferSerialAPI(worker:WorkerInfo) {
     transferFunction(
         worker,
         function writeStream(self, origin, streamId, message:any) {
-            const Serial = self.graph.Serial as WebSerial;
+            const Serial = globalThis.Serial as WebSerial;
 
             Serial.writeStream(Serial.streams[streamId], message).then(console.log);
 
