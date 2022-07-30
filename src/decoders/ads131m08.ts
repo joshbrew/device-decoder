@@ -22,8 +22,8 @@ export default function ads131m08codec(value:ArrayBuffer) {
         7:new Array(9)
     };
 
-    for(let i = 0; i < 9; i++) { //hard coded packet iteration
-        let j = i * 25;
+    for(let i = 0; i < 9; i++) { //hard coded packet iteration, 9 sample sets x 8 channels per packet 
+        let j = i * 25; //every 25th byte is a counter so skip those
         output[0][i] = bitflippin.bytesToInt24(arr[j],arr[j+1],arr[j+2]);
         output[1][i] = bitflippin.bytesToInt24(arr[j+3],arr[j+4],arr[j+5]);
         output[2][i] = bitflippin.bytesToInt24(arr[j+6],arr[j+7],arr[j+8]);
