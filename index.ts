@@ -66,44 +66,44 @@ const workers = new WorkerService();
 const decoderworker = workers.addWorker({url:gsworker}); //this will handle decoder logic
 const chartworker = workers.addWorker({url:gsworker}); //this will visualize data for us if formats fit
 
-decoderworker.request( 
-    {
-        route:'setRoute', 
-        args:[
-            function (value:any) { //to be overwritten when we want to swap decoders
-                return value; //ping pong
-            }.toString(),
-            'decode'
-        ]
-    } as ServiceMessage //use service messages to communicate with disconnected service graphs
-).then(console.log);
+// decoderworker.request( 
+//     {
+//         route:'setRoute', 
+//         args:[
+//             function (value:any) { //to be overwritten when we want to swap decoders
+//                 return value; //ping pong
+//             }.toString(),
+//             'decode'
+//         ]
+//     } as ServiceMessage //use service messages to communicate with disconnected service graphs
+// ).then(console.log);
 
-//let's load the serial library in a worker and try to run it there >_>
-decoderworker.request(
-    {
-        route:'receiveClass',
-        args:[WebSerial.toString(),'WebSerial'] 
-    } as ServiceMessage
-).then(console.log);
+// //let's load the serial library in a worker and try to run it there >_>
+// decoderworker.request(
+//     {
+//         route:'receiveClass',
+//         args:[WebSerial.toString(),'WebSerial'] 
+//     } as ServiceMessage
+// ).then(console.log);
 
-//create a callback to setup our transferred class
-decoderworker.request(
-    {
-        route:'setRoute',
-        args:[
-            function setupSerial(self) {
-                self.graph.Serial = new self.graph.WebSerial() as WebSerial; 
-                console.log('worker: Setting up Serial', self.graph.Serial)
+// //create a callback to setup our transferred class
+// decoderworker.request(
+//     {
+//         route:'setRoute',
+//         args:[
+//             function setupSerial(self) {
+//                 self.graph.Serial = new self.graph.WebSerial() as WebSerial; 
+//                 console.log('worker: Setting up Serial', self.graph.Serial)
 
-                self.graph.Serial.getPorts().then(console.log)
-                return true;
-            }.toString(),
-            'setupSerial'
-        ]
-    } as ServiceMessage
-).then(console.log);
+//                 self.graph.Serial.getPorts().then(console.log)
+//                 return true;
+//             }.toString(),
+//             'setupSerial'
+//         ]
+//     } as ServiceMessage
+// ).then(console.log);
 
-decoderworker.request({route:'setupSerial'}).then(console.log); //now make sure it is ready
+// decoderworker.request({route:'setupSerial'}).then(console.log); //now make sure it is ready
 
 //transfer decoders
 function transferFunction(worker:WorkerInfo, fn:any, fnName?:string) {
@@ -123,7 +123,7 @@ function transferClass(worker:WorkerInfo, cls:any, className?:string) {
         route:'receiveClass',
         args:[
             cls.toString(),
-            'WebSerial'
+            className
         ] 
     } as ServiceMessage);
 }
@@ -323,6 +323,14 @@ const domtree = {
             display:flex;
             flex-direction: column-reverse;
         }
+
+        .console canvas {
+            position:absolute;
+            z-index:2;
+            width:100%;
+            height:100%;
+        }
+
         `,
         children:{
             'debuggerbody':{
@@ -764,6 +772,7 @@ const domtree = {
                                                                         </div>
                                                                         <div id='${id}connectioninfo'>Read Rate: <span id='${id}readrate'></span> updates/sec</div>
                                                                         <div id='${id}console' class='console'>
+                                                                            <canvas id='${id}canvas'></canvas>
                                                                         </div>
                                                                     </div>`;
                                                                 }
