@@ -311,10 +311,6 @@ function transferStreamAPI(worker:WorkerInfo) {
 
     transferClass(worker, WebSerial, 'WebSerial');
 
-    for(const prop in decoders) { //transfer the decoders by name
-        transferFunction(worker, decoders[prop], prop);
-    }
-
     transferFunction(
         worker,
         function receiveDecoder(decoder:any, decoderName:string) {
@@ -325,6 +321,7 @@ function transferStreamAPI(worker:WorkerInfo) {
     transferFunction(
         worker,
         function decode(data:any) {
+            console.log(globalThis.decoders,globalThis.decoder)
             return globalThis.decoders[globalThis.decoder](data);
         },
         'decode'
@@ -340,7 +337,7 @@ function transferStreamAPI(worker:WorkerInfo) {
     );
     transferFunction(
         worker, 
-        function setupSerial(self) {
+        function setupSerial() {
             globalThis.Serial = new globalThis.WebSerial() as WebSerial; 
             globalThis.decoder = 'raw';
             console.log('worker: Setting up Serial', globalThis.Serial)
@@ -537,9 +534,7 @@ function createStreamRenderPipeline() {
     transferFunction(
         streamworker,
         function decodeAndPassToChart(self, origin, data:any, chartPortId:string) {
-            console.log('decode:', data, chartPortId)
-            let decoded = self.run('decode',data);
-            console.log(decoded);
+            let decoded = self.graph.run('decode',data);
             self.transmit(
                 {
                     route:'updateChartData',
@@ -866,6 +861,8 @@ const domtree = {
                                                                                         let decoderval = decoderselect.value;
                                                                                         let initialChart = chartSettings[decoderval];
                                                                                         initialChart._id = streamworkers.portId;
+
+                                                                                        streamworkers.streamworker.send({route:'setActiveDecoder', args:decoderselect.value});
 
                                                                                         decoderselect.addEventListener('change',(ev)=> {
                                                                                             streamworkers.streamworker.send({route:'setActiveDecoder', args:decoderselect.value});
