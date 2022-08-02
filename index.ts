@@ -9,7 +9,7 @@ import gsworker from './src/debugger.worker'
 
 //import beautify_js from './src/beautify.min'
 import { decoders } from './src/decoders/index'
-import { WebglLinePlotUtils } from 'webgl-plot-utils';
+import { WebglLinePlotUtil, WebglLinePlotProps, WebglLinePlotInfo, WebglLineProps } from 'webgl-plot-utils';
 
 
 
@@ -57,67 +57,202 @@ import { WebglLinePlotUtils } from 'webgl-plot-utils';
 
 */
 
+function isMobile() {
+    let check = false;
+    (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))) check = true;})(navigator.userAgent||navigator.vendor||(window as any).opera);
+    return check;
+};
+
 const Serial = new WebSerial();
 const BLE = new BLEClient();
+const plotter = new WebglLinePlotUtil();
 
 
 const workers = new WorkerService(); 
 
-const setupChart = (canvas) => {
-    globalThis.chart = new WebglLinePlotUtils(canvas, false);
+const defaultChart = {
+    lines:{
+        '0':{nPoints:1000}
+    },
+    generateNewLines:true,
+    cleanGeneration:true
 }
 
-const updateChartData = (data:{[key:string]:number|number[]},sps:{[key:string]:number}) => {
-    
+// chart settings as per our WebglLineProps interface
+const chartSettings:{[key:string]:Partial<WebglLinePlotProps>} = {
+    'raw':defaultChart,
+    'utf8':defaultChart,
+    'console-f12':defaultChart,
+    'debug':defaultChart,
+    'ads131m08':{
+        lines:{
+            '0':{nSec:10, sps:250},
+            '1':{nSec:10, sps:250},
+            '2':{nSec:10, sps:250},
+            '3':{nSec:10, sps:250},
+            '4':{nSec:10, sps:250},
+            '5':{nSec:10, sps:250},
+            '6':{nSec:10, sps:250},
+            '7':{nSec:10, sps:250}
+        }
+    },
+    'max3010x':{
+        lines:{
+            red:{nPoints:1000},
+            ir:{nPoints:1000}
+        }
+    },
+    'mpu6050':{
+        lines:{
+            'ax':{nSec:10, sps:100},
+            'ay':{nSec:10, sps:100},
+            'az':{nSec:10, sps:100},
+            'gx':{nSec:10, sps:100},
+            'gy':{nSec:10, sps:100},
+            'gz':{nSec:10, sps:100}
+        }
+    },
+    'freeeeg32':{
+        lines:{
+            'ax':{nSec:10, sps:500},
+            'ay':{nSec:10, sps:500},
+            'az':{nSec:10, sps:500},
+            'gx':{nSec:10, sps:500},
+            'gy':{nSec:10, sps:500},
+            'gz':{nSec:10, sps:500}
+        }
+    }, //https://github.com/joshbrew/freeeeg32.js
+    'freeeeg128':{
+        lines:{
+            'ax':{nSec:10, sps:500},
+            'ay':{nSec:10, sps:500},
+            'az':{nSec:10, sps:500},
+            'gx':{nSec:10, sps:500},
+            'gy':{nSec:10, sps:500},
+            'gz':{nSec:10, sps:500}
+        }
+    },
+    'cyton':{
+        lines:{
+            '0':{nSec:10, sps:250},
+            '1':{nSec:10, sps:250},
+            '2':{nSec:10, sps:250},
+            '3':{nSec:10, sps:250},
+            '4':{nSec:10, sps:250},
+            '5':{nSec:10, sps:250},
+            '6':{nSec:10, sps:250},
+            '7':{nSec:10, sps:250},
+            'ax':{nSec:10, sps:250},
+            'ay':{nSec:10, sps:250},
+            'az':{nSec:10, sps:250},
+            'gx':{nSec:10, sps:250},
+            'gy':{nSec:10, sps:250},
+            'gz':{nSec:10, sps:250},
+        }
+    }, //https://github.com/joshbrew/cyton.js
+    //'cognixionBLE':{}, //see the super secret docs
+    'hegduino':{
+        lines:{
+            red:{nPoints:1000},
+            ir:{nPoints:1000},
+            ratio:{nPoints:1000},
+            ambient:{nPoints:1000},
+            temperature:{nPoints:1000},
+        }
+    }, //https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
+    //'peanut':{} //https://github.com/joshbrew/peanutjs/blob/main/peanut.js
+    //...custom?
 }
 
-const updateChart = (data:[number[]]) => {
-    globalThis.chart.updateAllLines(data);
-    globalThis.chart.update();
+for(let i = 0; i < 128; i++) {
+    if(i<32) {
+        chartSettings['freeeeg32'].lines[i] = {sps:500,nSec:10};
+    }
+    chartSettings['freeeeg128'].lines[i] = {sps:500,nSec:10};
 }
 
-//TODO: Make a worker for each stream & visual, TO THE MAXXX, they will just run in order, too bad we can't force cores to mainline different tasks so device source streams and frontend logic don't compete
-const decoderworker = workers.addWorker({url:gsworker}); //this will handle decoder logic
-const chartworker = workers.addWorker({url:gsworker}); //this will visualize data for us if formats fit
+const setupChart = (settings:WebglLinePlotProps) => {
+    return plotter.initPlot(settings).settings._id;
+}
 
-decoderworker.request( 
-    {
-        route:'setRoute', 
-        args:[
-            function (value:any) { //to be overwritten when we want to swap decoders
-                return value; //ping pong
-            }.toString(),
-            'decode'
-        ]
-    } as ServiceMessage //use service messages to communicate with disconnected service graphs
-).then(console.log);
+const updateChartData = (
+    plot:WebglLinePlotInfo|string, 
+    lines?:{
+        [key:string]:{
+            values:number[]|number,
+            position?:number,
+            autoscale?:boolean,
+            interpolate?:boolean
+        }
+    }|number|(number|number[])[]|string, 
+    draw:boolean=true
+) => {
+    let parsed = WebglLinePlotUtil.formatDataForCharts(lines);
+    if(typeof parsed === 'object')
+    {    
+        plotter.update(plot,parsed,draw);
+        return true;
+    } return false;
+}
 
-// //let's load the serial library in a worker and try to run it there >_>
+const clearChart = (
+    plot:WebglLinePlotInfo|string
+) => {
+    plotter.deinitPlot(plot);
+    return true;
+}
+
+const resetChart = (
+    plot:WebglLinePlotInfo|string,
+    settings:WebglLinePlotProps
+) => {
+    plotter.reinitPlot(plot,settings);
+    return settings._id;
+}
+
+
+// //TODO: Make a worker for each stream & visual, TO THE MAXXX, they will just run in order, too bad we can't force cores to mainline different tasks so device source streams and frontend logic don't compete
+// const decoderworker = workers.addWorker({url:gsworker}); //this will handle decoder logic
+// const chartworker = workers.addWorker({url:gsworker}); //this will visualize data for us if formats fit
+
+// decoderworker.request( 
+//     {
+//         route:'setRoute', 
+//         args:[
+//             function (value:any) { //to be overwritten when we want to swap decoders
+//                 return value; //ping pong
+//             }.toString(),
+//             'decode'
+//         ]
+//     } as ServiceMessage //use service messages to communicate with disconnected service graphs
+// ).then(console.log);
+
+// // //let's load the serial library in a worker and try to run it there >_>
+// // decoderworker.request(
+// //     {
+// //         route:'receiveClass',
+// //         args:[WebSerial.toString(),'WebSerial'] 
+// //     } as ServiceMessage
+// // ).then(console.log);
+
+// // //create a callback to setup our transferred class
 // decoderworker.request(
 //     {
-//         route:'receiveClass',
-//         args:[WebSerial.toString(),'WebSerial'] 
+//         route:'setRoute',
+//         args:[
+//             function setupSerial(self) {
+//                 globalThis.Serial = new globalThis.WebSerial() as WebSerial; 
+//                 console.log('worker: Setting up Serial', globalThis.Serial)
+
+//                 globalThis.Serial.getPorts().then(console.log)
+//                 return true;
+//             }.toString(),
+//             'setupSerial'
+//         ]
 //     } as ServiceMessage
 // ).then(console.log);
 
-// //create a callback to setup our transferred class
-decoderworker.request(
-    {
-        route:'setRoute',
-        args:[
-            function setupSerial(self) {
-                globalThis.Serial = new globalThis.WebSerial() as WebSerial; 
-                console.log('worker: Setting up Serial', globalThis.Serial)
-
-                globalThis.Serial.getPorts().then(console.log)
-                return true;
-            }.toString(),
-            'setupSerial'
-        ]
-    } as ServiceMessage
-).then(console.log);
-
-decoderworker.request({route:'setupSerial'}).then(console.log); //now make sure it is ready
+// decoderworker.request({route:'setupSerial'}).then(console.log); //now make sure it is ready
 
 //transfer decoders
 function transferFunction(worker:WorkerInfo, fn:any, fnName?:string) {
@@ -143,9 +278,36 @@ function transferClass(worker:WorkerInfo, cls:any, className?:string) {
 }
 
 
-
+function transferChartCommands(worker:WorkerInfo) {
+    transferFunction(
+        worker,
+        function setupPlotter() {
+            globalThis.plotter = new globalThis.WebglLinePlotUtil() as WebglLinePlotUtil;
+        }
+    );
+    transferFunction(
+        worker,
+        setupChart,
+        'setupChart'
+    );
+    transferFunction(
+        worker,
+        updateChartData,
+        'updateChartData'
+    );
+    transferFunction(
+        worker,
+        resetChart,
+        'resetChart'
+    );
+    transferFunction(
+        worker,
+        clearChart,
+        'clearChart'
+    );
+}
 //onclick we will add worker, transfer the api, then call all of the functions in the correct order, passing available arguments
-function transferSerialAPI(worker:WorkerInfo) {
+function transferStreamAPI(worker:WorkerInfo) {
 
     transferClass(worker, WebSerial, 'WebSerial');
 
@@ -160,6 +322,13 @@ function transferSerialAPI(worker:WorkerInfo) {
         },
         'receiveDecoder'
     )
+    transferFunction(
+        worker,
+        function decode(data:any) {
+            return globalThis.decoders[globalThis.decoder](data);
+        },
+        'decode'
+    );
     transferFunction(
         worker,
         function setActiveDecoder(decoderName) {
@@ -181,9 +350,54 @@ function transferSerialAPI(worker:WorkerInfo) {
         },
         'setupSerial'
     );
+
     transferFunction(
         worker,
-        function startSerialStream(self, origin, settings:SerialOptions & { usbVendorId:number, usbProductId:number, pipeTo?:string, frequency?:number }) {
+        function openPort(self, origin, settings:SerialOptions & { usbVendorId:number, usbProductId:number, pipeTo?:string|{route:string, _id:string}, frequency?:number }) {
+            globalThis.Serial.getPorts().then((ports)=>{
+                const WorkerService = self.graph as WorkerService;
+                if(!globalThis.Serial) WorkerService.run('setupSerial');
+    
+                const Serial = globalThis.Serial as WebSerial;
+
+                let port = ports.find((port)=>{
+                    return port.getInfo().usbVendorId === settings.usbVendorId && port.getInfo().usbProductId === settings.usbProductId;
+                });
+                if(port) {
+                    Serial.openPort(port, settings).then(() => {
+                        const stream = Serial.createStream({
+                            port, 
+                            frequency:settings.frequency ? settings.frequency : 10,
+                            ondata: (value:ArrayBuffer) => { 
+                                if(globalThis.decoder) value = WorkerService.run(globalThis.decoder, value); //run the decoder if set on this thread, else return the array buffer result raw or pipe to another thread
+    
+                                if(stream.settings.pipeTo) {
+                                    if(typeof stream.settings.pipeTo === 'string')
+                                        WorkerService.transmit(value, stream.settings.pipeTo, (value instanceof ArrayBuffer || (value as any).constructor?.name.indexOf('Array') > 0) ? [value] as any : undefined);
+                                    //we can subscribe on the other end to this worker output by id
+                                    else if (stream.settings.pipeTo?.route) {
+                                        WorkerService.transmit({route:stream.settings.pipeTo.route, args:value }, stream.settings.pipeTo._id, (value instanceof ArrayBuffer || (value as any).constructor?.name.indexOf('Array') > 0) ? [value] as any : undefined);
+                                    }
+                                } else {
+                                    WorkerService.transmit(value, origin, (value instanceof ArrayBuffer || (value as any).constructor?.name.indexOf('Array') > 0) ? [value] as any : undefined);
+                                    //we can subscribe on the other end to this worker output by id
+                                }
+                            }
+                        });
+                        stream.settings = settings; //save the settings 
+    
+                        Serial.readStream(stream);
+                    });
+                } else {
+                    return false;
+                }
+            })
+        },
+        'openPort'
+    )
+    transferFunction(
+        worker,
+        function startSerialStream(self, origin, settings:SerialOptions & { usbVendorId:number, usbProductId:number, pipeTo?:string|{route:string, _id:string}, frequency?:number }) {
 
             const WorkerService = self.graph as WorkerService;
             if(!globalThis.Serial) WorkerService.run('setupSerial');
@@ -199,8 +413,12 @@ function transferSerialAPI(worker:WorkerInfo) {
                             if(globalThis.decoder) value = WorkerService.run(globalThis.decoder, value); //run the decoder if set on this thread, else return the array buffer result raw or pipe to another thread
 
                             if(stream.settings.pipeTo) {
-                                WorkerService.transmit(value, stream.settings.pipeTo, (value instanceof ArrayBuffer || (value as any).constructor?.name.indexOf('Array') > 0) ? [value] as any : undefined);
+                                if(typeof stream.settings.pipeTo === 'string')
+                                    WorkerService.transmit(value, stream.settings.pipeTo, (value instanceof ArrayBuffer || (value as any).constructor?.name.indexOf('Array') > 0) ? [value] as any : undefined);
                                 //we can subscribe on the other end to this worker output by id
+                                else if (stream.settings.pipeTo?.route) {
+                                    WorkerService.transmit({route:stream.settings.pipeTo.route, args:value }, stream.settings.pipeTo._id, (value instanceof ArrayBuffer || (value as any).constructor?.name.indexOf('Array') > 0) ? [value] as any : undefined);
+                                }
                             } else {
                                 WorkerService.transmit(value, origin, (value instanceof ArrayBuffer || (value as any).constructor?.name.indexOf('Array') > 0) ? [value] as any : undefined);
                                 //we can subscribe on the other end to this worker output by id
@@ -246,6 +464,136 @@ function transferSerialAPI(worker:WorkerInfo) {
 //setup the serial with pipeTo set to the second worker, and the second worker set up with the decoder
 //subscribe the decoder worker to run decoder on worker1's message and then pass result to main thread and/or render thread(s)
 
+
+//create the necessary canvases and transfer to the worker, run the setup routines. etc
+function initWorkerChart(
+    worker:WorkerInfo, 
+    settings:Partial<WebglLinePlotProps>, //default graph one line
+    parentDiv:string|HTMLElement
+) {
+    transferChartCommands(worker);
+
+    if(typeof parentDiv === 'string') parentDiv = document.getElementById(parentDiv);
+    if(!parentDiv) parentDiv = document.body;
+
+    const plotDiv = document.createElement('div');
+    plotDiv.style.width = '100%';
+    plotDiv.style.height = '100%';
+
+    const chart = document.createElement('canvas');
+
+    (chart as any).width = '100%';
+    (chart as any).height = '100%';
+    chart.style.width = '100%';
+    chart.style.height = '100%';
+
+    const overlay = document.createElement('canvas');
+
+    overlay.style.position = 'absolute';
+    (overlay as any).width = '100%';
+    (overlay as any).height = '100%';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+
+    plotDiv.appendChild(chart);
+    plotDiv.appendChild(overlay);
+
+    let offscreenchart = (chart as any).transferControlToOffscreen();
+    let offscreenoverlay = (overlay as any).transferControlToOffscreen();
+
+    parentDiv.appendChild(plotDiv);
+
+    return {
+        request: worker.request({
+            route:'setupChart',
+            args:Object.assign({
+                canvas:offscreenchart,
+                overlay:offscreenoverlay
+            },settings)
+        }, [offscreenchart, offscreenoverlay]),
+        chart,
+        overlay,
+        plotDiv,
+        parentDiv
+    };
+
+
+}
+
+
+function createStreamRenderPipeline() {
+    let streamworker = workers.addWorker({url:gsworker});
+    let chartworker = workers.addWorker({url:gsworker});
+
+    transferStreamAPI(streamworker);
+    transferChartCommands(chartworker);
+
+    let portId = workers.establishMessageChannel(streamworker.worker, chartworker.worker); //returns the id of the port so we can orchestrate port communication
+
+    // initWorkerChart(
+    //     chartworker
+    // )
+
+    transferFunction(
+        streamworker,
+        function decodeAndPassToChart(self, origin, data:any, chartPortId:string) {
+            console.log('decode:', data, chartPortId)
+            let decoded = self.run('decode',data);
+            console.log(decoded);
+            self.transmit(
+                {
+                    route:'updateChartData',
+                    args:decoded
+                },
+                chartPortId
+            );
+            return decoded;
+        },
+        'decodeAndPassToChart'
+    );
+
+    //for BLE we need to pass the output to the stream worker and run decode,
+    //for serial we need to tell the serial port/decoder worker to do that instead of the main thread,
+    // and proxy the serial port controls
+
+    return {
+        streamworker,
+        chartworker,
+        portId
+    };
+}
+
+//after calling createStreamRenderPipeline
+function initWorkerSerialStream(
+    streamworker:WorkerInfo, 
+    chartworker:WorkerInfo,
+    portId:string, 
+    streamSettings:SerialOptions & { usbVendorId:number, usbProductId:number, pipeTo?:string|{route:string, _id:string}, frequency?:number },
+    chartSettings:WebglLinePlotProps,
+    chartParent:HTMLElement|string
+) {
+    
+    streamSettings.pipeTo = {route:'updateChartData', _id:portId};
+    
+    streamworker.send({
+        route:'startSerialStream',
+        args:streamSettings
+    });
+
+    initWorkerChart(
+        chartworker, 
+        chartSettings, 
+        chartParent
+    );
+}
+
+
+function cleanupWorkerStreamPipeline(streamworker, chartworker, plotDiv?:HTMLElement) {
+    workers.terminate(streamworker.worker);
+    workers.terminate(chartworker.worker);
+
+    if(plotDiv) plotDiv.remove();   
+}
 
 //also incl https://github.com/joshbrew/BiquadFilters.js/blob/main/BiquadFilters.js
 
@@ -365,8 +713,18 @@ const domtree = {
                                                         (parent.querySelector('#serviceuuid') as HTMLInputElement).value.split(',').forEach((uu) => { if(uu.length === reqlen) services[uu.toLowerCase()] = {}; else console.error('uuid format is wonk', uu, 'expected format (e.g.):', '0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase()) }); //todo, set up characteristics on first go
                                                         if(Object.keys(services).length === 0) services = {['0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase()]:{}};
 
+                                                        let disconnectCallbacks = {}
+
                                                         BLE.setup({
-                                                            services
+                                                            services,
+                                                            ondisconnect:(deviceId:string) => {
+                                                                console.log('disconnected', deviceId);
+                                                                if(disconnectCallbacks[deviceId]) {
+                                                                    for(const key in disconnectCallbacks[deviceId]) {
+                                                                        disconnectCallbacks[deviceId][key](deviceId);
+                                                                    }
+                                                                }
+                                                            }
                                                         }).then((stream)=>{
                                                             console.log(stream)
 
@@ -375,6 +733,7 @@ const domtree = {
                                                                 stream=stream;
                                                                 output:any;
                                                                 outputText:string;
+                                                                workers={};
 
                                                                 anim:any;
 
@@ -404,18 +763,30 @@ const domtree = {
                                                                             id='${this.stream.deviceId}console' 
                                                                             class='console'>
                                                                         </div>
+                                                                        <div
+                                                                            id='${this.stream.deviceId}chart' 
+                                                                            style='height:300px; width:100%;'
+                                                                        ></div>
                                                                     </div>`;
                                                                 }
 
                                                                 oncreate = (self:DOMElement,props:any) => {
                                                                     //spawn a graph based prototype hierarchy for the connection info?
                                                                     //e.g. to show the additional modularity off
+                                                                    disconnectCallbacks[this.stream.deviceId] = {
+                                                                        'rmworkers':()=>{
+                                                                            if(this.workers) 
+                                                                                for(const key in this.workers) {
+                                                                                    cleanupWorkerStreamPipeline( this.workers[key].streamworker,  this.workers[key].chartworker);
+                                                                                    delete this.workers[ this.workers[key].portId as string];
+                                                                                }
+                                                                        }
+                                                                    }
                             
                                                                     let c = self.querySelector('[id="'+this.stream.deviceId+'console"]') as HTMLElement;
                                                                     let outputmode = self.querySelector('[id="'+this.stream.deviceId+'outputmode"]') as HTMLInputElement;
                             
                                                                     this.anim = () => { 
-                            
                                                                         if(outputmode.value === 'a') 
                                                                             c.innerText = `${this.output}`; 
                                                                         else if (outputmode.value === 'b') {
@@ -463,7 +834,7 @@ const domtree = {
                                                                         }
                                                                     }
 
-                                                                    rssiFinder(); //mobile only
+                                                                    if(isMobile()) rssiFinder(); //mobile only
 
 
                                                                     BLE.getServices(this.stream.device.deviceId).then((svcs) => {
@@ -490,20 +861,48 @@ const domtree = {
                                                                                     let debugmessage = `${c.uuid} notify:`;
 
                                                                                     const notifyOnClick = () => {
+                                                                                        //init decoder and chart worker
+                                                                                        let streamworkers = createStreamRenderPipeline();
+                                                                                        let decoderval = decoderselect.value;
+                                                                                        let initialChart = chartSettings[decoderval];
+                                                                                        initialChart._id = streamworkers.portId;
+
+                                                                                        decoderselect.addEventListener('change',(ev)=> {
+                                                                                            streamworkers.streamworker.send({route:'setActiveDecoder', args:decoderselect.value});
+                                                                                            streamworkers.chartworker.send({route:'reinitPlot', args:[initialChart._id,chartSettings[decoderselect.value]]});
+                                                                                        })
+
+                                                                                        let chartDeets = initWorkerChart(
+                                                                                            streamworkers.chartworker, 
+                                                                                            initialChart, 
+                                                                                            this.querySelector('[id="'+this.stream.deviceId+'chart"]') as HTMLElement
+                                                                                        );
+
+                                                                                        this.workers[streamworkers.portId as string] = streamworkers;
+
                                                                                         BLE.subscribe(this.stream.device, s.uuid, c.uuid, (result:DataView) => {
-                                                                                            this.output = decoders[decoderselect.value](result.buffer,debugmessage);
+                                                                                            console.log('notify', result)
+                                                                                            streamworkers.streamworker.request({route:'decodeAndPassToChart', args:[result.buffer,streamworkers.portId]},[result.buffer]).then((output) => {
+                                                                                                console.log('decoded', output);
+                                                                                                this.output = output;
                                                                                         
-                                                                                            if(outputmode.value === 'b') {
-                                                                                                this.outputText += typeof this.output === 'string' ? `${this.output}\n` : `${JSON.stringify(this.output)}\n`
-                                                                                            }
-                                                                                            requestAnimationFrame(this.anim);
+                                                                                                if(outputmode.value === 'b') {
+                                                                                                    if(decoderselect.value === 'debug') this.outputText += debugmessage + ' ';
+                                                                                                    this.outputText += typeof this.output === 'string' ? `${this.output}\n` : `${JSON.stringify(this.output)}\n`
+                                                                                                }
+                                                                                                requestAnimationFrame(this.anim);
+                                                                                            })
                                                                                             //this.anim();
                                                                                         });
 
                                                                                         (self.querySelector('[id="'+c.uuid+'notifybutton"]') as HTMLButtonElement).innerText = 'Unsubscribe';
                                                                                         (self.querySelector('[id="'+c.uuid+'notifybutton"]') as HTMLButtonElement).onclick = ()=> {
+                                                                             
                                                                                             BLE.unsubscribe(this.stream.device, s.uuid, c.uuid);
                                                                                             
+                                                                                            cleanupWorkerStreamPipeline( streamworkers.streamworker, streamworkers.chartworker, chartDeets.plotDiv);
+                                                                                            delete this.workers[streamworkers.portId as string];
+
                                                                                             (self.querySelector('[id="'+c.uuid+'notifybutton"]') as HTMLButtonElement).innerText = 'Subscribe';
                                                                                             (self.querySelector('[id="'+c.uuid+'notifybutton"]') as HTMLButtonElement).onclick = notifyOnClick;
                                                                                         }
@@ -664,11 +1063,7 @@ const domtree = {
                                             className:'config'
                                         },
                                         onrender:(self)=>{
-                                            function isMobile() {
-                                                let check = false;
-                                                (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))) check = true;})(navigator.userAgent||navigator.vendor||(window as any).opera);
-                                                return check;
-                                              };
+                                            
 
                                             if(isMobile()) self.style.display = 'none';
 
@@ -717,6 +1112,7 @@ const domtree = {
                                                                 readRate:number=0;
                                                                 anim:any;
                                                                 decoder='raw'
+                                                                workers={};
                 
                                                                 constructor() {
                                                                     super(); 
@@ -801,6 +1197,12 @@ const domtree = {
                                                                             c.innerText = this.outputText;
                                                                         }
                                                                     }
+
+                                                                    //transfer serial api stuff,
+                                                                    //setup the workers
+                                                                    //now supplant this below code
+
+                                                                    let info = port.getInfo();
 
                                                                     Serial.openPort(port, this.settings).then(()=>{
 

@@ -14,8 +14,8 @@ import {
 export type DeviceOptions = {
     namePrefix?:string,
     deviceId?:string,
-    onConnect?:()=>void,
-    onDisconnect?:()=>void,
+    onconnect?:()=>void,
+    ondisconnect?:(deviceId:string)=>void,
     connectOptions?:TimeoutOptions,
     services?:{ 
         [key:string]:{ // service uuid you want to set and all of the characteristic settings and responses, keys are UUIDs
@@ -130,7 +130,7 @@ export class BLEClient extends bitflippin {
     setupDevice = (device:BleDevice,options?:DeviceOptions):Promise<DeviceInfo> => {
         return new Promise(async (res,rej) => {
             this.devices[device.deviceId] = {device, deviceId:device.deviceId,...options};
-            this.client.connect(device.deviceId,options?.onDisconnect,options?.connectOptions).then(async () => {
+            this.client.connect(device.deviceId,options?.ondisconnect,options?.connectOptions).then(async () => {
                 for(const service in options?.services) {
                     for(const characteristic in options.services[service]) {
                         let opt = options.services[service][characteristic];
@@ -153,7 +153,7 @@ export class BLEClient extends bitflippin {
 
     connect(device:BleDevice,options?:DeviceOptions):Promise<BleDevice> {
         return new Promise((res,rej) => {
-            this.client.connect(device.deviceId,options?.onDisconnect,options?.connectOptions)
+            this.client.connect(device.deviceId,options?.ondisconnect,options?.connectOptions)
             .then(connected => {
                 res(device); //connected
             }).catch(rej);});

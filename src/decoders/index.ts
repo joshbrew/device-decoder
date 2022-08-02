@@ -14,7 +14,7 @@ export const decoders:any = {
     'ads131m08':ads131m08codec,
     //'max3010x':(data:ArrayBuffer) => { return data; },
     //'mpu6050':(data:ArrayBuffer) => { return data; },
-    'freeeg32':freeeeg32codec, //https://github.com/joshbrew/freeeeg32.js
+    'freeeeg32':freeeeg32codec, //https://github.com/joshbrew/freeeeg32.js
     'freeeeg128':freeeeg128codec,
     'cyton':cytoncodec, //https://github.com/joshbrew/cyton.js
     //'cognixionBLE':(data:ArrayBuffer) => { return data; }, //see the super secret docs
