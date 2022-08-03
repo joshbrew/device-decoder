@@ -1,11 +1,12 @@
 import {StreamInfo, WebSerial} from './src/serial/serialstream'
 import {BLEClient, DeviceOptions} from './src/ble/ble_client'
-import {Router, DOMService, proxyWorkerRoutes, workerCanvasRoutes, DOMElement } from '../GraphServiceRouter/index'
+import {Router, DOMService, proxyWorkerRoutes, workerCanvasRoutes, DOMElement } from 'graphscript'
 import { ElementInfo, ElementProps } from 'graphscript/dist/services/dom/types/element';
 import { DOMElementProps } from 'graphscript/dist/services/dom/types/component';
 import { decoders, chartSettings, SerialOptions } from './src/devices/index'
 import { workers, cleanupWorkerStreamPipeline, createStreamRenderPipeline, initWorkerChart } from './src/worker_pipes'
 
+import './index.css'
 
 /**
     <Debugger window component>
@@ -66,10 +67,22 @@ const domtree = {
         tagName:'device-debugger',
         styles:`
 
+        #header {
+            background-color:black;
+            color:white;
+            border-bottom:1px solid white;
+        }
+
+        
+        #customdecoder {
+            border-top:1px solid white;
+            border-bottom:1px solid white;
+        }
+
         label {
             display:inline-block;
             width:100%;
-            border-bottom:1px solid black;
+            border-bottom:1px solid white;
         }
 
         label > input {
