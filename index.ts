@@ -1,5 +1,5 @@
 import {StreamInfo, WebSerial} from './src/serial/serialstream'
-import {BLEClient} from './src/ble/ble_client'
+import {BLEClient, DeviceOptions} from './src/ble/ble_client'
 import {Router, DOMService, WorkerService, ServiceMessage, proxyWorkerRoutes, workerCanvasRoutes, DOMElement } from '../GraphServiceRouter/index'
 import { ElementInfo, ElementProps } from 'graphscript/dist/services/dom/types/element';
 import { DOMElementProps } from 'graphscript/dist/services/dom/types/component';
@@ -741,7 +741,7 @@ const domtree = {
 
                                                         let disconnectCallbacks = {}
 
-                                                        BLE.setup({
+                                                        const setupOpts:DeviceOptions = {
                                                             services,
                                                             ondisconnect:(deviceId:string) => {
                                                                 console.log('disconnected', deviceId);
@@ -751,7 +751,15 @@ const domtree = {
                                                                     }
                                                                 }
                                                             }
-                                                        }).then((stream)=>{
+                                                        };
+                                                        if((parent.querySelector('#deviceId') as HTMLInputElement).value) {
+                                                            setupOpts.deviceId = (parent.querySelector('#deviceId') as HTMLInputElement).value;
+                                                        }
+                                                        else if((parent.querySelector('#namePrefix') as HTMLInputElement).value) {
+                                                            setupOpts.namePrefix = (parent.querySelector('#namePrefix') as HTMLInputElement).value;
+                                                        }
+
+                                                        BLE.setup(setupOpts).then((stream)=>{
                                                             console.log(stream)
 
                                                             class ConnectionTemplate extends DOMElement {

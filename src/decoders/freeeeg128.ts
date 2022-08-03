@@ -7,7 +7,7 @@ export default function freeeeg128codec(value:ArrayBuffer) {
     let output:any = {};
 
     for(let i = 1; i < 385; i+=3) {
-        output[i] = bitflippin.bytesToInt24(arr[i],arr[i+1],arr[i+2]);
+        output[i] = bitflippin.bytesToUInt24(arr[i],arr[i+1],arr[i+2]);
     }
  
     let accIdx = 385;//128*3 + 1; //

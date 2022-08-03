@@ -8,7 +8,7 @@ export default function freeeeg32codec(value:ArrayBuffer) {
     let output:any = {};
 
     for(let i = 1; i < 97; i+=3) {
-        output[i] = bitflippin.bytesToInt24(arr[i],arr[i+1],arr[i+2]);
+        output[i] = bitflippin.bytesToUInt24(arr[i],arr[i+1],arr[i+2]);
     }
 
     let accIdx = 97; //32*3 + 1
