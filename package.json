@@ -23,8 +23,8 @@
   "license": "AGPL-3.0-or-later",
   "dependencies": {
     "@capacitor-community/bluetooth-le": "^1.8.3",
-    "graphscript": "~0.0.90",
-    "webgl-plot-utils": "~0.1.30"
+    "graphscript": "~0.0.92",
+    "webgl-plot-utils": "~0.1.32"
   },
   "devDependencies": {
     "@capacitor/android": "^3.5.1",
