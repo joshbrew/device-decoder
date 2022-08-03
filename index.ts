@@ -443,8 +443,8 @@ function initWorkerChart(
     const chart = document.createElement('canvas');
 
     const devicePixelRatio = window.devicePixelRatio || 1;
-    (chart as any).width = plotDiv.style.width;
-    (chart as any).height = plotDiv.style.height;
+    (chart as any).width = parentDiv.clientWidth;
+    (chart as any).height = parentDiv.clientHeight;
     chart.style.width = '100%';
     chart.style.height = '100%';
 
@@ -452,8 +452,8 @@ function initWorkerChart(
 
     overlay.style.position = 'absolute';
     overlay.style.zIndex = '10';
-    (overlay as any).width = plotDiv.style.width;
-    (overlay as any).height = plotDiv.style.height;
+    (overlay as any).width = parentDiv.clientWidth;
+    (overlay as any).height = parentDiv.clientHeight;
     overlay.style.width = '100%';
     overlay.style.height = '100%';
 
@@ -471,18 +471,22 @@ function initWorkerChart(
 
     parentDiv.appendChild(plotDiv);
 
+    //setTimeout(() => {
+    let updated = Object.assign({
+        canvas:offscreenchart,
+        overlay:offscreenoverlay,
+    },settings);
+
+
     let request = worker.request({
         route:'setupChart',
-        args:Object.assign({
-            canvas:offscreenchart,
-            overlay:offscreenoverlay
-        },settings)
+        args:updated
     }, [offscreenchart, offscreenoverlay]);
-
-    console.log(request)
+    
+    //}, 100)
 
     return {
-        request, 
+        request,
         chart,
         overlay,
         plotDiv,
@@ -904,21 +908,21 @@ const domtree = {
                                                                                         this.workers[streamworkers.portId as string] = streamworkers;
 
                                                                                         BLE.subscribe(this.stream.device, s.uuid, c.uuid, (result:DataView) => {
-                                                                                            // console.log('notify', result)
-                                                                                            // const uint8 = new Uint8Array(result.buffer);
-                                                                                            // streamworkers.streamworker.request({route:'decodeAndPassToChart', args:[uint8,streamworkers.portId]},[uint8.buffer]).then((output) => {
-                                                                                            //     //console.log('decoded', output);
-                                                                                            //     if(output) {
-                                                                                            //         this.output = output;
+                                                                                            //console.log('notify', result)
+                                                                                            const uint8 = new Uint8Array(result.buffer);
+                                                                                            streamworkers.streamworker.request({route:'decodeAndPassToChart', args:[uint8,streamworkers.portId]},[uint8.buffer]).then((output) => {
+                                                                                                //console.log('decoded', output);
+                                                                                                if(output) {
+                                                                                                    this.output = output;
                                                                                             
-                                                                                            //         if(outputmode.value === 'b') {
-                                                                                            //             if(decoderselect.value === 'debug') this.outputText += debugmessage + ' ';
-                                                                                            //             this.outputText += typeof this.output === 'string' ? `${this.output}\n` : `${JSON.stringify(this.output)}\n`
-                                                                                            //         }
-                                                                                            //         requestAnimationFrame(this.anim);
-                                                                                            //     }
-                                                                                            // });
-                                                                                            //this.anim();
+                                                                                                    if(outputmode.value === 'b') {
+                                                                                                        if(decoderselect.value === 'debug') this.outputText += debugmessage + ' ';
+                                                                                                        this.outputText += typeof this.output === 'string' ? `${this.output}\n` : `${JSON.stringify(this.output)}\n`
+                                                                                                    }
+                                                                                                    requestAnimationFrame(this.anim);
+                                                                                                }
+                                                                                            });
+                                                                                            this.anim();
                                                                                         });
 
                                                                                         (self.querySelector('[id="'+c.uuid+'notifybutton"]') as HTMLButtonElement).innerText = 'Unsubscribe';
