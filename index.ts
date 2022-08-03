@@ -9,7 +9,7 @@ import gsworker from './src/debugger.worker'
 
 //import beautify_js from './src/beautify.min'
 import { decoders } from './src/decoders/index'
-import { WebglLinePlotUtil, WebglLinePlotProps, WebglLinePlotInfo, WebglLineProps } from 'webgl-plot-utils';
+import { WebglLinePlotUtil, WebglLinePlotProps, WebglLinePlotInfo, WebglLineProps } from '../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils'//'webgl-plot-utils';
 
 
 
@@ -112,7 +112,7 @@ const chartSettings:{[key:string]:Partial<WebglLinePlotProps>} = {
             'gz':{nSec:10, sps:100}
         }
     },
-    'freeeeg32':{
+    'freeeeg32':{ //adding the rest below
         lines:{
             'ax':{nSec:10, sps:500},
             'ay':{nSec:10, sps:500},
@@ -122,7 +122,7 @@ const chartSettings:{[key:string]:Partial<WebglLinePlotProps>} = {
             'gz':{nSec:10, sps:500}
         }
     }, //https://github.com/joshbrew/freeeeg32.js
-    'freeeeg128':{
+    'freeeeg128':{  //adding the rest below
         lines:{
             'ax':{nSec:10, sps:500},
             'ay':{nSec:10, sps:500},
@@ -171,8 +171,11 @@ for(let i = 0; i < 128; i++) {
     chartSettings['freeeeg128'].lines[i] = {sps:500,nSec:10};
 }
 
+
 const setupChart = (settings:WebglLinePlotProps) => {
-    return plotter.initPlot(settings).settings._id;
+    console.log('initializing chart', settings)
+    if(!globalThis.plotter) globalThis.plotter = new globalThis.WebglLinePlotUtil();
+    return globalThis.plotter.initPlot(settings).settings._id;
 }
 
 const updateChartData = (
@@ -187,10 +190,10 @@ const updateChartData = (
     }|number|(number|number[])[]|string, 
     draw:boolean=true
 ) => {
-    let parsed = WebglLinePlotUtil.formatDataForCharts(lines);
+    let parsed = globalThis.WebglLinePlotUtil.formatDataForCharts(lines);
     if(typeof parsed === 'object')
     {    
-        plotter.update(plot,parsed,draw);
+        globalThis.plotter.update(plot,parsed,draw);
         return true;
     } return false;
 }
@@ -198,7 +201,7 @@ const updateChartData = (
 const clearChart = (
     plot:WebglLinePlotInfo|string
 ) => {
-    plotter.deinitPlot(plot);
+    globalThis.plotter.deinitPlot(plot);
     return true;
 }
 
@@ -206,53 +209,10 @@ const resetChart = (
     plot:WebglLinePlotInfo|string,
     settings:WebglLinePlotProps
 ) => {
-    plotter.reinitPlot(plot,settings);
+    globalThis.plotter.reinitPlot(plot,settings);
     return settings._id;
 }
 
-
-// //TODO: Make a worker for each stream & visual, TO THE MAXXX, they will just run in order, too bad we can't force cores to mainline different tasks so device source streams and frontend logic don't compete
-// const decoderworker = workers.addWorker({url:gsworker}); //this will handle decoder logic
-// const chartworker = workers.addWorker({url:gsworker}); //this will visualize data for us if formats fit
-
-// decoderworker.request( 
-//     {
-//         route:'setRoute', 
-//         args:[
-//             function (value:any) { //to be overwritten when we want to swap decoders
-//                 return value; //ping pong
-//             }.toString(),
-//             'decode'
-//         ]
-//     } as ServiceMessage //use service messages to communicate with disconnected service graphs
-// ).then(console.log);
-
-// // //let's load the serial library in a worker and try to run it there >_>
-// // decoderworker.request(
-// //     {
-// //         route:'receiveClass',
-// //         args:[WebSerial.toString(),'WebSerial'] 
-// //     } as ServiceMessage
-// // ).then(console.log);
-
-// // //create a callback to setup our transferred class
-// decoderworker.request(
-//     {
-//         route:'setRoute',
-//         args:[
-//             function setupSerial(self) {
-//                 globalThis.Serial = new globalThis.WebSerial() as WebSerial; 
-//                 console.log('worker: Setting up Serial', globalThis.Serial)
-
-//                 globalThis.Serial.getPorts().then(console.log)
-//                 return true;
-//             }.toString(),
-//             'setupSerial'
-//         ]
-//     } as ServiceMessage
-// ).then(console.log);
-
-// decoderworker.request({route:'setupSerial'}).then(console.log); //now make sure it is ready
 
 //transfer decoders
 function transferFunction(worker:WorkerInfo, fn:any, fnName?:string) {
@@ -283,7 +243,8 @@ function transferChartCommands(worker:WorkerInfo) {
         worker,
         function setupPlotter() {
             globalThis.plotter = new globalThis.WebglLinePlotUtil() as WebglLinePlotUtil;
-        }
+        },
+        'setupPlotter'
     );
     transferFunction(
         worker,
@@ -321,7 +282,6 @@ function transferStreamAPI(worker:WorkerInfo) {
     transferFunction(
         worker,
         function decode(data:any) {
-            console.log(globalThis.decoders,globalThis.decoder)
             return globalThis.decoders[globalThis.decoder](data);
         },
         'decode'
@@ -329,6 +289,7 @@ function transferStreamAPI(worker:WorkerInfo) {
     transferFunction(
         worker,
         function setActiveDecoder(decoderName) {
+            //console.log('received decoder:',decoderName)
             globalThis.decoder = decoderName;
 
             return true;
@@ -477,18 +438,22 @@ function initWorkerChart(
     plotDiv.style.width = '100%';
     plotDiv.style.height = '100%';
 
+    parentDiv.appendChild(plotDiv)
+
     const chart = document.createElement('canvas');
 
-    (chart as any).width = '100%';
-    (chart as any).height = '100%';
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    (chart as any).width = plotDiv.style.width;
+    (chart as any).height = plotDiv.style.height;
     chart.style.width = '100%';
     chart.style.height = '100%';
 
     const overlay = document.createElement('canvas');
 
     overlay.style.position = 'absolute';
-    (overlay as any).width = '100%';
-    (overlay as any).height = '100%';
+    overlay.style.zIndex = '10';
+    (overlay as any).width = plotDiv.style.width;
+    (overlay as any).height = plotDiv.style.height;
     overlay.style.width = '100%';
     overlay.style.height = '100%';
 
@@ -498,16 +463,26 @@ function initWorkerChart(
     let offscreenchart = (chart as any).transferControlToOffscreen();
     let offscreenoverlay = (overlay as any).transferControlToOffscreen();
 
+    // offscreenchart.width = (chart as any).width * devicePixelRatio;
+    // offscreenchart.height = (chart as any).height * devicePixelRatio;
+
+    // offscreenoverlay.width = (overlay as any).width * devicePixelRatio;
+    // offscreenoverlay.height = (overlay as any).height * devicePixelRatio;
+
     parentDiv.appendChild(plotDiv);
 
+    let request = worker.request({
+        route:'setupChart',
+        args:Object.assign({
+            canvas:offscreenchart,
+            overlay:offscreenoverlay
+        },settings)
+    }, [offscreenchart, offscreenoverlay]);
+
+    console.log(request)
+
     return {
-        request: worker.request({
-            route:'setupChart',
-            args:Object.assign({
-                canvas:offscreenchart,
-                overlay:offscreenoverlay
-            },settings)
-        }, [offscreenchart, offscreenoverlay]),
+        request, 
         chart,
         overlay,
         plotDiv,
@@ -535,12 +510,13 @@ function createStreamRenderPipeline() {
         streamworker,
         function decodeAndPassToChart(self, origin, data:any, chartPortId:string) {
             let decoded = self.graph.run('decode',data);
-            self.transmit(
+            //console.log('decoded', decoded)
+            if(decoded) self.graph.workers[chartPortId].send(
                 {
                     route:'updateChartData',
-                    args:decoded
-                },
-                chartPortId
+                    args:[chartPortId,decoded]
+                }//,
+                //chartPortId
             );
             return decoded;
         },
@@ -591,6 +567,55 @@ function cleanupWorkerStreamPipeline(streamworker, chartworker, plotDiv?:HTMLEle
 }
 
 //also incl https://github.com/joshbrew/BiquadFilters.js/blob/main/BiquadFilters.js
+
+// //TODO: Make a worker for each stream & visual, TO THE MAXXX, they will just run in order, too bad we can't force cores to mainline different tasks so device source streams and frontend logic don't compete
+// const decoderworker = workers.addWorker({url:gsworker}); //this will handle decoder logic//
+
+// transferStreamAPI(decoderworker);
+
+// decoderworker.request({route:'decode', args:[[1,2,3]]}).then((res)=>{console.log('decoded', res)});
+// // const chartworker = workers.addWorker({url:gsworker}); //this will visualize data for us if formats fit
+
+// decoderworker.send('test')
+
+// decoderworker.request( 
+//     {
+//         route:'setRoute', 
+//         args:[
+//             function (value:any) { //to be overwritten when we want to swap decoders
+//                 return value; //ping pong
+//             }.toString(),
+//             'decode'
+//         ]
+//     } as ServiceMessage //use service messages to communicate with disconnected service graphs
+// ).then(console.log);
+
+// // //let's load the serial library in a worker and try to run it there >_>
+// // decoderworker.request(
+// //     {
+// //         route:'receiveClass',
+// //         args:[WebSerial.toString(),'WebSerial'] 
+// //     } as ServiceMessage
+// // ).then(console.log);
+
+// // //create a callback to setup our transferred class
+// decoderworker.request(
+//     {
+//         route:'setRoute',
+//         args:[
+//             function setupSerial(self) {
+//                 globalThis.Serial = new globalThis.WebSerial() as WebSerial; 
+//                 console.log('worker: Setting up Serial', globalThis.Serial)
+
+//                 globalThis.Serial.getPorts().then(console.log)
+//                 return true;
+//             }.toString(),
+//             'setupSerial'
+//         ]
+//     } as ServiceMessage
+// ).then(console.log);
+
+// decoderworker.request({route:'setupSerial'}).then(console.log); //now make sure it is ready
 
 
 //alternatively, implement this all in a single web component
@@ -727,7 +752,7 @@ const domtree = {
                                                                     
                                                                 stream=stream;
                                                                 output:any;
-                                                                outputText:string;
+                                                                outputText:string='';
                                                                 workers={};
 
                                                                 anim:any;
@@ -820,6 +845,7 @@ const domtree = {
 
                                                                     let rssielm = self.querySelector('[id="'+this.stream.device.deviceId + 'rssi"]') as HTMLElement;
 
+                                                                    //mobile only
                                                                     let rssiFinder = () => {
                                                                         if(BLE.devices[this.stream.device.deviceId]) {
                                                                             BLE.readRssi(this.stream.device).then((rssi) => {
@@ -878,17 +904,20 @@ const domtree = {
                                                                                         this.workers[streamworkers.portId as string] = streamworkers;
 
                                                                                         BLE.subscribe(this.stream.device, s.uuid, c.uuid, (result:DataView) => {
-                                                                                            console.log('notify', result)
-                                                                                            streamworkers.streamworker.request({route:'decodeAndPassToChart', args:[result.buffer,streamworkers.portId]},[result.buffer]).then((output) => {
-                                                                                                console.log('decoded', output);
-                                                                                                this.output = output;
-                                                                                        
-                                                                                                if(outputmode.value === 'b') {
-                                                                                                    if(decoderselect.value === 'debug') this.outputText += debugmessage + ' ';
-                                                                                                    this.outputText += typeof this.output === 'string' ? `${this.output}\n` : `${JSON.stringify(this.output)}\n`
-                                                                                                }
-                                                                                                requestAnimationFrame(this.anim);
-                                                                                            })
+                                                                                            // console.log('notify', result)
+                                                                                            // const uint8 = new Uint8Array(result.buffer);
+                                                                                            // streamworkers.streamworker.request({route:'decodeAndPassToChart', args:[uint8,streamworkers.portId]},[uint8.buffer]).then((output) => {
+                                                                                            //     //console.log('decoded', output);
+                                                                                            //     if(output) {
+                                                                                            //         this.output = output;
+                                                                                            
+                                                                                            //         if(outputmode.value === 'b') {
+                                                                                            //             if(decoderselect.value === 'debug') this.outputText += debugmessage + ' ';
+                                                                                            //             this.outputText += typeof this.output === 'string' ? `${this.output}\n` : `${JSON.stringify(this.output)}\n`
+                                                                                            //         }
+                                                                                            //         requestAnimationFrame(this.anim);
+                                                                                            //     }
+                                                                                            // });
                                                                                             //this.anim();
                                                                                         });
 
@@ -1060,10 +1089,7 @@ const domtree = {
                                             className:'config'
                                         },
                                         onrender:(self)=>{
-                                            
-
                                             if(isMobile()) self.style.display = 'none';
-
                                         },
                                         children:{
                                             'serialconnect':{

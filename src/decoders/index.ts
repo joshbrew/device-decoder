@@ -7,7 +7,7 @@ import hegduinocodec from './hegduino';
 const textdecoder = new TextDecoder();
 
 export const decoders:any = {
-    'raw':(data:ArrayBuffer) => { return new Uint8Array(data); },
+    'raw':(data:any) => { if(data?.buffer) return Array.from(new Uint8Array(data)); else return data; },
     'utf8':(data:ArrayBuffer) => { return textdecoder.decode(data); },
     'console-f12':(data:ArrayBuffer) => { data = new Uint8Array(data); console.log(data); return data; },
     'debug':(data:ArrayBuffer,debugmessage:string) => { data = new Uint8Array(data); console.log(debugmessage,data); return `${debugmessage} ${data}`; },

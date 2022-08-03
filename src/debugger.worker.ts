@@ -1,7 +1,7 @@
-import { WorkerService, unsafeRoutes, proxyWorkerRoutes, workerCanvasRoutes, GPUService } from "graphscript";
+import { WorkerService, unsafeRoutes, proxyWorkerRoutes, workerCanvasRoutes, GPUService } from "../../GraphServiceRouter/index";
 import { WebSerial } from './serial/serialstream'; //extended classes need to be imported for compilation
 import { decoders } from './decoders/index';
-import {WebglLinePlotUtil} from 'webgl-plot-utils';
+import {WebglLinePlotUtil} from '../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils';
 import { bitflippin } from "./bitflippin";
 
 declare var WorkerGlobalScope;
@@ -9,8 +9,7 @@ declare var WorkerGlobalScope;
 if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
     (self as any).SERVICE = new WorkerService({
         routes:[
-            (self as any).SERVICE,
-            GPUService,
+            GPUService as any,
             proxyWorkerRoutes,
             workerCanvasRoutes,
             unsafeRoutes //allows dynamic route loading
@@ -20,16 +19,17 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
 
     globalThis.WebSerial = WebSerial;
     globalThis.decoders = decoders;
+    globalThis.decoder = 'raw';
     globalThis.bitflippin = bitflippin;
     globalThis.WebglLinePlotUtil = WebglLinePlotUtil;
 
     self.onmessage = (ev:MessageEvent) => {
-        console.log(JSON.stringify(ev.data))
         let result = ((self as any).SERVICE as WorkerService).receive(ev.data); //this will handle graph logic and can run requests for the window or messsage ports etc etc.
-        //console.log(ev.data,result)
-        //console.log(ev.data, result, (self as any).SERVICE)
+        //console.log(JSON.stringify(ev.data), JSON.stringify(result),JSON.stringify(Array.from((self as any).SERVICE.nodes.keys())))
         //console.log(result);
     }
+
+    //console.log(self.SERVICE)
     
 }
 
