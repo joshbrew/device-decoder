@@ -65,7 +65,7 @@ export const SerialOptions:any = { //default is \r\n or 0x0D,0x0A
     },
     'peanut': {
         buffering:{
-            searchBytes:new Uint8Array([240,240])
+            searchBytes:new Uint8Array([170,170])
         }
     }
 }
