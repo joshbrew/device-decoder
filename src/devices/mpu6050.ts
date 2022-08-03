@@ -25,6 +25,8 @@ export function mpu6050codec(data:any) {
         output.gy[i] = bitflippin.bytesToInt16(arr[i*12+9],arr[i*12+10]);
         output.gz[i] = bitflippin.bytesToInt16(arr[i*12+11],arr[i*12+12]);
     }
+
+    return output;
 }
 
 export const mpu6050ChartSettings = {
