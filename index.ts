@@ -454,8 +454,10 @@ function initWorkerChart(
     overlay.style.zIndex = '10';
     (overlay as any).width = parentDiv.clientWidth;
     (overlay as any).height = parentDiv.clientHeight;
-    overlay.style.width = '100%';
-    overlay.style.height = '100%';
+    overlay.style.left = parentDiv.offsetLeft + 'px';
+    overlay.style.top = parentDiv.offsetTop + 'px';
+    overlay.style.width = parentDiv.clientWidth + 'px';
+    overlay.style.height = parentDiv.clientHeight + 'px';
 
     plotDiv.appendChild(chart);
     plotDiv.appendChild(overlay);
