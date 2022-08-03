@@ -1,6 +1,6 @@
 import { WorkerService, unsafeRoutes, proxyWorkerRoutes, workerCanvasRoutes, GPUService } from "../../GraphServiceRouter/index";
 import { WebSerial } from './serial/serialstream'; //extended classes need to be imported for compilation
-import { decoders } from './decoders/index';
+import { decoders } from './devices/index';
 import {WebglLinePlotUtil} from '../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils';
 import { bitflippin } from "./bitflippin";
 

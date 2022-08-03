@@ -1,7 +1,7 @@
 
 let textdecoder = new TextDecoder();
 
-export default function hegduinocodec(value:ArrayBuffer) {
+export function hegduinocodec(value:any) {
     //hegduino format is utf8
     //Per line: timestamp, red, infrared, ratio, temperature
     let output = { //https://github.com/joshbrew/HEG_ESP32_Delobotomizer/blob/main/Firmware/MAX86141_HEG/MAX86141_HEG.h
@@ -32,4 +32,14 @@ export default function hegduinocodec(value:ArrayBuffer) {
         return output;
 
     } else return txt; //e.g. echoed commands or startup/crash messages
+}
+
+export const hegduinoChartSettings = {
+    lines:{
+        red:{nSec:10, sps:40},
+        ir:{nSec:10, sps:40},
+        ratio:{nSec:10, sps:40},
+        ambient:{nSec:10, sps:40},
+        temperature:{nSec:10, sps:40},
+    }
 }

@@ -1,6 +1,6 @@
 
 
-const codes = { //bytecode struct formats
+export const PeanutCodes = { //bytecode struct formats
     0x02: {type: 'POOR_SIGNAL',   format:'<B',                byteLength:1},
     0x90: {type: 'unfilteredHEG', format:'<i',                byteLength:4},
     0x91: {type: 'filteredHEG',   format:'<i',                byteLength:4},
@@ -16,4 +16,4 @@ const codes = { //bytecode struct formats
     0xB6: {type: 'rawdata27',     format:'<B'+'i'.repeat(26), byteLength:1+4*26}
 }
 
-const searchBytes = new Uint8Array([170,170]);
+const searchBytes = new Uint8Array([170,170]); //newlines

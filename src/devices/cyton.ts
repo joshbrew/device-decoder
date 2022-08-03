@@ -2,8 +2,10 @@
 import { bitflippin } from "../bitflippin";
 
 //8 channels x 3 bytes per channel each line, plus 6x2 bytes for the IMU. First byte is counter byte;
-export default function cytoncodec(value:ArrayBuffer) {
-    let arr = new Uint8Array(value); //convert to uint8array
+export function cytoncodec(data:any) {
+    let arr; 
+    if(!data.buffer) arr = new Uint8Array(data);
+    else arr = data;
 
     let output:any = {};
 
@@ -21,3 +23,22 @@ export default function cytoncodec(value:ArrayBuffer) {
 
     return output;
 }
+
+export const cytonChartSettings = {
+    lines:{
+        '0':{nSec:10, sps:250},
+        '1':{nSec:10, sps:250},
+        '2':{nSec:10, sps:250},
+        '3':{nSec:10, sps:250},
+        '4':{nSec:10, sps:250},
+        '5':{nSec:10, sps:250},
+        '6':{nSec:10, sps:250},
+        '7':{nSec:10, sps:250},
+        'ax':{nSec:10, sps:250},
+        'ay':{nSec:10, sps:250},
+        'az':{nSec:10, sps:250},
+        'gx':{nSec:10, sps:250},
+        'gy':{nSec:10, sps:250},
+        'gz':{nSec:10, sps:250},
+    }
+};

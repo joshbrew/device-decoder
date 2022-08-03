@@ -86,7 +86,7 @@ export class BLEClient extends bitflippin {
                         filters:[{services}],
                         optionalServices:services
                     };
-                    if(options?.namePrefix) deviceRequest.filters[0].namePrefix = options.namePrefix;
+                    if(options?.namePrefix) deviceRequest.filters.push({namePrefix:options.namePrefix})// = options.namePrefix;
                 
                     this.client.requestDevice(deviceRequest)
                         .then((device) => {

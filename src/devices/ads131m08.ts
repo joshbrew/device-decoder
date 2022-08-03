@@ -8,8 +8,10 @@
  */
 import { bitflippin } from "../bitflippin";
 
-export default function ads131m08codec(value:ArrayBuffer) {
-    let arr = new Uint8Array(value); //convert to uint8array
+export function ads131m08codec(data:any) {
+    let arr; 
+    if(!data.buffer) arr = new Uint8Array(data);
+    else arr = data;
 
     let output = {
         0:new Array(9),
@@ -35,4 +37,17 @@ export default function ads131m08codec(value:ArrayBuffer) {
     }
     
     return output;
+}
+
+export const ads131m08ChartSettings = {
+    lines:{
+        '0':{nSec:10, sps:250},
+        '1':{nSec:10, sps:250},
+        '2':{nSec:10, sps:250},
+        '3':{nSec:10, sps:250},
+        '4':{nSec:10, sps:250},
+        '5':{nSec:10, sps:250},
+        '6':{nSec:10, sps:250},
+        '7':{nSec:10, sps:250}
+    }
 }

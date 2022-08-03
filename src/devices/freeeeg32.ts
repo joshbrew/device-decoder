@@ -2,8 +2,10 @@
 import { bitflippin } from "../bitflippin";
 
 //32 channels x 3 bytes per channel each line, plus 6x2 bytes for the IMU. First byte is counter byte;
-export default function freeeeg32codec(value:ArrayBuffer) {
-    let arr = new Uint8Array(value); //convert to uint8array
+export function freeeeg32codec(data:any) {
+    let arr; 
+    if(!data.buffer) arr = new Uint8Array(data);
+    else arr = data;
 
     let output:any = {};
 
@@ -20,4 +22,19 @@ export default function freeeeg32codec(value:ArrayBuffer) {
     output['gz'] = bitflippin.bytesToInt16(arr[accIdx+10],arr[accIdx+11]);
 
     return output;
+}
+
+export const freeeeg32ChartSettings = {  //adding the rest below
+    lines:{
+        'ax':{nSec:10, sps:500},
+        'ay':{nSec:10, sps:500},
+        'az':{nSec:10, sps:500},
+        'gx':{nSec:10, sps:500},
+        'gy':{nSec:10, sps:500},
+        'gz':{nSec:10, sps:500}
+    }
+}
+
+for(let i = 0; i < 32; i++) {
+    freeeeg32ChartSettings.lines[i] = {sps:500,nSec:10};
 }
