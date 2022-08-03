@@ -146,6 +146,8 @@ const domtree = {
             height:300px;
             display:flex;
             flex-direction: column-reverse;
+            border-bottom:1px solid white;
+            border-top:1px solid white;
         }
 
         .console canvas {

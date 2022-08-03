@@ -1448,6 +1448,8 @@ ${F.join("")}}`}case"VariableDeclaration":let N=t.normalizeDeclarations(A).map(a
             height:300px;
             display:flex;
             flex-direction: column-reverse;
+            border-bottom:1px solid white;
+            border-top:1px solid white;
         }
 
         .console canvas {
