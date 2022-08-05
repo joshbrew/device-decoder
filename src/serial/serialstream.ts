@@ -118,6 +118,7 @@ export class WebSerial extends bitflippin {
     //get the readable/writable streams from the ports and set up optional transforms
     createStream = (
         options:{
+            _id?:string,
             port:SerialPort,
             frequency:number,
             ondata:(value:any)=>void, 
@@ -141,7 +142,7 @@ export class WebSerial extends bitflippin {
     ) => {
 
         let stream:any = {
-            _id:`stream${Math.floor(Math.random()*1000000000000000)}`,
+            _id:options._id ? options._id : `stream${Math.floor(Math.random()*1000000000000000)}`,
             info:options.port.getInfo(),
             running:false,
             ...options
@@ -198,12 +199,12 @@ export class WebSerial extends bitflippin {
                                         nextIndex = i;
                                         if(nextIndex >= 0) {
                                             if(!stream.buffering.locked) {
-                                                stream.ondata(stream.buffering.buffer.splice(stream.buffering.lockIdx+stream.buffering.searchBytes.length,nextIndex+stream.buffering.searchBytes.length)); 
+                                                stream.ondata(new Uint8Array(stream.buffering.buffer.splice(stream.buffering.lockIdx+stream.buffering.searchBytes.length,nextIndex+stream.buffering.searchBytes.length))); 
                                                 stream.buffering.buffer.splice(0,stream.buffering.searchBytes.length); //splice off the front pattern buffer bytes and assume every next section defined by nextIndex is a target section
                                                 stream.buffering.locked = true;
                                             }
-                                            else {
-                                                stream.ondata(stream.buffering.buffer.splice(0,nextIndex));
+                                            else if(nextIndex > 0) {
+                                                stream.ondata(new Uint8Array(stream.buffering.buffer.splice(stream.buffering.searchBytes.length,nextIndex)));
                                             }
                                             
                                         }
@@ -241,7 +242,7 @@ export class WebSerial extends bitflippin {
     closeStream(
         stream:StreamInfo,
         onclose?:(info:StreamInfo)=>void
-    ) {
+    ):Promise<boolean> {
 
         stream.running = false;
         return new Promise((res,rej) => {

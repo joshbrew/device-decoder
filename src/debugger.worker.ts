@@ -1,4 +1,4 @@
-import { WorkerService, unsafeRoutes, proxyWorkerRoutes, workerCanvasRoutes, GPUService } from 'graphscript'//"../../GraphServiceRouter/index";
+import { WorkerService, unsafeRoutes, proxyWorkerRoutes, workerCanvasRoutes, GPUService } from "../../GraphServiceRouter/index";//from 'graphscript'
 import { WebSerial } from './serial/serialstream'; //extended classes need to be imported for compilation
 import { decoders } from './devices/index';
 import { WebglLinePlotUtil } from 'webgl-plot-utils';
