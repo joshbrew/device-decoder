@@ -1,5 +1,5 @@
 
-import {WorkerService, ServiceMessage} from '../../GraphServiceRouter/index' //'graphscript'//
+import {WorkerService, ServiceMessage} from 'graphscript'////'../../GraphServiceRouter/index' //
 import { WorkerInfo } from 'graphscript';
 import {WebSerial} from './serial/serialstream'
 import gsworker from './debugger.worker'
