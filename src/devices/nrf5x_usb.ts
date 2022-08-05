@@ -12,16 +12,16 @@ export function nrf5x_usbcodec(data:any) {
     const output:any = {};
 
     if(arr[0] === 2) {
-        Object.assign(output,ads131m08codec(arr.subarray(1)));
+        Object.assign(output,ads131m08codec(arr.subarray(2)));
     } else if (arr[0] === 3) {
-        let result = ads131m08codec(arr.subarray(1));
+        let result = ads131m08codec(arr.subarray(2));
         Object.keys(result).forEach((key,i) => {
             output[i+8] = result[key];
         })
     } else if (arr[0] === 4) {
-        Object.assign(output,mpu6050codec(arr.subarray(1)));
+        Object.assign(output,mpu6050codec(arr.subarray(2)));
     } else if (arr[0] === 5) {
-        Object.assign(output,max3010xcodec(arr.subarray(1)));
+        Object.assign(output,max3010xcodec(arr.subarray(2)));
     } else {
         Object.assign(output,ads131m08codec(arr));
     }
