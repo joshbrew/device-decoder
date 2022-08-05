@@ -19,5 +19,5 @@ TODO:
 
 Features [graphscript](https://github.com/brainsatplay/graphscript) to script the site efficiently.
 
-![d](./debugger_.png)
+![d](./debugger__.png)
 
