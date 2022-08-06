@@ -357,7 +357,7 @@ const domtree = {
 
                                                                                         decoderselect.addEventListener('change',(ev)=> {
                                                                                             streamworkers.streamworker.send({route:'setActiveDecoder', args:decoderselect.value});
-                                                                                            streamworkers.chartworker.send({route:'reinitPlot', args:[initialChart._id,chartSettings[decoderselect.value]]});
+                                                                                            streamworkers.chartworker.send({route:'resetChart', args:[initialChart._id,chartSettings[decoderselect.value]]});
                                                                                         })
 
                                                                                         let chartDeets = initWorkerChart(
@@ -859,7 +859,7 @@ const domtree = {
                                                                         (self.querySelector('[id="'+id+'decoder"]') as HTMLInputElement).onchange = (ev) => {
                                                                             this.decoder = (self.querySelector('[id="'+id+'decoder"]') as HTMLInputElement).value;
                                                                             workers.streamworker.post('setActiveDecoder', this.decoder);
-                                                                            workers.chartworker.post('reinitPlot', [initialChart._id,chartSettings[decoderselect.value]]);
+                                                                            workers.chartworker.post('resetChart', [initialChart._id,chartSettings[decoderselect.value]]);
                                                                         }
                                                                         
                                                                     //});
