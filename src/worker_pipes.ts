@@ -2,11 +2,12 @@
 import {WorkerService, ServiceMessage} from 'graphscript'////'../../GraphServiceRouter/index' //
 import { WorkerInfo } from 'graphscript';
 import {WebSerial} from './serial/serialstream'
+import {BiquadChannelFilterer} from './BiquadFilters'
 import gsworker from './debugger.worker'
 
 export const workers = new WorkerService(); 
 
-import { WebglLinePlotUtil, WebglLinePlotProps, WebglLinePlotInfo, WebglLineProps } from 'webgl-plot-utils'//'../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils'//'webgl-plot-utils';
+import { WebglLinePlotUtil, WebglLinePlotProps, WebglLinePlotInfo, WebglLineProps } from '../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils'//'webgl-plot-utils';
 
 
 
@@ -49,13 +50,14 @@ export const updateChartData = (
             autoscale?:boolean,
             interpolate?:boolean
         }
-    }|number|(number|number[])[]|string, 
+    }, 
     draw:boolean=true
 ) => {
-    let parsed = globalThis.WebglLinePlotUtil.formatDataForCharts(lines);
-    if(typeof parsed === 'object')
+    //let parsed = globalThis.WebglLinePlotUtil.formatDataForCharts(lines);
+    if(typeof lines === 'object')
     {    
-        globalThis.plotter.update(plot,parsed,draw);
+        //console.log(parsed);
+        globalThis.plotter.update(plot,lines,draw);
         return true;
     } return false;
 }
@@ -134,6 +136,23 @@ export function transferStreamAPI(worker:WorkerInfo) {
         },
         'setActiveDecoder'
     );
+    transferFunction(
+        worker,
+        function setFilters(
+            filters:{
+                [key:string]:{
+                    sps:number,
+                    options?:any
+                }
+            }
+        ) {
+            if(!globalThis.filters) globalThis.filters = {};
+            for(const key in filters) {
+                globalThis.filters[key] = new BiquadChannelFilterer(filters[key].sps,filters[key].options); 
+            }
+            return true;
+        }
+    )
     transferFunction(
         worker, 
         function setupSerial() {
@@ -354,13 +373,34 @@ export function createStreamRenderPipeline(dedicatedSerialWorker=false) {
         streamworker,
         function decodeAndPassToChart(self, origin, data:any, chartPortId:string) {
             let decoded = self.graph.run('decode',data);
-            if(decoded) self.graph.workers[chartPortId].send(
-                {
-                    route:'updateChartData',
-                    args:[chartPortId,decoded]
-                }//,
-                //chartPortId
-            );
+            if(decoded) {
+                let parsed = globalThis.WebglLinePlotUtil.formatDataForCharts(decoded);
+            
+                if(parsed) {
+                    if(globalThis.filtering) {
+                        for(const prop in parsed) {
+                            if(globalThis.filters[prop]) { //apply biquad filters
+                                let filter = globalThis.filters[prop] as BiquadChannelFilterer;
+                                if(Array.isArray(parsed[prop])) {
+                                    parsed[prop] = parsed[prop].map((v:number) => filter.apply(v));
+                                } else if (parsed[prop]?.values) {
+                                    parsed[prop].values = parsed[prop].values.map((v:number) => filter.apply(v));
+                                }
+                            }
+                        }
+                    }
+
+                    console.log('parsed', parsed);
+            
+                    self.graph.workers[chartPortId].send(
+                        {
+                            route:'updateChartData',
+                            args:[chartPortId,parsed]
+                        }//,
+                        //chartPortId
+                    );
+                }
+            }
             //console.log(decoded, self.graph)
             return decoded;
         },

@@ -16,7 +16,7 @@ export const decoders:any = {
     'raw':(data:any) => { if(data?.buffer) return Array.from(new Uint8Array(data)); else return data; },
     'utf8':(data:any) => { return textdecoder.decode(data); },
     'console-f12':(data:any) => { if(data?.buffer) data = Array.from(new Uint8Array(data)); console.log(data); return data; },
-    'debug':(data:any,debugmessage:string) => { if(data?.buffer) data = Array.from(new Uint8Array(data)); console.log(debugmessage,data); return `${debugmessage} ${data}`; },
+    'debug':(data:any,debugmessage:string) => { if(data?.buffer) data = Array.from(new Uint8Array(data)); console.log(debugmessage,data); return data; },
     'ads131m08':ads131m08codec,
     'max3010x':max3010xcodec,
     'mpu6050':mpu6050codec,

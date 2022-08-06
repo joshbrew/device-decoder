@@ -763,18 +763,20 @@ const domtree = {
 
                                                                     workers.streamworker.subscribe('decode', (data:any) => {
                                                                         this.output = data;
-                                                                        this.readRate = 1/(0.001*(now - this.lastRead)); //reads per second.
-                                                                        this.lastRead = now;
+                                                                        if(data) {
+                                                                            this.readRate = 1/(0.001*(now - this.lastRead)); //reads per second.
+                                                                            this.lastRead = now;
 
-                                                                        if(outputmode.value === 'b') {
-                                                                            if(decoderselect.value === 'debug') this.outputText += debugmessage + ' ';
-                                                                            this.outputText += typeof this.output === 'string' ? `${this.output}\n` : `${JSON.stringify(this.output)}\n`
+                                                                            if(outputmode.value === 'b') {
+                                                                                if(decoderselect.value === 'debug') this.outputText += debugmessage + ' ';
+                                                                                this.outputText += typeof this.output === 'string' ? `${this.output}\n` : `${JSON.stringify(this.output)}\n`
+                                                                            }
+
+                                                                            if(this.anim) requestAnimationFrame(this.anim); //throttles animations to refresh rate
+                                                                            //if(this.anim) this.anim();
+                                                                            //roughly...
+                                                                            //decoderworker.request({route:'decode',args:data},[data]).then((value) => {document.getElementById('console').innerText = `${value}`;} )
                                                                         }
-
-                                                                        if(this.anim) requestAnimationFrame(this.anim); //throttles animations to refresh rate
-                                                                        //if(this.anim) this.anim();
-                                                                        //roughly...
-                                                                        //decoderworker.request({route:'decode',args:data},[data]).then((value) => {document.getElementById('console').innerText = `${value}`;} )
                                                                     });
 
                                                                     
