@@ -55,7 +55,7 @@ export const cognixionONEChartSettings:Partial<WebglLinePlotProps> = {
 
 
 export const cognixionONEFilterSettings:{[key:string]:FilterSettings} = {
-    '0':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
+    '0':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45}, //scalar?
     '1':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
     '2':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
     '3':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
