@@ -391,6 +391,8 @@ export function initWorkerChart(
                             nSec:parseFloat(nSec.value) ? parseFloat(nSec.value) : 10
                         };
                     }
+                    chartsettings.lines = linesettings;
+                    chartworker.run('reinitPlot', [settings._id,chartsettings]);
                 }
             });
         });
@@ -529,17 +531,17 @@ export function setSignalControls(
 
                 let setting = {
                     [prop]:{
-                        sps:sps.value ? parseFloat(sps.value) : 100,
+                        sps: parseFloat(sps.value) ? parseFloat(sps.value) : 100,
                         useScaling:useScaling.checked,
-                        scalar:scalar.value ? parseFloat(scalar.value) : 1,
+                        scalar: parseFloat(scalar.value) ? parseFloat(scalar.value) : 1,
                         useNotch50:useNotch50.checked,
                         useNotch60:useNotch60.checked,
                         useDCBlock:useDCBlock.checked,
                         useLowpass:useLowpass.checked,
-                        lowpassHz: lowpassHz.value ? parseFloat(lowpassHz.value) : 100,
+                        lowpassHz:  parseFloat(lowpassHz.value) ? parseFloat(lowpassHz.value) : 100,
                         useBandpass: useBandpass.checked,
-                        bandpassLower: bandpassLower.value ? parseFloat(bandpassLower.value) : 3,
-                        bandpassUpper: bandpassUpper.value ? parseFloat(bandpassUpper.value) : 45
+                        bandpassLower:  parseFloat(bandpassLower.value) ? parseFloat(bandpassLower.value) : 3,
+                        bandpassUpper:  parseFloat(bandpassUpper.value) ? parseFloat(bandpassUpper.value) : 45
                     } as FilterSettings
                 }
 
