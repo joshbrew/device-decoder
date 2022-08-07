@@ -625,6 +625,8 @@ export function createStreamRenderPipeline(dedicatedSerialWorker=false) {
                             //chartPortId
                         );
                     }
+
+                    return parsed;
                 }
             }
             //console.log(decoded, self.graph)
