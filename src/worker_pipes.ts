@@ -378,12 +378,19 @@ export function initWorkerChart(
     overlay.onmouseover = () => {
         chartworker.run('getChartSettings', settings._id).then((chartsettings:Partial<WebglLinePlotProps>) => {
             streamworker.run('getFilterSettings').then((filters) => {
-                console.log(filters);
+                //console.log(filters);
                 controls.style.display = '';
                 setSignalControls(settings._id, chartsettings, filters, streamworker);
+                document.getElementById(settings._id+'window').oninput = (ev) => {
+                    for(const line in chartsettings.lines) {
+                        let nSec = document.getElementById(settings._id+line+'nSec') as HTMLInputElement;
+                        nSec.value = (ev.target as HTMLInputElement).value;
+                    }
+                }
+
                 document.getElementById(settings._id + 'setchartsettings').onclick = () => {
                     let linesettings = {};
-                    for(const line in chartsettings) {
+                    for(const line in chartsettings.lines) {
                         let sps = document.getElementById(settings._id+line+'sps') as HTMLInputElement;
                         let nSec = document.getElementById(settings._id+line+'nSec') as HTMLInputElement;
                         linesettings[line] = { 
@@ -392,7 +399,8 @@ export function initWorkerChart(
                         };
                     }
                     chartsettings.lines = linesettings;
-                    chartworker.run('reinitPlot', [settings._id,chartsettings]);
+                    console.log(linesettings);
+                    chartworker.run('resetChart', [settings._id,chartsettings]);
                 }
             });
         });
