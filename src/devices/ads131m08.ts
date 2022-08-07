@@ -54,14 +54,15 @@ export const ads131m08ChartSettings:Partial<WebglLinePlotProps> = {
     }
 }
 
+let defaultsetting = {sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45, useScaling:true, scalar:1.2*32/(Math.pow(2,24)-1)};
 
 export const ads131m08FilterSettings:{[key:string]:FilterSettings} = {
-    '0':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '1':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '2':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '3':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '4':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '5':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '6':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '7':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45}
+    '0':JSON.parse(JSON.stringify(defaultsetting)),
+    '1':JSON.parse(JSON.stringify(defaultsetting)),
+    '2':JSON.parse(JSON.stringify(defaultsetting)),
+    '3':JSON.parse(JSON.stringify(defaultsetting)),
+    '4':JSON.parse(JSON.stringify(defaultsetting)),
+    '5':JSON.parse(JSON.stringify(defaultsetting)),
+    '6':JSON.parse(JSON.stringify(defaultsetting)),
+    '7':JSON.parse(JSON.stringify(defaultsetting))
 }

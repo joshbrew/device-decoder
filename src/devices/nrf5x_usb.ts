@@ -40,21 +40,23 @@ export const nrf5x_usbChartSettings:Partial<WebglLinePlotProps> = {
 }
 
 
+let defaultsetting = {sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45, scalar:1.2*32/(Math.pow(2,24)-1)};
+
 export const nrf5x_usbFilterSettings:{[key:string]:FilterSettings} = {
-    '0':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '1':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '2':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '3':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '4':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '5':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '6':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '7':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '8':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '9':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '10':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '11':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '12':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '13':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '14':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '15':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45}
+    '0':JSON.parse(JSON.stringify(defaultsetting)),
+    '1':JSON.parse(JSON.stringify(defaultsetting)),
+    '2':JSON.parse(JSON.stringify(defaultsetting)),
+    '3':JSON.parse(JSON.stringify(defaultsetting)),
+    '4':JSON.parse(JSON.stringify(defaultsetting)),
+    '5':JSON.parse(JSON.stringify(defaultsetting)),
+    '6':JSON.parse(JSON.stringify(defaultsetting)),
+    '7':JSON.parse(JSON.stringify(defaultsetting)),
+    '8':JSON.parse(JSON.stringify(defaultsetting)),
+    '9':JSON.parse(JSON.stringify(defaultsetting)),
+    '10':JSON.parse(JSON.stringify(defaultsetting)),
+    '11':JSON.parse(JSON.stringify(defaultsetting)),
+    '12':JSON.parse(JSON.stringify(defaultsetting)),
+    '13':JSON.parse(JSON.stringify(defaultsetting)),
+    '14':JSON.parse(JSON.stringify(defaultsetting)),
+    '15':JSON.parse(JSON.stringify(defaultsetting))
 }
