@@ -1,34 +1,33 @@
+import {bitflippin} from '../bitflippin'
+import { WebglLinePlotProps } from 'webgl-plot-utils';
+import { FilterSettings } from '../BiquadFilters';
 
-/**
- * 
- * ads131m08 BLE packet output for our board:
- * [0,1,2],[3,4,5],[6,7,8],[9,10,11],[12,13,14],[15,16,17],[19,19,20],[21,22,23], [24],  [25,26,27],... * 9 samples per packet, then \r\n
- *                                                             first 8 channels,  ctr,   next channel set
- * 
- */
-import { WebglLinePlotProps } from "webgl-plot-utils";
-import { FilterSettings } from "../BiquadFilters";
-import { bitflippin } from "../bitflippin";
+//BLE mode CNX_EEG_raw_data_struct packet structure: [ctr, [0,1,2],[3,4,5],[6,7,8],[9,10,11],[12,13,14],[15,16,17],[18,19,20],[21,22,23], 0x00], up to 7 per BLE packet but variable. 
+// Less channels pack less bytes inbetween rather than setting zeros which is kinda annoying and creates more work than necessary on the frontend, and that is not even touching the rest of the settings on this thing.
+//this codec assumes all 8 ADS1299 channels are running on the default settings. 
 
-export function ads131m08codec(data:any) {
+//For the USB default stream, use the cyton codec
+
+export function cognixionONE_EEG_codec(data:any) {
     let arr; 
     if(!data.buffer) arr = new Uint8Array(data);
     else arr = data;
 
-    let output = {
-        0:new Array(9),
-        1:new Array(9),
-        2:new Array(9),
-        3:new Array(9),
-        4:new Array(9),
-        5:new Array(9),
-        6:new Array(9),
-        7:new Array(9)
+    let output = { //up to 7 samples
+        0:new Array(),
+        1:new Array(),
+        2:new Array(),
+        3:new Array(),
+        4:new Array(),
+        5:new Array(),
+        6:new Array(),
+        7:new Array()
     };
 
-    for(let i = 0; i < 9; i++) { //hard coded packet iteration, 9 sample sets x 8 channels per packet 
-        let j = i * 25; //every 25th byte is a counter so skip those
-        output[0][i] = bitflippin.bytesToUInt24(arr[j],arr[j+1],arr[j+2]);
+    for(let i = 0; i < 7; i++) { //hard coded packet iteration, 9 sample sets x 8 channels per packet 
+        let j = i * 26 + 1; //every 0th byte is a counter and every 26th byte is 0x00 so skip those
+        if(!arr[j+23]) break;
+        output[0][i] = bitflippin.bytesToUInt24(arr[j],arr[j+1],arr[j+2]); //signed or unsigned? assuming unsigned
         output[1][i] = bitflippin.bytesToUInt24(arr[j+3],arr[j+4],arr[j+5]);
         output[2][i] = bitflippin.bytesToUInt24(arr[j+6],arr[j+7],arr[j+8]);
         output[3][i] = bitflippin.bytesToUInt24(arr[j+9],arr[j+10],arr[j+11]);
@@ -41,7 +40,7 @@ export function ads131m08codec(data:any) {
     return output;
 }
 
-export const ads131m08ChartSettings:Partial<WebglLinePlotProps> = {
+export const cognixionONEChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
         '0':{nSec:10, sps:250},
         '1':{nSec:10, sps:250},
@@ -55,7 +54,7 @@ export const ads131m08ChartSettings:Partial<WebglLinePlotProps> = {
 }
 
 
-export const ads131m08FilterSettings:{[key:string]:FilterSettings} = {
+export const cognixionONEFilterSettings:{[key:string]:FilterSettings} = {
     '0':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
     '1':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
     '2':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},

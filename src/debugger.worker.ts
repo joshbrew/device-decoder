@@ -3,6 +3,7 @@ import { WebSerial } from './serial/serialstream'; //extended classes need to be
 import { decoders } from './devices/index';
 import { WebglLinePlotUtil } from '../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils'//'webgl-plot-utils';
 import { bitflippin } from "./bitflippin";
+import { BiquadChannelFilterer } from './BiquadFilters';
 
 declare var WorkerGlobalScope;
 
@@ -22,9 +23,10 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
     globalThis.decoder = 'raw';
     globalThis.bitflippin = bitflippin;
     globalThis.WebglLinePlotUtil = WebglLinePlotUtil;
-    globalThis.charting = true;
+    globalThis.runningAnim = true;
     globalThis.filtering = true;
     globalThis.filters = {};
+    globalThis.BiquadChannelFilterer = BiquadChannelFilterer;
     //console.log(self.SERVICE)
     
 }

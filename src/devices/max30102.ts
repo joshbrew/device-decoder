@@ -1,3 +1,4 @@
+import { WebglLinePlotProps } from "webgl-plot-utils";
 import { bitflippin } from "../bitflippin";
 
 
@@ -15,8 +16,8 @@ export function max3010xcodec(data:any) {
 
     let i=0;
     while(i < 32) {
-        output['red'][i] = bitflippin.bytesToInt24(arr[i*6+1],arr[i*6+2],arr[i*6+3]);
-        output['ir'][i] = bitflippin.bytesToInt24(arr[i*6+4],arr[i*6+5],arr[i*6+6]);
+        output['red'][i] = bitflippin.bytesToUInt24(arr[i*6+1],arr[i*6+2],arr[i*6+3]);
+        output['ir'][i] = bitflippin.bytesToUInt24(arr[i*6+4],arr[i*6+5],arr[i*6+6]);
         i+=6;
     }
 
@@ -25,7 +26,7 @@ export function max3010xcodec(data:any) {
     return output;
 }
 
-export const max3010xChartSettings = {
+export const max3010xChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
         red:{nSec:10, sps:100},
         ir:{nSec:10, sps:100},

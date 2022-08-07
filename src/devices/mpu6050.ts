@@ -1,3 +1,4 @@
+import { WebglLinePlotProps } from "webgl-plot-utils";
 import { bitflippin } from "../bitflippin";
 
 
@@ -29,7 +30,7 @@ export function mpu6050codec(data:any) {
     return output;
 }
 
-export const mpu6050ChartSettings = {
+export const mpu6050ChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
         'ax':{nSec:10, sps:100},
         'ay':{nSec:10, sps:100},

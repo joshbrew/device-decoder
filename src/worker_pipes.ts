@@ -2,7 +2,7 @@
 import {WorkerService, ServiceMessage} from 'graphscript'////'../../GraphServiceRouter/index' //
 import { WorkerInfo } from 'graphscript';
 import {WebSerial} from './serial/serialstream'
-import {BiquadChannelFilterer} from './BiquadFilters'
+import {BiquadChannelFilterer, FilterSettings} from './BiquadFilters'
 import gsworker from './debugger.worker'
 
 export const workers = new WorkerService(); 
@@ -106,6 +106,12 @@ export function transferChartCommands(worker:WorkerInfo) {
         clearChart,
         'clearChart'
     );
+    transferFunction(
+        worker,
+        function getChartSettings(plotId) {
+            return globalThis.plotter.getChartSettings(plotId);
+        }
+    )
 }
 //onclick we will add worker, transfer the api, then call all of the functions in the correct order, passing available arguments
 export function transferStreamAPI(worker:WorkerInfo) {
@@ -138,20 +144,55 @@ export function transferStreamAPI(worker:WorkerInfo) {
     );
     transferFunction(
         worker,
+        function toggleAnim() {
+            globalThis.runningAnim = !globalThis.runningAnim;
+
+            return globalThis.runningAnim; //pass along to the animation message port?
+        },
+        'toggleAnim'
+    );
+    transferFunction(
+        worker,
         function setFilters(
             filters:{
-                [key:string]:{
-                    sps:number,
-                    options?:any
-                }
-            }
+                [key:string]:FilterSettings
+            },
+            clearFilters=false //clear any other filters not being overwritten
         ) {
-            if(!globalThis.filters) globalThis.filters = {};
+            if(!globalThis.filters || clearFilters) globalThis.filters = {};
             for(const key in filters) {
-                globalThis.filters[key] = new BiquadChannelFilterer(filters[key].sps,filters[key].options); 
+                globalThis.filters[key] = new BiquadChannelFilterer(filters[key]); 
             }
             return true;
-        }
+        },
+        'setFilters'
+    );
+    transferFunction(
+        worker,
+        function getFilterSettings() {
+            if(globalThis.filters) {
+                let filters = {};
+                for(const key in globalThis.filters) {
+                    filters[key] = {
+                        sps:globalThis.filters[key].sps,
+                        useScaling:globalThis.filters[key].useScaling,
+                        scalar:globalThis.filters[key].scalar,
+                        useNotch50:globalThis.filters[key].useNotch50,
+                        useNotch60:globalThis.filters[key].useNotch60,
+                        useDCBlock:globalThis.filters[key].useDCBlock,
+                        useLowpass:globalThis.filters[key].useLowpass,
+                        lowpassHz: globalThis.filters[key].lowpassHz,
+                        useBandpass: globalThis.filters[key].useBandpass,
+                        bandpassLower: globalThis.filters[key].bandpassLower,
+                        bandpassUpper: globalThis.filters[key].bandpassUpper
+                    }
+                }
+                return filters;
+            }
+
+            return undefined;
+        },
+        'getFilterSettings'
     )
     transferFunction(
         worker, 
@@ -274,11 +315,16 @@ export function transferStreamAPI(worker:WorkerInfo) {
 
 //create the necessary canvases and transfer to the worker, run the setup routines. etc
 export function initWorkerChart(
-    worker:WorkerInfo, 
+    chartworker:WorkerInfo, 
     settings:Partial<WebglLinePlotProps>, //default graph one line
-    parentDiv:string|HTMLElement
+    parentDiv:string|HTMLElement,
+    streamworker?:WorkerInfo //for setting filers on outputs
 ) {
-    transferChartCommands(worker);
+    transferChartCommands(chartworker);
+
+    if(!settings._id) {
+        settings._id = `chart${Math.floor(Math.random()*1000000000000000)}`;
+    }
 
     if(typeof parentDiv === 'string') parentDiv = document.getElementById(parentDiv) as HTMLElement;
     if(!parentDiv) parentDiv = document.body;
@@ -296,19 +342,65 @@ export function initWorkerChart(
     (chart as any).height = parentDiv.clientHeight ? parentDiv.clientHeight : 450;
     chart.style.width = '100%';
     chart.style.height = '100%';
+    chart.id = settings._id + 'chartcanvas';
 
     const overlay = document.createElement('canvas');
 
     (overlay as any).width = parentDiv.clientWidth ? parentDiv.clientWidth : window.innerWidth;
     (overlay as any).height = parentDiv.clientHeight ? parentDiv.clientHeight : 450;
-    overlay.style.left = parentDiv.offsetLeft + 'px';
-    overlay.style.top = parentDiv.offsetTop + 'px';
     overlay.style.width = (parentDiv.clientWidth ? parentDiv.clientWidth : window.innerWidth) + 'px';
     overlay.style.height = (parentDiv.clientHeight ? parentDiv.clientHeight : 450) + 'px';
     overlay.style.transform = `translateY(-${overlay.height}px)`;
+    overlay.id = settings._id + 'chartoverlay'
+
+    const controls = document.createElement('div');
+    controls.id = settings._id + 'controls';
+    controls.innerHTML = `
+        <div>
+            Chart Controls:<br>
+            Time Window (s): <input type='number' value='10' placeholder='10' id='${settings._id}window'>
+            <button id='${settings._id}setchartsettings'>Update Chart Settings</button>
+        </div>
+        <div>
+            Signal Controls:
+            <table id='${settings._id}signals'></table>
+        </div>
+    `;
+
+    
+    (controls as any).width = parentDiv.clientWidth ? parentDiv.clientWidth : window.innerWidth;
+    (controls as any).height = parentDiv.clientHeight ? parentDiv.clientHeight : 450;
+    controls.style.width = (parentDiv.clientWidth ? parentDiv.clientWidth : window.innerWidth) + 'px';
+    controls.style.height = (parentDiv.clientHeight ? parentDiv.clientHeight : 450) + 'px';
+    controls.style.transform = `translateY(-${(parentDiv.clientHeight? parentDiv.clientHeight : 450)*2}px)`;
+    controls.style.display = 'none';
+
+    overlay.onmouseover = () => {
+        chartworker.run('getChartSettings', settings._id).then((chartsettings:Partial<WebglLinePlotProps>) => {
+            streamworker.run('getFilterSettings').then((filters) => {
+                console.log(filters);
+                controls.style.display = '';
+                setSignalControls(settings._id, chartsettings, filters, streamworker);
+                document.getElementById(settings._id + 'setchartsettings').onclick = () => {
+                    let linesettings = {};
+                    for(const line in chartsettings) {
+                        let sps = document.getElementById(settings._id+line+'sps') as HTMLInputElement;
+                        let nSec = document.getElementById(settings._id+line+'nSec') as HTMLInputElement;
+                        linesettings[line] = { 
+                            sps:parseFloat(sps.value) ? parseFloat(sps.value) : 100,
+                            nSec:parseFloat(nSec.value) ? parseFloat(nSec.value) : 10
+                        };
+                    }
+                }
+            });
+        });
+    }
+
+    controls.onmouseleave = () => { controls.style.display = 'none'; }
 
     plotDiv.appendChild(chart);
     plotDiv.appendChild(overlay);
+    plotDiv.appendChild(controls);
 
     let offscreenchart = (chart as any).transferControlToOffscreen();
     let offscreenoverlay = (overlay as any).transferControlToOffscreen();
@@ -328,7 +420,7 @@ export function initWorkerChart(
     },settings);
 
 
-    let request = worker.request({
+    let request = chartworker.request({
         route:'setupChart',
         args:updated
     }, [offscreenchart, offscreenoverlay]);
@@ -339,9 +431,139 @@ export function initWorkerChart(
         request,
         chart,
         overlay,
+        controls,
         plotDiv,
         parentDiv
     };
+
+
+}
+
+export function setSignalControls(
+    plotId:string,
+    chartSettings:Partial<WebglLinePlotProps>,
+    filterSettings:FilterSettings, 
+    streamworker:WorkerInfo) {
+    let controls = document.getElementById(plotId + 'signals');
+    if(!controls) return false;
+
+    if(chartSettings.lines) {
+        let html = `
+        <tr>
+            <th>Name</th>
+            <th>SPS</th>
+            <th>Plot nSec</th>
+            <th>Scalar <input type='checkbox' id='${plotId}useScaling'></th>
+            <th>50Hz Notch <input type='checkbox' id='${plotId}useNotch50'></th>
+            <th>60Hz Notch <input type='checkbox' id='${plotId}useNotch60'></th>
+            <th>DC Block <input type='checkbox' id='${plotId}useDCBlock'></th>
+            <th>Lowpass <input type='checkbox' id='${plotId}useLowpass'></th>
+            <th>Bandpass <input type='checkbox' id='${plotId}useBandpass'></th>
+        </tr>
+        `;
+        for(const prop in chartSettings.lines) {
+            let line = chartSettings.lines[prop] as WebglLineProps
+            html += `
+            <tr>
+                <td id='${plotId}${prop}name'>${prop}</td>
+                <td><input id='${plotId}${prop}sps' type='number' step='1' value='${line.sps ? line.sps : 100}'></td>
+                <td><input id='${plotId}${prop}nSec' type='number' step='1' value='${line.nSec ? line.nSec : (line.nPoints ? Math.floor(line.nPoints/line.sps) : 10)}'></td>
+                <td><input id='${plotId}${prop}useScaling' type='checkbox' ${filterSettings[prop]?.useScaling ? 'checked' : ''}><input id='${plotId}${prop}scalar'  type='number' value='${filterSettings[prop]?.scalar ? filterSettings[prop].scalar : 1}'></td>
+                <td><input id='${plotId}${prop}useNotch50' type='checkbox' ${filterSettings[prop]?.useNotch50 ? 'checked' : ''}></td>
+                <td><input id='${plotId}${prop}useNotch60' type='checkbox' ${filterSettings[prop]?.useNotch60 ? 'checked' : ''}></td>
+                <td><input id='${plotId}${prop}useDCBlock' type='checkbox' ${filterSettings[prop]?.useDCBlock ? 'checked' : ''}></td>
+                <td><input id='${plotId}${prop}useLowpass' type='checkbox' ${filterSettings[prop]?.useLowpass ? 'checked' : ''}><input id='${plotId}${prop}lowpassHz'  type='number' ${filterSettings[prop]?.lowpassHz ? filterSettings[prop].lowpassHz : 100}>Hz</td>
+                <td><input id='${plotId}${prop}useBandpass' type='checkbox' ${filterSettings[prop]?.useBandpass ? 'checked' : ''}><input id='${plotId}${prop}bandpassLower'  type='number' ${filterSettings[prop]?.bandpassLower ? filterSettings[prop].bandpassLower : 3}>Hz to <input id='${plotId}${prop}bandpassUpper'  type='number' ${filterSettings[prop]?.bandpassUpper ? filterSettings[prop].bandpassUpper : 45}>Hz</td>
+            </tr>`
+        }
+        controls.innerHTML = html;
+
+        let usescalar = document.getElementById(plotId+'useScaling');
+        let usen50 = document.getElementById(plotId+'useNotch50');
+        let usen60 = document.getElementById(plotId+'useNotch60');
+        let usedcb = document.getElementById(plotId+'useDCBlock');
+        let uselp = document.getElementById(plotId+'useLowpass');
+        let usebp = document.getElementById(plotId+'useBandpass');
+
+        let headeronchange = (checked, idsuffix) => {
+            for(const prop in chartSettings.lines) {
+                let elm = document.getElementById(plotId+prop+idsuffix) as HTMLInputElement;
+                if(elm?.checked !== checked) elm.click(); //trigger its onchange to set reset the filter
+            }
+        }
+
+        usescalar.onchange = (ev) => {
+            headeronchange((ev.target as HTMLInputElement).checked,'useScaling')
+        }
+        usen50.onchange = (ev) => {
+            headeronchange((ev.target as HTMLInputElement).checked,'useNotch50')
+        }
+        usen60.onchange = (ev) => {
+            headeronchange((ev.target as HTMLInputElement).checked,'useNotch60')
+        }
+        usedcb.onchange = (ev) => {
+            headeronchange((ev.target as HTMLInputElement).checked,'useDCBlock')
+        }
+        uselp.onchange = (ev) => {
+            headeronchange((ev.target as HTMLInputElement).checked,'useLowpass')
+        }
+        usebp.onchange = (ev) => {
+            headeronchange((ev.target as HTMLInputElement).checked,'useBandpass')
+        }
+
+        for(const prop in chartSettings.lines) {
+            let sps = document.getElementById(plotId+prop+'sps') as HTMLInputElement;
+            let nSec = document.getElementById(plotId+prop+'nSec') as HTMLInputElement;
+            let useScaling = document.getElementById(plotId+prop+'useScaling') as HTMLInputElement;
+            let scalar = document.getElementById(plotId+prop+'scalar') as HTMLInputElement;
+            let useNotch50 = document.getElementById(plotId+prop+'useNotch50') as HTMLInputElement;
+            let useNotch60 = document.getElementById(plotId+prop+'useNotch60') as HTMLInputElement;
+            let useDCBlock = document.getElementById(plotId+prop+'useDCBlock') as HTMLInputElement;
+            let useLowpass = document.getElementById(plotId+prop+'useLowpass') as HTMLInputElement;
+            let lowpassHz = document.getElementById(plotId+prop+'lowpassHz') as HTMLInputElement;
+            let useBandpass = document.getElementById(plotId+prop+'useBandpass') as HTMLInputElement;
+            let bandpassLower = document.getElementById(plotId+prop+'bandpassLower') as HTMLInputElement;
+            let bandpassUpper = document.getElementById(plotId+prop+'bandpassUpper') as HTMLInputElement;
+
+            let filteronchange = () => {
+
+                let setting = {
+                    [prop]:{
+                        sps:sps.value ? parseFloat(sps.value) : 100,
+                        useScaling:useScaling.checked,
+                        scalar:scalar.value ? parseFloat(scalar.value) : 1,
+                        useNotch50:useNotch50.checked,
+                        useNotch60:useNotch60.checked,
+                        useDCBlock:useDCBlock.checked,
+                        useLowpass:useLowpass.checked,
+                        lowpassHz: lowpassHz.value ? parseFloat(lowpassHz.value) : 100,
+                        useBandpass: useBandpass.checked,
+                        bandpassLower: bandpassLower.value ? parseFloat(bandpassLower.value) : 3,
+                        bandpassUpper: bandpassUpper.value ? parseFloat(bandpassUpper.value) : 45
+                    } as FilterSettings
+                }
+
+                streamworker.post('setFilters', setting); //replace current filter for this line
+            }
+
+            sps.onchange = () => {
+                filteronchange();
+            }
+
+            useScaling.onchange = filteronchange;
+            useNotch50.onchange = filteronchange;
+            useNotch60.onchange = filteronchange;
+            useDCBlock.onchange = filteronchange;
+            useLowpass.onchange = filteronchange;
+            useBandpass.onchange = filteronchange;
+            lowpassHz.onchange = filteronchange;
+            scalar.onchange = filteronchange;
+            bandpassLower.onchange = filteronchange;
+            bandpassUpper.onchange = filteronchange;
+
+            nSec.onchange = sps.onchange;
+        }
+    }
 
 
 }
@@ -390,15 +612,17 @@ export function createStreamRenderPipeline(dedicatedSerialWorker=false) {
                         }
                     }
 
-                    console.log('parsed', parsed);
+                    //console.log('parsed', parsed);
             
-                    self.graph.workers[chartPortId].send(
-                        {
-                            route:'updateChartData',
-                            args:[chartPortId,parsed]
-                        }//,
-                        //chartPortId
-                    );
+                    if(globalThis.runningAnim) {
+                        self.graph.workers[chartPortId].send(
+                            {
+                                route:'updateChartData',
+                                args:[chartPortId,parsed]
+                            }//,
+                            //chartPortId
+                        );
+                    }
                 }
             }
             //console.log(decoded, self.graph)

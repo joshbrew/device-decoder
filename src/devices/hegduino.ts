@@ -1,3 +1,4 @@
+import { WebglLinePlotProps } from "webgl-plot-utils";
 
 let textdecoder = new TextDecoder();
 
@@ -34,12 +35,12 @@ export function hegduinocodec(value:any) {
     } else return txt; //e.g. echoed commands or startup/crash messages
 }
 
-export const hegduinoChartSettings = {
+export const hegduinoChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
-        red:{nSec:10, sps:40},
-        ir:{nSec:10, sps:40},
-        ratio:{nSec:10, sps:40},
-        ambient:{nSec:10, sps:40},
-        temperature:{nSec:10, sps:40},
+        red:{nSec:60, sps:40},
+        ir:{nSec:60, sps:40},
+        ratio:{nSec:60, sps:40},
+        ambient:{nSec:60, sps:40},
+        temperature:{nSec:60, sps:40},
     }
 }

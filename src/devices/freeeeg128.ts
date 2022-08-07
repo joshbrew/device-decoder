@@ -1,3 +1,5 @@
+import { WebglLinePlotProps } from "webgl-plot-utils";
+import { FilterSettings } from "../BiquadFilters";
 import { bitflippin } from "../bitflippin";
 
 //128 channels x 3 bytes per channel each line, plus 6x2 bytes for the IMU. First byte is counter byte;
@@ -24,7 +26,7 @@ export function freeeeg128codec(data:any) {
 }
 
 
-export const freeeeg128ChartSettings = {  //adding the rest below
+export const freeeeg128ChartSettings:Partial<WebglLinePlotProps> = {  //adding the rest below
     lines:{
         'ax':{nSec:10, sps:500},
         'ay':{nSec:10, sps:500},
@@ -35,6 +37,9 @@ export const freeeeg128ChartSettings = {  //adding the rest below
     }
 }
 
+export const freeeeg128FilterSettings:{[key:string]:FilterSettings} = { }
+
 for(let i = 0; i < 128; i++) {
     freeeeg128ChartSettings.lines[i] = {sps:500,nSec:10};
+    freeeeg128FilterSettings[i] = {sps:500, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45};
 }

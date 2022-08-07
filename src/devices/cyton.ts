@@ -1,4 +1,6 @@
 
+import { WebglLinePlotProps } from "webgl-plot-utils";
+import { FilterSettings } from "../BiquadFilters";
 import { bitflippin } from "../bitflippin";
 
 //8 channels x 3 bytes per channel each line, plus 6x2 bytes for the IMU. First byte is counter byte;
@@ -10,7 +12,7 @@ export function cytoncodec(data:any) {
     let output:any = {};
 
     for(let i = 1; i < 25; i+=3) {
-        output[i] = bitflippin.bytesToInt24(arr[i],arr[i+1],arr[i+2]);
+        output[i] = bitflippin.bytesToInt24(arr[i],arr[i+1],arr[i+2]); //signed ints
     }
 
     let accIdx = 25; //8*3 + 1
@@ -24,7 +26,7 @@ export function cytoncodec(data:any) {
     return output;
 }
 
-export const cytonChartSettings = {
+export const cytonChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
         '0':{nSec:10, sps:250},
         '1':{nSec:10, sps:250},
@@ -42,3 +44,14 @@ export const cytonChartSettings = {
         'gz':{nSec:10, sps:250},
     }
 };
+
+export const cytonFilterSettings:{[key:string]:FilterSettings} = {
+    '0':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
+    '1':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
+    '2':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
+    '3':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
+    '4':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
+    '5':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
+    '6':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
+    '7':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45}
+}

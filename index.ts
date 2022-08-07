@@ -3,7 +3,7 @@ import {BLEClient, DeviceOptions} from './src/ble/ble_client'
 import {Router, DOMService, proxyWorkerRoutes, workerCanvasRoutes, DOMElement } from 'graphscript'//'../GraphServiceRouter/index'//
 import { ElementInfo, ElementProps } from 'graphscript/dist/services/dom/types/element';
 import { DOMElementProps } from 'graphscript/dist/services/dom/types/component';
-import { decoders, chartSettings, SerialOptions } from './src/devices/index'
+import { decoders, chartSettings, SerialOptions, filterPresets } from './src/devices/index'
 import { workers, cleanupWorkerStreamPipeline, createStreamRenderPipeline, initWorkerChart } from './src/worker_pipes'
 
 import './index.css'
@@ -354,16 +354,25 @@ const domtree = {
                                                                                         initialChart._id = streamworkers.chartPort;
 
                                                                                         streamworkers.streamworker.send({route:'setActiveDecoder', args:decoderselect.value});
+                                                                                        if(filterPresets[decoderselect.value]) {
+                                                                                            streamworkers.streamworker.post('setFilters', filterPresets[decoderselect.value]);
+                                                                                        }
 
                                                                                         decoderselect.addEventListener('change',(ev)=> {
-                                                                                            streamworkers.streamworker.send({route:'setActiveDecoder', args:decoderselect.value});
-                                                                                            streamworkers.chartworker.send({route:'resetChart', args:[initialChart._id,chartSettings[decoderselect.value]]});
+                                                                                            streamworkers.streamworker.post('setActiveDecoder', decoderselect.value);
+                                                                                            let settings = Object.assign({},chartSettings[decoderselect.value]);
+                                                                                            settings.width = window.innerWidth;
+                                                                                            streamworkers.chartworker.post('resetChart', [initialChart._id,settings]);
+                                                                                            if(filterPresets[decoderselect.value]) {
+                                                                                                streamworkers.streamworker.post('setFilters', filterPresets[decoderselect.value]);
+                                                                                            }
                                                                                         })
 
                                                                                         let chartDeets = initWorkerChart(
                                                                                             streamworkers.chartworker, 
                                                                                             initialChart, 
-                                                                                            this.querySelector('[id="'+this.stream.deviceId+'chart"]') as HTMLElement
+                                                                                            this.querySelector('[id="'+this.stream.deviceId+'chart"]') as HTMLElement,
+                                                                                            streamworkers.streamworker
                                                                                         );
 
                                                                                         this.workers[streamworkers.chartPort as string] = streamworkers;
@@ -599,12 +608,12 @@ const domtree = {
                 
                                                     elm.onclick = () => {
                                                         //TODO: do this on a thread instead...
-                                                        let workers = createStreamRenderPipeline(true);
+                                                        let streamworkers = createStreamRenderPipeline(true);
 
                                                         let settings = getSettings();
                                                         settings.usbVendorId = (parent.querySelector('#usbVendorId') as HTMLInputElement).value ? parseInt((parent.querySelector('#usbVendorId') as HTMLInputElement).value) : undefined;
                                                         settings.usbProductId = (parent.querySelector('#usbProductId') as HTMLInputElement).value ? parseInt((parent.querySelector('#usbProductId') as HTMLInputElement).value) : undefined
-                                                        settings.pipeTo = {_id:workers.decoderPort, route:'decodeAndPassToChart', extraArgs:[workers.chartPort]}
+                                                        settings.pipeTo = {_id:streamworkers.decoderPort, route:'decodeAndPassToChart', extraArgs:[streamworkers.chartPort]}
                                                         
                                                         Serial.requestPort(
                                                             settings.usbVendorId,
@@ -616,7 +625,7 @@ const domtree = {
 
                                                             //port.onconnect = () => {console.log('connected!', port);}
 
-                                                        workers.serialworker.run('openPort', settings).then(
+                                                        streamworkers.serialworker.run('openPort', settings).then(
                                                             (result: { _id:string, info:SerialPortInfo }) => {   
                                                         //     });
 
@@ -751,17 +760,18 @@ const domtree = {
                                                                         //subscribe to the worker output
                                                                     let now = performance.now();
                                                                     let initialChart = chartSettings[decoderselect.value];
-                                                                    initialChart._id = workers.chartPort;
+                                                                    initialChart._id = streamworkers.chartPort;
 
-                                                                    workers.streamworker.send({route:'setActiveDecoder', args:decoderselect.value});
+                                                                    streamworkers.streamworker.send({route:'setActiveDecoder', args:decoderselect.value});
 
                                                                     let chartDeets = initWorkerChart(
-                                                                        workers.chartworker, 
+                                                                        streamworkers.chartworker, 
                                                                         initialChart, 
-                                                                        this.querySelector('[id="'+id+'chart"]') as HTMLElement
+                                                                        this.querySelector('[id="'+id+'chart"]') as HTMLElement,
+                                                                        streamworkers.streamworker
                                                                     );
 
-                                                                    workers.streamworker.subscribe('decode', (data:any) => {
+                                                                    streamworkers.streamworker.subscribe('decode', (data:any) => {
                                                                         this.output = data;
                                                                         if(data) {
                                                                             this.readRate = 1/(0.001*(now - this.lastRead)); //reads per second.
@@ -780,90 +790,93 @@ const domtree = {
                                                                     });
 
                                                                     
-                                                                        // this.stream.ondata=(data:ArrayBuffer)=>{
-                                                                        //     //pass to console
-                                                                        //     this.output = decoders[this.decoder](data,debugmessage);
-                
-                                                                           
-                                                                        // }
-
-                                                                        (self.querySelector('[id="'+id+'send"]') as HTMLButtonElement).onclick = () => {
-                                                                            let value = (self.querySelector('[id="'+id+'input"]') as HTMLButtonElement).value;
-                                                                            if(parseInt(value)) {
-                                                                                workers.serialworker.post('writeStream', WebSerial.toDataView(parseInt(value)));
-                                                                                //Serial.writeStream(this.stream,WebSerial.toDataView(parseInt(value)));
-                                                                            } else {
-                                                                                workers.serialworker.post('writeStream', WebSerial.toDataView(value));
-                                                                                //Serial.writeStream(this.stream,WebSerial.toDataView((value)));
-                                                                            }
+                                                                    (self.querySelector('[id="'+id+'decoder"]') as HTMLInputElement).onchange = (ev) => {
+                                                                        this.decoder = (self.querySelector('[id="'+id+'decoder"]') as HTMLInputElement).value;
+                                                                        streamworkers.streamworker.post('setActiveDecoder', this.decoder);
+                                                                        let settings = Object.assign({},chartSettings[decoderselect.value]);
+                                                                        settings.width = window.innerWidth;
+                                                                        streamworkers.chartworker.post('resetChart', [initialChart._id,settings]);
+                                                                        if(filterPresets[decoderselect.value]) {
+                                                                            streamworkers.streamworker.send({route:'setFilters', args:filterPresets[decoderselect.value]});
                                                                         }
-                
-                                                                        // Serial.readStream(this.stream);
-                                                                        // console.log('reading stream', this.stream);
-
-                                                                        (self.querySelector('[id="'+id+'"]') as HTMLElement).style.display = '';
-                
-                                                                        const xconnectEvent = (ev) => {
-                                                                            workers.serialworker.run('closeStream', this.stream._id).then(() => {
-
-                                                                            //});
-                                                                            //Serial.closeStream(this.stream).then(() => {
-                                                                                (self.querySelector('[id="'+id+'xconnect"]') as HTMLButtonElement).innerHTML = 'Reconnect';
-                                                                                (self.querySelector('[id="'+id+'xconnect"]') as HTMLButtonElement).onclick = (ev) => {
-                                                                                    //Serial.closeStream(this.stream,()=>{
-                                                                                    Serial.getPorts().then((ports) => { //check previously permitted ports for auto reconnect
-                                                                                        for(let i = 0; i<ports.length; i++) {
-                                                                                            if(ports[i].getInfo().usbVendorId === result.info.usbVendorId && ports[i].getInfo().usbProductId === result.info.usbProductId) {
-                                                                                                //let settings = getSettings();
-                                                                                                settings.usbVendorId = result.info.usbVendorId;
-                                                                                                settings.usbProductId = result.info.usbProductId;
-                                                                                                workers.serialworker.post('openPort', settings);
-                                                                                                self.render();
-                                                                                                // Serial.openPort(ports[i], settings).then(()=>{
-                                                                                                //     let debugmessage = `serial port ${ports[i].getInfo().usbVendorId}:${ports[i].getInfo().usbProductId} read:`;
-                                                                                                //     this.stream = Serial.createStream({
-                                                                                                //         port:ports[i],
-                                                                                                //         frequency:1,
-                                                                                                //         ondata:(data:ArrayBuffer)=>{
-                                                                                                //             //pass to console
-                                                                                                //             this.output = decoders[this.decoder](data, debugmessage);
-                                                                                                            
-                                                                                                //             if(outputmode.value === 'b') {
-                                                                                                //                 this.outputText += `${this.output}\n`
-                                                                                                //             }
-                                                                                                            
-                                                                                                //             requestAnimationFrame(this.anim); //throttles animations to refresh rate
-                                                                                                //             //roughly...
-                                                                                                //             //decoderworker.request({route:'decode',args:data},[data]).then((value) => {document.getElementById('console').innerText = `${value}`;} )
-                                                                                                //         }
-                                                                                                //     });
-                                                                                                //     this.settings = settings;
-                                                                                                //     self.render(); //re-render, will trigger oncreate again to reset this button and update the template 
-                                                                                                // });
-                                                                                                break;
-                                                                                            }
-                                                                                        }
-                                                                                    });
-                                                                                }
-                                                                            })
-                                                                        }
-                
-                                                                        (self.querySelector('[id="'+id+'xconnect"]') as HTMLButtonElement).onclick = xconnectEvent;
-                
-                                                                        (self.querySelector('[id="'+id+'x"]') as HTMLButtonElement).onclick = () => {
-                                                                            workers.serialworker.run('closeStream', result._id).then(() => {}).catch(er=>console.error(er));
-                                                                            cleanupWorkerStreamPipeline(workers.streamworker,workers.chartworker,chartDeets.plotDiv,workers.serialworker)
-                                                                            //Serial.closeStream(this.stream,()=>{}).catch(er=>console.error(er));
-                                                                            this.delete();
-                                                                            //self.querySelector('[id="'+id+'console"]').remove(); //remove the adjacent output console
-                                                                        }
+                                                                    }
                                                                     
-                                                                        (self.querySelector('[id="'+id+'decoder"]') as HTMLInputElement).onchange = (ev) => {
-                                                                            this.decoder = (self.querySelector('[id="'+id+'decoder"]') as HTMLInputElement).value;
-                                                                            workers.streamworker.post('setActiveDecoder', this.decoder);
-                                                                            workers.chartworker.post('resetChart', [initialChart._id,chartSettings[decoderselect.value]]);
+                                                                    // this.stream.ondata=(data:ArrayBuffer)=>{
+                                                                    //     //pass to console
+                                                                    //     this.output = decoders[this.decoder](data,debugmessage);
+                                                                    // }
+
+                                                                    (self.querySelector('[id="'+id+'send"]') as HTMLButtonElement).onclick = () => {
+                                                                        let value = (self.querySelector('[id="'+id+'input"]') as HTMLButtonElement).value;
+                                                                        if(parseInt(value)) {
+                                                                            streamworkers.serialworker.post('writeStream', WebSerial.toDataView(parseInt(value)));
+                                                                            //Serial.writeStream(this.stream,WebSerial.toDataView(parseInt(value)));
+                                                                        } else {
+                                                                            streamworkers.serialworker.post('writeStream', WebSerial.toDataView(value));
+                                                                            //Serial.writeStream(this.stream,WebSerial.toDataView((value)));
                                                                         }
-                                                                        
+                                                                    }
+            
+                                                                    // Serial.readStream(this.stream);
+                                                                    // console.log('reading stream', this.stream);
+
+                                                                    (self.querySelector('[id="'+id+'"]') as HTMLElement).style.display = '';
+            
+                                                                    const xconnectEvent = (ev) => {
+                                                                        streamworkers.serialworker.run('closeStream', this.stream._id).then(() => {
+
+                                                                        //});
+                                                                        //Serial.closeStream(this.stream).then(() => {
+                                                                            (self.querySelector('[id="'+id+'xconnect"]') as HTMLButtonElement).innerHTML = 'Reconnect';
+                                                                            (self.querySelector('[id="'+id+'xconnect"]') as HTMLButtonElement).onclick = (ev) => {
+                                                                                //Serial.closeStream(this.stream,()=>{
+                                                                                Serial.getPorts().then((ports) => { //check previously permitted ports for auto reconnect
+                                                                                    for(let i = 0; i<ports.length; i++) {
+                                                                                        if(ports[i].getInfo().usbVendorId === result.info.usbVendorId && ports[i].getInfo().usbProductId === result.info.usbProductId) {
+                                                                                            //let settings = getSettings();
+                                                                                            settings.usbVendorId = result.info.usbVendorId;
+                                                                                            settings.usbProductId = result.info.usbProductId;
+                                                                                            streamworkers.serialworker.post('openPort', settings);
+                                                                                            self.render();
+                                                                                            // Serial.openPort(ports[i], settings).then(()=>{
+                                                                                            //     let debugmessage = `serial port ${ports[i].getInfo().usbVendorId}:${ports[i].getInfo().usbProductId} read:`;
+                                                                                            //     this.stream = Serial.createStream({
+                                                                                            //         port:ports[i],
+                                                                                            //         frequency:1,
+                                                                                            //         ondata:(data:ArrayBuffer)=>{
+                                                                                            //             //pass to console
+                                                                                            //             this.output = decoders[this.decoder](data, debugmessage);
+                                                                                                        
+                                                                                            //             if(outputmode.value === 'b') {
+                                                                                            //                 this.outputText += `${this.output}\n`
+                                                                                            //             }
+                                                                                                        
+                                                                                            //             requestAnimationFrame(this.anim); //throttles animations to refresh rate
+                                                                                            //             //roughly...
+                                                                                            //             //decoderworker.request({route:'decode',args:data},[data]).then((value) => {document.getElementById('console').innerText = `${value}`;} )
+                                                                                            //         }
+                                                                                            //     });
+                                                                                            //     this.settings = settings;
+                                                                                            //     self.render(); //re-render, will trigger oncreate again to reset this button and update the template 
+                                                                                            // });
+                                                                                            break;
+                                                                                        }
+                                                                                    }
+                                                                                });
+                                                                            }
+                                                                        })
+                                                                    }
+            
+                                                                    (self.querySelector('[id="'+id+'xconnect"]') as HTMLButtonElement).onclick = xconnectEvent;
+            
+                                                                    (self.querySelector('[id="'+id+'x"]') as HTMLButtonElement).onclick = () => {
+                                                                        streamworkers.serialworker.run('closeStream', result._id).then(() => {}).catch(er=>console.error(er));
+                                                                        cleanupWorkerStreamPipeline(streamworkers.streamworker,streamworkers.chartworker,chartDeets.plotDiv,streamworkers.serialworker)
+                                                                        //Serial.closeStream(this.stream,()=>{}).catch(er=>console.error(er));
+                                                                        this.delete();
+                                                                        //self.querySelector('[id="'+id+'console"]').remove(); //remove the adjacent output console
+                                                                    }
+                                                                    
                                                                     //});
                                                                 }
                 
@@ -879,7 +892,12 @@ const domtree = {
                 
                                     
                                                     }).catch(()=>{
-                                                        cleanupWorkerStreamPipeline(workers.streamworker,workers.chartworker,undefined,workers.serialworker);
+                                                        cleanupWorkerStreamPipeline(
+                                                            streamworkers.streamworker,
+                                                            streamworkers.chartworker,
+                                                            undefined,
+                                                            streamworkers.serialworker
+                                                        );
                                                     })
                                                             
                                                     }
