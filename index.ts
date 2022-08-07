@@ -771,7 +771,7 @@ const domtree = {
                                                                         streamworkers.streamworker
                                                                     );
 
-                                                                    streamworkers.streamworker.subscribe('decode', (data:any) => {
+                                                                    streamworkers.streamworker.subscribe('decodeAndPassToChart', (data:any) => {
                                                                         this.output = data;
                                                                         if(data) {
                                                                             this.readRate = 1/(0.001*(now - this.lastRead)); //reads per second.
