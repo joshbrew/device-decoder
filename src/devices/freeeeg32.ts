@@ -41,5 +41,5 @@ export const freeeeg32FilterSettings:{[key:string]:FilterSettings} = { }
 
 for(let i = 0; i < 32; i++) {
     freeeeg32ChartSettings.lines[i] = {sps:500,nSec:10};
-    freeeeg32FilterSettings[i] = {sps:500, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45, useScaling:true, scalar:2.5*8/(Math.pow(2,24)-1)}; //alternative is 250sps and 32x gain
+    freeeeg32FilterSettings[i] = {sps:500, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45, useScaling:true, scalar:2.5/(8*(Math.pow(2,24)-1))}; //alternative is 250sps and 32x gain
 }

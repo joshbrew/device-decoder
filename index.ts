@@ -235,13 +235,11 @@ const domtree = {
                                                                             <button id='${this.stream.deviceId}x'>Remove</button>
                                                                         </div>
                                                                         <div>
-                                                                            <label>
-                                                                                Output Mode: <br/>
-                                                                                <select id='${this.stream.deviceId}outputmode'>
-                                                                                    <option value='b' selected> All </option>
-                                                                                    <option value='a'> Latest </option>
-                                                                                </select>
-                                                                            </label>
+                                                                            Output Mode:
+                                                                            <select id='${this.stream.deviceId}outputmode'>
+                                                                                <option value='b' selected> All </option>
+                                                                                <option value='a'> Latest </option>
+                                                                            </select>
                                                                         </div>
                                                                         <div id='${this.stream.deviceId}connectioninfo'> RSSI: <span id='${this.stream.deviceId}rssi'></span></div>
                                                                         <button id='${this.stream.deviceId}showconsole'>Hide Console</button>
@@ -733,21 +731,17 @@ const domtree = {
                                                                             <button id='${id}x'>Remove</button>
                                                                         </div>
                                                                         <div>
-                                                                            <label>
-                                                                                Decoder:
-                                                                                <select id='${id}decoder'>
-                                                                                    ${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}
-                                                                                </select>
-                                                                            </label>
-                                                                            <label>
-                                                                                Output Mode: <br/>
-                                                                                <select id='${id}outputmode'>
-                                                                                    <option value='b' selected> All </option>
-                                                                                    <option value='a'> Latest </option>
-                                                                                </select>
-                                                                                <button id='${id}showconsole'>Hide Console</button>
-                                                                                <button id='${id}showchart'>Hide Chart</button>
-                                                                            </label>
+                                                                            Decoder:
+                                                                            <select id='${id}decoder'>
+                                                                                ${Object.keys(decoders).map((d,i) => `<option value='${d}' ${i === 0 ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('')}
+                                                                            </select>
+                                                                            Output Mode: 
+                                                                            <select id='${id}outputmode'>
+                                                                                <option value='b' selected> All </option>
+                                                                                <option value='a'> Latest </option>
+                                                                            </select><br/>
+                                                                            <button id='${id}showconsole'>Hide Console</button>
+                                                                            <button id='${id}showchart'>Hide Chart</button>
                                                                         </div>
                                                                         <div id='${id}connectioninfo'>Read Rate: <span id='${id}readrate'></span> updates/sec</div>
                                                                         <div id='${id}console' class='console'>

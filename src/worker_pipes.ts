@@ -475,20 +475,20 @@ export function setSignalControls(
         </tr>
         `;
 
-        console.log(chartSettings);
+        //console.log(chartSettings);
         for(const prop in chartSettings.lines) {
             let line = chartSettings.lines[prop] as WebglLineProps
             html += `
             <tr>
                 <td id='${plotId}${prop}name'><input id='${plotId}${prop}viewing' type='checkbox' ${(line.viewing) ? 'checked' : ''}>${prop}</td>
                 <td><input id='${plotId}${prop}sps' type='number' step='1' value='${line.sps ? line.sps : 100}'></td>
-                <td><input id='${plotId}${prop}nSec' type='number' step='1' value='${line.nSec ? line.nSec : (line.nPoints ? Math.floor(line.nPoints/line.sps) : 10)}'></td>
+                <td><input id='${plotId}${prop}nSec' type='number' step='1' value='${line.nSec ? line.nSec : (line.nPoints ? Math.floor(line.nPoints/(line.sps ? line.sps : 100)) : 10)}'></td>
                 <td><input id='${plotId}${prop}scalar'  type='number' value='${filterSettings[prop]?.scalar ? filterSettings[prop].scalar : 1}'><input id='${plotId}${prop}useScaling' type='checkbox' ${filterSettings[prop]?.useScaling ? 'checked' : ''}></td>
                 <td><input id='${plotId}${prop}useNotch50' type='checkbox' ${filterSettings[prop]?.useNotch50 ? 'checked' : ''}></td>
                 <td><input id='${plotId}${prop}useNotch60' type='checkbox' ${filterSettings[prop]?.useNotch60 ? 'checked' : ''}></td>
                 <td><input id='${plotId}${prop}useDCBlock' type='checkbox' ${filterSettings[prop]?.useDCBlock ? 'checked' : ''}></td>
-                <td><input id='${plotId}${prop}lowpassHz'  type='number' ${filterSettings[prop]?.lowpassHz ? filterSettings[prop].lowpassHz : 100}>Hz<input id='${plotId}${prop}useLowpass' type='checkbox' ${filterSettings[prop]?.useLowpass ? 'checked' : ''}></td>
-                <td><input id='${plotId}${prop}bandpassLower'  type='number' ${filterSettings[prop]?.bandpassLower ? filterSettings[prop].bandpassLower : 3}>Hz to <input id='${plotId}${prop}bandpassUpper'  type='number' ${filterSettings[prop]?.bandpassUpper ? filterSettings[prop].bandpassUpper : 45}>Hz<input id='${plotId}${prop}useBandpass' type='checkbox' ${filterSettings[prop]?.useBandpass ? 'checked' : ''}></td>
+                <td><input id='${plotId}${prop}lowpassHz'  type='number' value='${filterSettings[prop]?.lowpassHz ? filterSettings[prop].lowpassHz : 100}'>Hz<input id='${plotId}${prop}useLowpass' type='checkbox' ${filterSettings[prop]?.useLowpass ? 'checked' : ''}></td>
+                <td><input id='${plotId}${prop}bandpassLower'  type='number' value='${filterSettings[prop]?.bandpassLower ? filterSettings[prop].bandpassLower : 3}'>Hz to <input id='${plotId}${prop}bandpassUpper'  type='number' value='${filterSettings[prop]?.bandpassUpper ? filterSettings[prop].bandpassUpper : 45}'>Hz<input id='${plotId}${prop}useBandpass' type='checkbox' ${filterSettings[prop]?.useBandpass ? 'checked' : ''}></td>
             </tr>`
         }
         controls.innerHTML = html;
@@ -557,17 +557,17 @@ export function setSignalControls(
 
                 let setting = {
                     [prop]:{
-                        sps: parseFloat(sps.value) ? parseFloat(sps.value) : 100,
+                        sps: sps.value ? parseFloat(sps.value) : 100,
                         useScaling:useScaling.checked,
-                        scalar: parseFloat(scalar.value) ? parseFloat(scalar.value) : 1,
+                        scalar: scalar.value ? parseFloat(scalar.value) : 1,
                         useNotch50:useNotch50.checked,
                         useNotch60:useNotch60.checked,
                         useDCBlock:useDCBlock.checked,
                         useLowpass:useLowpass.checked,
-                        lowpassHz:  parseFloat(lowpassHz.value) ? parseFloat(lowpassHz.value) : 100,
+                        lowpassHz:  lowpassHz.value ? parseFloat(lowpassHz.value) : 100,
                         useBandpass: useBandpass.checked,
-                        bandpassLower:  parseFloat(bandpassLower.value) ? parseFloat(bandpassLower.value) : 3,
-                        bandpassUpper:  parseFloat(bandpassUpper.value) ? parseFloat(bandpassUpper.value) : 45
+                        bandpassLower:  bandpassLower.value ? parseFloat(bandpassLower.value) : 3,
+                        bandpassUpper:  bandpassUpper.value ? parseFloat(bandpassUpper.value) : 45
                     } as FilterSettings
                 }
 

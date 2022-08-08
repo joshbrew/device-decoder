@@ -28,6 +28,9 @@ body {
 
 
 
+.chartcontrols {
+    background-color:rgba(0,0,0,0.7)
+}
 
 .chartcontrols table {
     font-size:10px;
@@ -41,8 +44,8 @@ body {
     width:50px;
 }
 
-.chartcontrols tr {
-}
+/* .chartcontrols tr {
+} */
 
 .chartcontrols td {
     border-right: 1px solid white;

@@ -33,14 +33,21 @@ export function nrf5x_usbcodec(data:any) {
 
 export const nrf5x_usbChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
-        '0':{nPoints:1000}
+        '0':{nSec:10, sps:250},
+        '1':{nSec:10, sps:250},
+        '2':{nSec:10, sps:250},
+        '3':{nSec:10, sps:250},
+        '4':{nSec:10, sps:250},
+        '5':{nSec:10, sps:250},
+        '6':{nSec:10, sps:250},
+        '7':{nSec:10, sps:250}
     },
     generateNewLines:true,
     cleanGeneration:false
 }
 
 
-let defaultsetting = {sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45, useScaling:true, scalar:1.2*32/(Math.pow(2,24)-1)};
+let defaultsetting = {sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45, useScaling:true, scalar:1.2/(32*(Math.pow(2,24)-1))};
 
 export const nrf5x_usbFilterSettings:{[key:string]:FilterSettings} = {
     '0':JSON.parse(JSON.stringify(defaultsetting)),

@@ -54,7 +54,7 @@ export const ads131m08ChartSettings:Partial<WebglLinePlotProps> = {
     }
 }
 
-let defaultsetting = {sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45, useScaling:true, scalar:1.2*32/(Math.pow(2,24)-1)};
+let defaultsetting = {sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45, useScaling:true, scalar:1.2/(32*(Math.pow(2,24)-1))};
 
 export const ads131m08FilterSettings:{[key:string]:FilterSettings} = {
     '0':JSON.parse(JSON.stringify(defaultsetting)),
