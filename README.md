@@ -12,7 +12,7 @@ Live demo: https://devicedebugger.netlify.app
 
 
 #### Features: 
-- Generate consoles and charts for each connected BLE and Serial device. Decode raw data using our presets or write-in your own decoders.
+- Generate consoles and charts for each connected BLE and Serial device. Decode raw data using our presets or write-in your own decoders. Each serial device or notification stream gets dedicated workers for parsing and charting data. 
 - See BLE services based on the primary service characteristics you provide (due to security rules in browser you need to know the UUIDs)
 - Apply digital filters and scalars to charts, toggle lines being viewed, attempt to generate lines in unknown streams
 - Parse UTF8 and arduino-like debug streams e.g. 'red: 123 \t blue:345 \r\n'
