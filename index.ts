@@ -271,8 +271,8 @@ const domtree = {
                                                                     let c = self.querySelector('[id="'+this.stream.deviceId+'console"]') as HTMLElement;
                                                                     let outputmode = self.querySelector('[id="'+this.stream.deviceId+'outputmode"]') as HTMLInputElement;
 
-                                                                    let showconsole = self.querySelector('[id="'+id+'showconsole"]') as HTMLElement;
-                                                                    let showchart = self.querySelector('[id="'+id+'showchart"]') as HTMLElement;
+                                                                    let showconsole = self.querySelector('[id="'+this.stream.deviceId+'showconsole"]') as HTMLElement;
+                                                                    let showchart = self.querySelector('[id="'+this.stream.deviceId+'showchart"]') as HTMLElement;
 
                                                                     let showingconsole = true;
                                                                     let showingchart = true;
