@@ -244,6 +244,8 @@ const domtree = {
                                                                             </label>
                                                                         </div>
                                                                         <div id='${this.stream.deviceId}connectioninfo'> RSSI: <span id='${this.stream.deviceId}rssi'></span></div>
+                                                                        <button id='${this.stream.deviceId}showconsole'>Hide Console</button>
+                                                                        <button id='${this.stream.deviceId}showchart'>Hide Chart</button>
                                                                         <div 
                                                                             id='${this.stream.deviceId}console' 
                                                                             class='console'>
@@ -270,6 +272,45 @@ const domtree = {
                             
                                                                     let c = self.querySelector('[id="'+this.stream.deviceId+'console"]') as HTMLElement;
                                                                     let outputmode = self.querySelector('[id="'+this.stream.deviceId+'outputmode"]') as HTMLInputElement;
+
+                                                                    let showconsole = self.querySelector('[id="'+id+'showconsole"]') as HTMLElement;
+                                                                    let showchart = self.querySelector('[id="'+id+'showchart"]') as HTMLElement;
+
+                                                                    let showingconsole = true;
+                                                                    let showingchart = true;
+
+                                                                    showconsole.onclick = () => {
+                                                                        if(showingconsole) {
+                                                                            showconsole.innerText = 'Show Console';
+                                                                            showingconsole = false;
+                                                                            c.style.display = 'none';
+                                                                        } else {
+                                                                            showconsole.innerText = 'Hide Console';
+                                                                            showingconsole = true;
+                                                                            c.style.display = '';
+
+                                                                        }
+                                                                    }
+
+                                                                    
+                                                                    let chartdiv = self.querySelector('[id="'+id+'chart"]') as HTMLElement;
+                                                                    showchart.onclick = () => {
+                                                                        if(showingchart) {
+                                                                            showingchart = false;
+                                                                            chartdiv.style.display = 'none';
+                                                                            showchart.innerText = 'Show Chart';
+                                                                        } else {
+                                                                            showingchart = true;
+                                                                            chartdiv.style.display = '';
+                                                                            showchart.innerText = 'Hide Chart';
+
+                                                                        }
+                                                                        for(const w in this.workers) {
+                                                                            this.workers[w].streamworker.post('toggleAnim');
+                                                                        }
+                                                                        //streamworkers.streamworker.post('toggleAnim');
+                                                                    }
+
                             
                                                                     this.anim = () => { 
                                                                         if(outputmode.value === 'a') 
@@ -704,6 +745,8 @@ const domtree = {
                                                                                     <option value='b' selected> All </option>
                                                                                     <option value='a'> Latest </option>
                                                                                 </select>
+                                                                                <button id='${id}showconsole'>Hide Console</button>
+                                                                                <button id='${id}showchart'>Hide Chart</button>
                                                                             </label>
                                                                         </div>
                                                                         <div id='${id}connectioninfo'>Read Rate: <span id='${id}readrate'></span> updates/sec</div>
@@ -725,18 +768,52 @@ const domtree = {
                                                                     let outputmode = self.querySelector('[id="'+id+'outputmode"]') as HTMLInputElement;
                                                                     let decoderselect = self.querySelector('[id="'+id+'decoder"]') as HTMLInputElement;
                                                                     let readrate = self.querySelector('[id="'+id+'readrate"]') as HTMLElement;
+                                                                    let showconsole = self.querySelector('[id="'+id+'showconsole"]') as HTMLElement;
+                                                                    let showchart = self.querySelector('[id="'+id+'showchart"]') as HTMLElement;
+
+                                                                    let showingconsole = true;
+                                                                    let showingchart = true;
+
+                                                                    showconsole.onclick = () => {
+                                                                        if(showingconsole) {
+                                                                            showconsole.innerText = 'Show Console';
+                                                                            showingconsole = false;
+                                                                            c.style.display = 'none';
+                                                                        } else {
+                                                                            showconsole.innerText = 'Hide Console';
+                                                                            showingconsole = true;
+                                                                            c.style.display = '';
+
+                                                                        }
+                                                                    }
+
+                                                                    let chartdiv = self.querySelector('[id="'+id+'chart"]') as HTMLElement;
+                                                                    showchart.onclick = () => {
+                                                                        if(showingchart) {
+                                                                            showingchart = false;
+                                                                            chartdiv.style.display = 'none';
+                                                                            showchart.innerText = 'Show Chart';
+                                                                        } else {
+                                                                            showingchart = true;
+                                                                            chartdiv.style.display = '';
+                                                                            showchart.innerText = 'Hide Chart';
+
+                                                                        }
+                                                                        streamworkers.streamworker.post('toggleAnim');
+                                                                    }
 
                                                                     this.anim = () => { 
                 
                                                                         readrate.innerText = this.readRate.toFixed(6);
                             
-                                                                        if(outputmode.value === 'a') 
-                                                                            c.innerText = JSON.stringify(this.output); 
+                                                                        if(outputmode.value === 'a') {
+                                                                            if(showingconsole) c.innerText = JSON.stringify(this.output); 
+                                                                        }
                                                                         else if (outputmode.value === 'b') {
                                                                             if(this.outputText.length > 20000) { //e.g 20K char limit
                                                                                 this.outputText = this.outputText.substring(this.outputText.length - 20000, this.outputText.length); //trim output
                                                                             }
-                                                                            c.innerText = this.outputText;
+                                                                            if(showingconsole) c.innerText = this.outputText;
                                                                         }
                                                                     }
 
@@ -774,6 +851,7 @@ const domtree = {
                                                                     streamworkers.streamworker.subscribe('decodeAndPassToChart', (data:any) => {
                                                                         this.output = data;
                                                                         if(data) {
+                                                                            now = performance.now();
                                                                             this.readRate = 1/(0.001*(now - this.lastRead)); //reads per second.
                                                                             this.lastRead = now;
 

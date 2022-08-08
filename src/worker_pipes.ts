@@ -355,6 +355,7 @@ export function initWorkerChart(
 
     const controls = document.createElement('div');
     controls.id = settings._id + 'controls';
+    controls.className = 'chartcontrols'
     controls.innerHTML = `
         <div>
             Chart Controls:<br>
@@ -380,7 +381,7 @@ export function initWorkerChart(
             streamworker.run('getFilterSettings').then((filters) => {
                 //console.log(filters);
                 controls.style.display = '';
-                setSignalControls(settings._id, chartsettings, filters, streamworker);
+                setSignalControls(settings._id, chartsettings, filters, streamworker, chartworker);
                 document.getElementById(settings._id+'window').oninput = (ev) => {
                     for(const line in chartsettings.lines) {
                         let nSec = document.getElementById(settings._id+line+'nSec') as HTMLInputElement;
@@ -453,7 +454,9 @@ export function setSignalControls(
     plotId:string,
     chartSettings:Partial<WebglLinePlotProps>,
     filterSettings:FilterSettings, 
-    streamworker:WorkerInfo) {
+    streamworker:WorkerInfo,
+    chartworker:WorkerInfo
+) {
     let controls = document.getElementById(plotId + 'signals');
     if(!controls) return false;
 
@@ -471,19 +474,21 @@ export function setSignalControls(
             <th>Bandpass <input type='checkbox' id='${plotId}useBandpass'></th>
         </tr>
         `;
+
+        console.log(chartSettings);
         for(const prop in chartSettings.lines) {
             let line = chartSettings.lines[prop] as WebglLineProps
             html += `
             <tr>
-                <td id='${plotId}${prop}name'>${prop}</td>
+                <td id='${plotId}${prop}name'><input id='${plotId}${prop}viewing' type='checkbox' ${(line.viewing) ? 'checked' : ''}>${prop}</td>
                 <td><input id='${plotId}${prop}sps' type='number' step='1' value='${line.sps ? line.sps : 100}'></td>
                 <td><input id='${plotId}${prop}nSec' type='number' step='1' value='${line.nSec ? line.nSec : (line.nPoints ? Math.floor(line.nPoints/line.sps) : 10)}'></td>
-                <td><input id='${plotId}${prop}useScaling' type='checkbox' ${filterSettings[prop]?.useScaling ? 'checked' : ''}><input id='${plotId}${prop}scalar'  type='number' value='${filterSettings[prop]?.scalar ? filterSettings[prop].scalar : 1}'></td>
+                <td><input id='${plotId}${prop}scalar'  type='number' value='${filterSettings[prop]?.scalar ? filterSettings[prop].scalar : 1}'><input id='${plotId}${prop}useScaling' type='checkbox' ${filterSettings[prop]?.useScaling ? 'checked' : ''}></td>
                 <td><input id='${plotId}${prop}useNotch50' type='checkbox' ${filterSettings[prop]?.useNotch50 ? 'checked' : ''}></td>
                 <td><input id='${plotId}${prop}useNotch60' type='checkbox' ${filterSettings[prop]?.useNotch60 ? 'checked' : ''}></td>
                 <td><input id='${plotId}${prop}useDCBlock' type='checkbox' ${filterSettings[prop]?.useDCBlock ? 'checked' : ''}></td>
-                <td><input id='${plotId}${prop}useLowpass' type='checkbox' ${filterSettings[prop]?.useLowpass ? 'checked' : ''}><input id='${plotId}${prop}lowpassHz'  type='number' ${filterSettings[prop]?.lowpassHz ? filterSettings[prop].lowpassHz : 100}>Hz</td>
-                <td><input id='${plotId}${prop}useBandpass' type='checkbox' ${filterSettings[prop]?.useBandpass ? 'checked' : ''}><input id='${plotId}${prop}bandpassLower'  type='number' ${filterSettings[prop]?.bandpassLower ? filterSettings[prop].bandpassLower : 3}>Hz to <input id='${plotId}${prop}bandpassUpper'  type='number' ${filterSettings[prop]?.bandpassUpper ? filterSettings[prop].bandpassUpper : 45}>Hz</td>
+                <td><input id='${plotId}${prop}lowpassHz'  type='number' ${filterSettings[prop]?.lowpassHz ? filterSettings[prop].lowpassHz : 100}>Hz<input id='${plotId}${prop}useLowpass' type='checkbox' ${filterSettings[prop]?.useLowpass ? 'checked' : ''}></td>
+                <td><input id='${plotId}${prop}bandpassLower'  type='number' ${filterSettings[prop]?.bandpassLower ? filterSettings[prop].bandpassLower : 3}>Hz to <input id='${plotId}${prop}bandpassUpper'  type='number' ${filterSettings[prop]?.bandpassUpper ? filterSettings[prop].bandpassUpper : 45}>Hz<input id='${plotId}${prop}useBandpass' type='checkbox' ${filterSettings[prop]?.useBandpass ? 'checked' : ''}></td>
             </tr>`
         }
         controls.innerHTML = html;
@@ -522,6 +527,7 @@ export function setSignalControls(
         }
 
         for(const prop in chartSettings.lines) {
+            let viewing = document.getElementById(plotId+prop+'viewing') as HTMLInputElement;
             let sps = document.getElementById(plotId+prop+'sps') as HTMLInputElement;
             let nSec = document.getElementById(plotId+prop+'nSec') as HTMLInputElement;
             let useScaling = document.getElementById(plotId+prop+'useScaling') as HTMLInputElement;
@@ -534,6 +540,18 @@ export function setSignalControls(
             let useBandpass = document.getElementById(plotId+prop+'useBandpass') as HTMLInputElement;
             let bandpassLower = document.getElementById(plotId+prop+'bandpassLower') as HTMLInputElement;
             let bandpassUpper = document.getElementById(plotId+prop+'bandpassUpper') as HTMLInputElement;
+
+            viewing.onchange = () => {
+
+                if((!Array.isArray(chartSettings.lines[prop] as WebglLineProps))) {
+
+                    (chartSettings.lines[prop] as WebglLineProps).viewing = viewing.checked;
+                    (chartSettings as WebglLinePlotProps).generateNewLines = false; //make sure the lines don't regenerate automatically
+                    chartworker.run('resetChart', [plotId,chartSettings]);
+
+                }
+            }
+            
 
             let filteronchange = () => {
 
