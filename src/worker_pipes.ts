@@ -460,7 +460,7 @@ export function setSignalControls(
     let controls = document.getElementById(plotId + 'signals');
     if(!controls) return false;
 
-    if(chartSettings.lines) {
+    if(chartSettings?.lines) {
         let html = `
         <tr>
             <th>Name</th>
@@ -592,8 +592,6 @@ export function setSignalControls(
             nSec.onchange = sps.onchange;
         }
     }
-
-
 }
 
 
