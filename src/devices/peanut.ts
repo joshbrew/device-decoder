@@ -53,7 +53,7 @@ export function peanutcodec(data:any) {
         } else i++;
     }
 
-    console.log(result);
+    //console.log(result);
 
     return result;
 }
