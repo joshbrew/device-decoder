@@ -4,6 +4,7 @@ import {bitflippin} from '../bitflippin'
 
 // baud: 38400
 // write 'protocol 3\n'
+// use the search bytes 170,170 to find the newline after turning this mode on, in that order
 
 export const peanutStartCommand = 'protocol 3\n';
 export const peanutSearchBytes = new Uint8Array([170,170]);
