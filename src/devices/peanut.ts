@@ -5,6 +5,9 @@ import {bitflippin} from '../bitflippin'
 // baud: 38400
 // write 'protocol 3\n'
 
+export const peanutStartCommand = 'protocol 3\n';
+export const peanutSearchBytes = new Uint8Array([170,170]);
+
 export const PeanutCodes = { //bytecode struct formats
     0x02: {type: 'POOR_SIGNAL',   format:'<B',                byteLength:1},
     0x90: {type: 'unfilteredHEG', format:'<i',                byteLength:4},
@@ -39,13 +42,18 @@ export function peanutcodec(data:any) {
             else if (code === 'POOR_SIGNAL' || code === 'sampleNumber' || code === 'debug0' || code === 'debug1' || code === 'debug2' || code === 'debug3') 
                 unpacked = unpacked[0];
 
-            if(!result[PeanutCodes[data[i]].type]) {
-                result[PeanutCodes[data[i]].type] = [unpacked];
-            } else result[PeanutCodes[data[i]].type].push(unpacked);
-
+            if(!result[PeanutCodes[data[i]].type]) { 
+                if(Array.isArray(unpacked)) result[PeanutCodes[data[i]].type] = unpacked;
+                else result[PeanutCodes[data[i]].type] = [unpacked];
+            } else {
+                if(Array.isArray(unpacked)) result[PeanutCodes[data[i]].type].push(...unpacked);
+                else result[PeanutCodes[data[i]].type].push(unpacked);
+            }
             i += PeanutCodes[data[i]].byteLength+1;
         } else i++;
     }
+
+    console.log(result);
 
     return result;
 }
@@ -54,6 +62,6 @@ export const peanutChartSettings: Partial<WebglLinePlotProps> = {
     lines: {
         filteredHEG:{sps:10.101, nSec:60}
     },
-    generateNewLines:true,
+    generateNewLines:false,
     cleanGeneration:false
 }
