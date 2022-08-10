@@ -882,12 +882,8 @@ const domtree = {
 
                                                                     (self.querySelector('[id="'+id+'send"]') as HTMLButtonElement).onclick = () => {
                                                                         let value = (self.querySelector('[id="'+id+'input"]') as HTMLButtonElement).value;
-                                                                        if(parseInt(value)) {
-                                                                            streamworkers.serialworker.post('writeStream', [streamId, WebSerial.toDataView(parseInt(value))]);
-                                                                            //Serial.writeStream(this.stream,WebSerial.toDataView(parseInt(value)));
-                                                                        } else {
-                                                                            streamworkers.serialworker.post('writeStream',[streamId, WebSerial.toDataView(value)]);
-                                                                            //Serial.writeStream(this.stream,WebSerial.toDataView((value)));
+                                                                        if(value) {
+                                                                            streamworkers.serialworker.post('writeStream', [streamId, value]);
                                                                         }
                                                                     }
             
@@ -902,7 +898,7 @@ const domtree = {
 
                                                                         //});
                                                                         //Serial.closeStream(this.stream).then(() => {
-                                                                            (self.querySelector('[id="'+id+'xconnect"]') as HTMLButtonElement).innerHTML = 'Reconnect';
+                                                                            (self.querySelector('[id="'+id+'xconnect"]') as HTMLButtonElement).innerText = 'Reconnect';
                                                                             (self.querySelector('[id="'+id+'xconnect"]') as HTMLButtonElement).onclick = (ev) => {
                                                                                 //Serial.closeStream(this.stream,()=>{
                                                                                 Serial.getPorts().then((ports) => { //check previously permitted ports for auto reconnect
@@ -914,6 +910,7 @@ const domtree = {
                                                                                             streamworkers.serialworker.run('openPort', settings).then((res:{ _id:string, info:SerialPortInfo }) => {
                                                                                                 streamId = res._id;
                                                                                                 (self.querySelector('[id="'+id+'xconnect"]') as HTMLButtonElement).onclick = xconnectEvent;
+                                                                                                (self.querySelector('[id="'+id+'xconnect"]') as HTMLButtonElement).innerText = 'Disconnect';
                                                                                             });
                                                                                             // Serial.openPort(ports[i], settings).then(()=>{
                                                                                             //     let debugmessage = `serial port ${ports[i].getInfo().usbVendorId}:${ports[i].getInfo().usbProductId} read:`;

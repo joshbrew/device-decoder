@@ -286,7 +286,7 @@ export function transferStreamAPI(worker:WorkerInfo) {
         worker,
         function writeStream(self, origin, streamId, message:any) {
 
-            (globalThis.Serial as WebSerial).writeStream(globalThis.Serial.streams[streamId], message).then(console.log);
+            (globalThis.Serial as WebSerial).writeStream(globalThis.Serial.streams[streamId], message);
 
             return true;
         },

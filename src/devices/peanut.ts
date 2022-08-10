@@ -3,8 +3,7 @@ import { WebglLinePlotProps } from 'webgl-plot-utils';
 import {bitflippin} from '../bitflippin'
 
 // baud: 38400
-// bufferSize: 20
-
+// write 'protocol 3\n'
 
 export const PeanutCodes = { //bytecode struct formats
     0x02: {type: 'POOR_SIGNAL',   format:'<B',                byteLength:1},
@@ -29,7 +28,7 @@ export function peanutcodec(data:any) {
     while(i < data.length) {
         if(PeanutCodes[data[i]] && i + 1 + PeanutCodes[data[i]].byteLength <= data.length) {
             let slice = data.slice(i+1, i+1+PeanutCodes[data[i]].byteLength).buffer
-            console.log(data, i, PeanutCodes[data[i]].byteLength, PeanutCodes[data[i]].type, slice)
+            //console.log(data, i, PeanutCodes[data[i]].byteLength, PeanutCodes[data[i]].type, slice)
             let unpacked:any = bitflippin.struct(PeanutCodes[data[i]].format).unpack(
                 slice
             )
