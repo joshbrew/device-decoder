@@ -47,21 +47,34 @@ module.exports = {
 export class bitflippin {
     
     static codes = { //common codes
-        '\n':0x0A, //newline
-        '\r':0x0D, //carriage return
-        '\t':0x09, //tab
-        '\s':0x20, //space
-        '\b':0x08, //backspace
-        '\f':0x0C, //form feed
+        '\\n':0x0A, //newline
+        '\\r':0x0D, //carriage return
+        '\\t':0x09, //tab
+        '\\s':0x20, //space
+        '\\b':0x08, //backspace
+        '\\f':0x0C, //form feed
         '\\':0x5C  // backslash
     }
 
     // convert values to data views if not, with some basic encoding formats
     static toDataView(value:string|number|ArrayBufferLike|DataView|number[]) {
         if(!(value instanceof DataView)) { //dataviews just wrap arraybuffers for sending packets  
+            if(typeof value === 'string' && parseInt(value)) value = parseInt(value);
             if(typeof value === 'string') {
                 let enc = new TextEncoder();
-                value = new DataView(enc.encode(value).buffer);
+                let hascodes = {};
+                for(const code in bitflippin.codes) {
+                    while(value.indexOf(code) > -1) {
+                        let idx = value.indexOf(code);
+                        value = value.replace(code,'');
+                        hascodes[idx] = code;
+                    }
+                }
+                let encoded = Array.from(enc.encode(value));
+                for(const key in hascodes) {
+                    encoded.splice(parseInt(key),0,bitflippin.codes[hascodes[key]]);
+                }
+                value = new DataView(new Uint8Array(encoded).buffer);
             } else if (typeof value === 'number') {
                 let tmp = value;
                 if(value < 256) { //it's a single byte being written most likely, this is just a 'dumb' attempt
@@ -75,7 +88,7 @@ export class bitflippin {
                     value = new DataView(new ArrayBuffer(4));
                     value.setUint32(0,tmp);
                 }
-            } else if (value instanceof ArrayBuffer || value instanceof SharedArrayBuffer) {
+            } else if (value instanceof ArrayBuffer) {
                 value = new DataView(value); 
             } else if(Array.isArray(value)) { //assume it's an array-defined uint8 byte buffer that we need to convert
                 value = new DataView(Uint8Array.from(value).buffer);

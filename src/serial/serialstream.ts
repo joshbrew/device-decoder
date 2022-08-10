@@ -10,7 +10,7 @@ export type StreamInfo = {
     port:SerialPort,
     info:Partial<SerialPortInfo>,
     reader:ReadableStreamDefaultReader<any>,
-    writer:WritableStreamDefaultWriter<any>,
+    //writer:WritableStreamDefaultWriter<any>,
     transforms?:{
         [key:string]:{
             transform:TransformerTransformCallback<DataView, any>,
@@ -156,9 +156,9 @@ export class WebSerial extends bitflippin {
                 stream.reader = options.port.readable.getReader();
             }
         }
-        if(options.port?.writable) {
-            stream.writer = options.port.writable.getWriter();
-        }
+        // if(options.port?.writable) {
+        //     stream.writer = options.port.writable.getWriter();
+        // }
 
         this.streams[stream._id] = stream;
 
@@ -235,8 +235,10 @@ export class WebSerial extends bitflippin {
     //use this on an active stream instead of writePort
     writeStream(stream:StreamInfo|string, message:any) {
         if(typeof stream === 'string') stream = this.streams[stream];
-        if(stream.writer) {
-            return stream.writer.write(WebSerial.toDataView(message));
+        if(stream.port.writable) {
+            let writer = stream.port.writable.getWriter();
+            writer.write(WebSerial.toDataView(message));
+            writer.releaseLock();
         } return undefined;
     }
 
@@ -244,30 +246,32 @@ export class WebSerial extends bitflippin {
         stream:StreamInfo|string,
         onclose?:(info:StreamInfo)=>void
     ):Promise<boolean> {
-        if(typeof stream === 'string') stream = this.streams[stream];
+        if(typeof stream === 'string') stream = this.streams[stream] as StreamInfo;
         stream.running = false;
         
         return new Promise((res,rej) => {
             setTimeout(async ()=>{
-                if((stream as StreamInfo).port.readable) {
+                if((stream as StreamInfo).port.readable && (stream as StreamInfo).reader) {
                     try {
                         (stream as StreamInfo).reader.releaseLock()
-                        await (stream as StreamInfo).reader.cancel()
-                    } catch(er) {}
+                        try {
+                            await (stream as StreamInfo).reader.cancel() 
+                        } catch(err) {}
+                    } catch(er) {console.error(er)}
                 }
-                if((stream as StreamInfo).port.writable) {
-                    try { 
-                        (stream as StreamInfo).writer.releaseLock();
-                        await (stream as StreamInfo).writer.close()
-                    } catch(er) {}
-                }
+                // if((stream as StreamInfo).port.writable && (stream as StreamInfo).writer) {
+                //     try { 
+                //         (stream as StreamInfo).writer.releaseLock();
+                //         await (stream as StreamInfo).writer.close()
+                //     } catch(er) {}
+                // }
                 try {
                     await (stream as StreamInfo).port.close().then(()=>{if(onclose) onclose(this.streams[(stream as StreamInfo)._id])});
                 } catch(er) { rej(er); }
                 delete this.streams[(stream as StreamInfo)._id];
                 res(true);
                 },
-                (stream as StreamInfo).frequency
+                300
             );
     
         })

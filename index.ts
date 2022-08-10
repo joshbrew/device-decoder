@@ -883,6 +883,7 @@ const domtree = {
                                                                     (self.querySelector('[id="'+id+'send"]') as HTMLButtonElement).onclick = () => {
                                                                         let value = (self.querySelector('[id="'+id+'input"]') as HTMLButtonElement).value;
                                                                         if(value) {
+                                                                            console.log(value, WebSerial.toDataView(value));
                                                                             streamworkers.serialworker.post('writeStream', [streamId, value]);
                                                                         }
                                                                     }
