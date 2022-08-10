@@ -758,6 +758,8 @@ const domtree = {
                                                                     //spawn a graph based prototype hierarchy for the connection info?
                                                                     //e.g. to show the additional modularity off
                             
+                                                                    let streamId = result._id;
+
                                                                     let c = self.querySelector('[id="'+id+'console"]') as HTMLElement;
                                                                     let outputmode = self.querySelector('[id="'+id+'outputmode"]') as HTMLInputElement;
                                                                     let decoderselect = self.querySelector('[id="'+id+'decoder"]') as HTMLInputElement;
@@ -881,10 +883,10 @@ const domtree = {
                                                                     (self.querySelector('[id="'+id+'send"]') as HTMLButtonElement).onclick = () => {
                                                                         let value = (self.querySelector('[id="'+id+'input"]') as HTMLButtonElement).value;
                                                                         if(parseInt(value)) {
-                                                                            streamworkers.serialworker.post('writeStream', WebSerial.toDataView(parseInt(value)));
+                                                                            streamworkers.serialworker.post('writeStream', [streamId, WebSerial.toDataView(parseInt(value))]);
                                                                             //Serial.writeStream(this.stream,WebSerial.toDataView(parseInt(value)));
                                                                         } else {
-                                                                            streamworkers.serialworker.post('writeStream', WebSerial.toDataView(value));
+                                                                            streamworkers.serialworker.post('writeStream',[streamId, WebSerial.toDataView(value)]);
                                                                             //Serial.writeStream(this.stream,WebSerial.toDataView((value)));
                                                                         }
                                                                     }
@@ -894,8 +896,9 @@ const domtree = {
 
                                                                     (self.querySelector('[id="'+id+'"]') as HTMLElement).style.display = '';
             
+
                                                                     const xconnectEvent = (ev) => {
-                                                                        streamworkers.serialworker.run('closeStream', this.stream._id).then(() => {
+                                                                        streamworkers.serialworker.run('closeStream', streamId).then(() => {
 
                                                                         //});
                                                                         //Serial.closeStream(this.stream).then(() => {
@@ -908,8 +911,10 @@ const domtree = {
                                                                                             //let settings = getSettings();
                                                                                             settings.usbVendorId = result.info.usbVendorId;
                                                                                             settings.usbProductId = result.info.usbProductId;
-                                                                                            streamworkers.serialworker.post('openPort', settings);
-                                                                                            self.render();
+                                                                                            streamworkers.serialworker.run('openPort', settings).then((res:{ _id:string, info:SerialPortInfo }) => {
+                                                                                                streamId = res._id;
+                                                                                                (self.querySelector('[id="'+id+'xconnect"]') as HTMLButtonElement).onclick = xconnectEvent;
+                                                                                            });
                                                                                             // Serial.openPort(ports[i], settings).then(()=>{
                                                                                             //     let debugmessage = `serial port ${ports[i].getInfo().usbVendorId}:${ports[i].getInfo().usbProductId} read:`;
                                                                                             //     this.stream = Serial.createStream({
@@ -942,7 +947,7 @@ const domtree = {
                                                                     (self.querySelector('[id="'+id+'xconnect"]') as HTMLButtonElement).onclick = xconnectEvent;
             
                                                                     (self.querySelector('[id="'+id+'x"]') as HTMLButtonElement).onclick = () => {
-                                                                        streamworkers.serialworker.run('closeStream', result._id).then(() => {}).catch(er=>console.error(er));
+                                                                        streamworkers.serialworker.run('closeStream', streamId).then(() => {}).catch(er=>console.error(er));
                                                                         cleanupWorkerStreamPipeline(streamworkers.streamworker,streamworkers.chartworker,chartDeets.plotDiv,streamworkers.serialworker)
                                                                         //Serial.closeStream(this.stream,()=>{}).catch(er=>console.error(er));
                                                                         this.delete();
@@ -952,7 +957,7 @@ const domtree = {
                                                                     //});
                                                                 }
                 
-                                                            }
+                                                            } 
                 
                 
                                                             ConnectionTemplate.addElement(`${id}-info`);

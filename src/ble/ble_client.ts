@@ -165,43 +165,47 @@ export class BLEClient extends bitflippin {
         }).catch(rej)});
     }
 
-    disconnect(device:BleDevice) {
-        delete this.devices[device.deviceId];
-        return this.client.disconnect(device.deviceId);
+    disconnect(device:BleDevice|string) {
+        if(typeof device === 'object') device = device.deviceId;
+        delete this.devices[device];
+        return this.client.disconnect(device);
     }
 
     write(
-        device:BleDevice, 
+        device:BleDevice|string, 
         service: string, 
         characteristic: string, 
         value: string|number|ArrayBufferLike|DataView|number[], 
         callback?:()=>void,
         options?: TimeoutOptions
     ) {  
+        if(typeof device === 'object') device = device.deviceId;
         if(callback) {
-            return this.client.write(device.deviceId,service,characteristic,BLEClient.toDataView(value)).then(callback);
-        } else return this.client.writeWithoutResponse(device.deviceId,service,characteristic,BLEClient.toDataView(value),options);
+            return this.client.write(device,service,characteristic,BLEClient.toDataView(value)).then(callback);
+        } else return this.client.writeWithoutResponse(device,service,characteristic,BLEClient.toDataView(value),options);
     }
 
     read(
-        device:BleDevice,
+        device:BleDevice|string,
         service:string,
         characteristic:string,
         ondata?:(result:DataView)=>void,
         options?:TimeoutOptions
     ) {
-        if(ondata) return this.client.read(device.deviceId, service, characteristic, options).then(ondata);
-        else return this.client.read(device.deviceId, service, characteristic, options);
+        if(typeof device === 'object') device = device.deviceId;
+        if(ondata) return this.client.read(device, service, characteristic, options).then(ondata);
+        else return this.client.read(device, service, characteristic, options);
     }
 
     subscribe(
-        device:BleDevice, 
+        device:BleDevice|string, 
         service:string, 
         characteristic:string, 
         ondata:(result:DataView)=>void
     ) { 
+        if(typeof device === 'object') device = device.deviceId;
         return this.client.startNotifications(
-            device.deviceId,
+            device,
             service,
             characteristic,
             ondata
@@ -209,12 +213,13 @@ export class BLEClient extends bitflippin {
     }
 
     unsubscribe(
-        device:BleDevice, 
+        device:BleDevice|string, 
         service:string, 
         characteristic:string, 
     ) {
+        if(typeof device === 'object') device = device.deviceId;
         return this.client.stopNotifications(
-            device.deviceId,
+            device,
             service,
             characteristic
         );

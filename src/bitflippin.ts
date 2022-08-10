@@ -61,7 +61,7 @@ export class bitflippin {
         if(!(value instanceof DataView)) { //dataviews just wrap arraybuffers for sending packets  
             if(typeof value === 'string') {
                 let enc = new TextEncoder();
-                value = new DataView(enc.encode(value));
+                value = new DataView(enc.encode(value).buffer);
             } else if (typeof value === 'number') {
                 let tmp = value;
                 if(value < 256) { //it's a single byte being written most likely, this is just a 'dumb' attempt
@@ -78,7 +78,7 @@ export class bitflippin {
             } else if (value instanceof ArrayBuffer || value instanceof SharedArrayBuffer) {
                 value = new DataView(value); 
             } else if(Array.isArray(value)) { //assume it's an array-defined uint8 byte buffer that we need to convert
-                value = new DataView(Uint8Array.from(value));
+                value = new DataView(Uint8Array.from(value).buffer);
             }
         }
         return value;

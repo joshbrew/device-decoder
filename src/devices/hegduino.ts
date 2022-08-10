@@ -15,7 +15,7 @@ export function hegduinocodec(value:any) {
     }
 
     let txt = textdecoder.decode(value);
-    let line = txt.split(','); //serial will stream in as utf8 lines
+    let line = txt.split('|'); //serial will stream in as utf8 lines, we use | separators
     if(line.length === 3) { //android web ble mode (20 byte packet lim)
         output.timestamp = Date.now();
         output.red = parseInt(line[0]);

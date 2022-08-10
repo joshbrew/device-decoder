@@ -233,39 +233,41 @@ export class WebSerial extends bitflippin {
     }
 
     //use this on an active stream instead of writePort
-    writeStream(stream:StreamInfo, message:any) {
+    writeStream(stream:StreamInfo|string, message:any) {
+        if(typeof stream === 'string') stream = this.streams[stream];
         if(stream.writer) {
             return stream.writer.write(WebSerial.toDataView(message));
         } return undefined;
     }
 
     closeStream(
-        stream:StreamInfo,
+        stream:StreamInfo|string,
         onclose?:(info:StreamInfo)=>void
     ):Promise<boolean> {
-
+        if(typeof stream === 'string') stream = this.streams[stream];
         stream.running = false;
+        
         return new Promise((res,rej) => {
             setTimeout(async ()=>{
-                if(stream.port.readable) {
+                if((stream as StreamInfo).port.readable) {
                     try {
-                        stream.reader.releaseLock()
-                        await stream.reader.cancel()
+                        (stream as StreamInfo).reader.releaseLock()
+                        await (stream as StreamInfo).reader.cancel()
                     } catch(er) {}
                 }
-                if(stream.port.writable) {
+                if((stream as StreamInfo).port.writable) {
                     try { 
-                        stream.writer.releaseLock();
-                        await stream.writer.close()
+                        (stream as StreamInfo).writer.releaseLock();
+                        await (stream as StreamInfo).writer.close()
                     } catch(er) {}
                 }
                 try {
-                    await stream.port.close().then(()=>{if(onclose) onclose(this.streams[stream._id])});
+                    await (stream as StreamInfo).port.close().then(()=>{if(onclose) onclose(this.streams[(stream as StreamInfo)._id])});
                 } catch(er) { rej(er); }
-                delete this.streams[stream._id];
+                delete this.streams[(stream as StreamInfo)._id];
                 res(true);
                 },
-                stream.frequency
+                (stream as StreamInfo).frequency
             );
     
         })

@@ -8,8 +8,9 @@ import {hegduinocodec, hegduinoChartSettings} from './hegduino';
 import { max3010xcodec, max3010xChartSettings } from './max30102';
 import { mpu6050codec, mpu6050ChartSettings } from './mpu6050';
 import { cognixionONE_EEG_codec, cognixionONEChartSettings, cognixionONEFilterSettings } from './cognixionONE';
-//import { peanutcodec, peanutChartSettings } from './peanut';
+import { peanutcodec, peanutChartSettings } from './peanut';
 import { nrf5x_usbcodec, nrf5x_usbChartSettings, nrf5x_usbFilterSettings } from './nrf5x_usb';
+import { statechangerChartSettings, statechangercodec } from './statechanger';
 
 const textdecoder = new TextDecoder();
 
@@ -27,7 +28,9 @@ export const decoders:any = {
     'cognixionONE_BLE':cognixionONE_EEG_codec, //see the super secret docs
     'hegduino':hegduinocodec, //https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
     //'peanut':peanutcodec //https://github.com/joshbrew/peanutjs/blob/main/peanut.js
-    'nrf5x_usb':nrf5x_usbcodec
+    'nrf5x_usb':nrf5x_usbcodec,
+    'peanut':peanutcodec,
+    'statechanger':statechangercodec
     //...custom?
 }
 
@@ -54,7 +57,9 @@ export const chartSettings:{[key:string]:Partial<WebglLinePlotProps>} = {
     'cognixionONE_BLE':cognixionONEChartSettings, //see the super secret docs
     'hegduino':hegduinoChartSettings, //https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
     //'peanut':{} //https://github.com/joshbrew/peanutjs/blob/main/peanut.js
-    'nrf5x_usb':nrf5x_usbChartSettings
+    'nrf5x_usb':nrf5x_usbChartSettings,
+    'statechanger':statechangerChartSettings,
+    'peanut':peanutChartSettings
     //...custom?
 }
 
@@ -72,7 +77,7 @@ export const filterPresets:{[key:string]:{[key:string]:FilterSettings}} = {
     'cognixionONE_BLE':cognixionONEFilterSettings, //see the super secret docs
     'hegduino':undefined, //https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
     //'peanut':{} //https://github.com/joshbrew/peanutjs/blob/main/peanut.js
-    'nrf5x_usb':nrf5x_usbFilterSettings
+    'nrf5x_usb':nrf5x_usbFilterSettings,
     //...custom?
 }
 
