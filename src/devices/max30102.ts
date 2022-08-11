@@ -17,8 +17,18 @@ export function max3010xcodec(data:any) {
     let i=0;
     while(i < 32) {
         let idx = i*6;
-        output['red'][i] = (arr[idx+1] << 16 | arr[idx+2] << 8 | arr[idx+3]) & 0x7FFFF;
-        output['ir'][i] = (arr[idx+4] << 16 | arr[idx+5] << 8 | arr[idx+6]) & 0x7FFFF;
+    
+        // output['red'][i] = (arr[idx+1] << 16 | arr[idx+2] << 8 | arr[idx+3]) & 0x7FFFF;
+        // output['ir'][i] = (arr[idx+4] << 16 | arr[idx+5] << 8 | arr[idx+6]) & 0x7FFFF;
+        //temp fix till underlying driver is resolved
+        if(i%2 === 0) {
+            output['ir'][i] = (arr[idx+1] << 16 | arr[idx+2] << 8 | arr[idx+3]) & 0x7FFFF;
+            output['ir'][i+1] = (arr[idx+4] << 16 | arr[idx+5] << 8 | arr[idx+6]) & 0x7FFFF;
+        } else {
+            output['red'][i-1] = (arr[idx+1] << 16 | arr[idx+2] << 8 | arr[idx+3]) & 0x7FFFF;
+            output['red'][i] = (arr[idx+4] << 16 | arr[idx+5] << 8 | arr[idx+6]) & 0x7FFFF;
+        }
+        
         i++;
     }
 
