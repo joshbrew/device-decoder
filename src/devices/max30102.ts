@@ -32,7 +32,7 @@ export function max3010xcodec(data:any) {
         i++;
     }
 
-    output['dt'] = bitflippin.get2sCompliment(arr[arr.length-2],8) + 0.0625 * arr[arr.length-1]
+    output['dt'] = bitflippin.get2sCompliment(arr[193],8) + 0.0625 * arr[194]
 
     return output;
 }
