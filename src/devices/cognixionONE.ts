@@ -6,10 +6,6 @@ import { FilterSettings } from '../BiquadFilters';
 // Less channels pack less bytes inbetween rather than setting zeros which is kinda annoying and creates more work than necessary on the frontend, and that is not even touching the rest of the settings on this thing.
 //this codec assumes all 8 ADS1299 channels are running on the default settings. 
 
-//For the USB default stream, use the cyton codec
-export const cognixionONEBLESettings = {
-    primaryServiceUUIDs:[]
-}
 
 export function cognixionONE_EEG_codec(data:any) {
     let arr; 
@@ -41,6 +37,14 @@ export function cognixionONE_EEG_codec(data:any) {
     }
     
     return output;
+}
+
+//For the USB default stream, use the cyton codec
+export const cognixionONEBLESettings = {
+    primaryServiceUUIDs:[
+        '0x82046698-6313-4BB1-9645-6BA28BF86DF5'.toLowerCase(), //data  --> raw data stream: '0x8204669A-6313-4BB1-9645-6BA28BF86DF5'.toLowerCase()
+        '0x82E12914-9AFA-4648-BD1B-8E2B3DC6DAAF'.toLowerCase()  //controls
+    ]
 }
 
 export const cognixionONEChartSettings:Partial<WebglLinePlotProps> = {

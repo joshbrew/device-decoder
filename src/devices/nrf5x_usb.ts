@@ -4,15 +4,6 @@ import { ads131m08codec } from './ads131m08';
 import { max3010xcodec } from './max30102';
 import { mpu6050codec } from './mpu6050';
 
-export const nrf5xSerialSettings = {
-    baudRate:115200,
-    searchBytes:new Uint8Array([240,240])
-}
-
-export const nrf5xBLESettings = {
-    primaryServiceUUIDs:[]
-}
-
 export function nrf5x_usbcodec(data:any) {
     let arr:Uint8Array; 
     if(!data.buffer) arr = new Uint8Array(data); 
@@ -39,6 +30,17 @@ export function nrf5x_usbcodec(data:any) {
     }
 
     return output;
+}
+
+export const nrf5xSerialSettings = {
+    baudRate:115200,
+    searchBytes:new Uint8Array([240,240])
+}
+
+export const nrf5xBLESettings = {
+    primaryServiceUUIDs:[
+        '0000cafe-b0ba-8bad-f00d-deadbeef0000'// each notification is for a different sensor
+    ]
 }
 
 export const nrf5x_usbChartSettings:Partial<WebglLinePlotProps> = {
