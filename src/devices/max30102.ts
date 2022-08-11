@@ -11,17 +11,17 @@ export function max3010xcodec(data:any) {
     const output:any = {
         red:new Array(32),
         ir:new Array(32),
-        temp:0
+        dt:0
     };
 
-    let i=1;
+    let i=0;
     while(i < 32) {
-        output['red'][i] = bitflippin.bytesToUInt24(arr[i*6],arr[i*6+1],arr[i*6+2]);
-        output['ir'][i] = bitflippin.bytesToUInt24(arr[i*6+3],arr[i*6+4],arr[i*6+5]);
-        i+=6;
+        output['red'][i] = bitflippin.bytesToUInt24(arr[i*6+1],arr[i*6+2],arr[i*6+3]);
+        output['ir'][i] = bitflippin.bytesToUInt24(arr[i*6+4],arr[i*6+5],arr[i*6+6]);
+        i++;
     }
 
-    output['temp'] = bitflippin.bytesToInt16(arr[192],arr[193]);
+    output['dt'] = bitflippin.get2sCompliment(arr[arr.length-4],8) + 0.0625 * arr[arr.length-3]
 
     return output;
 }
@@ -30,6 +30,6 @@ export const max3010xChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
         red:{nSec:10, sps:100},
         ir:{nSec:10, sps:100},
-        temp:{nSec:10, sps:3.33}
+        dt:{nSec:10, sps:3.33}
     }
 }
