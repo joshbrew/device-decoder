@@ -23,6 +23,7 @@ export function nrf5x_usbcodec(data:any) {
     } else if (arr[0] === 4) {
         Object.assign(output,mpu6050codec(arr.subarray(2)));
     } else if (arr[0] === 5) {
+        //Object.assign(output,max3010xcodec(arr.subarray(1)));
         Object.assign(output,max3010xcodec(arr.subarray(2)));
     } else {
         Object.assign(output,ads131m08codec(arr));
@@ -47,7 +48,7 @@ export const nrf5x_usbChartSettings:Partial<WebglLinePlotProps> = {
 }
 
 
-let defaultsetting = {sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45, useScaling:true, scalar:1.2/(32*(Math.pow(2,24)-1))};
+let defaultsetting = {sps:250, useDCBlock:false, useBandpass:false, bandpassLower:3, bandpassUpper:45, useScaling:true, scalar:1.2/(32*(Math.pow(2,24)-1))};
 
 export const nrf5x_usbFilterSettings:{[key:string]:FilterSettings} = {
     '0':JSON.parse(JSON.stringify(defaultsetting)),

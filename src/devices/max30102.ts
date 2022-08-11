@@ -14,10 +14,10 @@ export function max3010xcodec(data:any) {
         temp:0
     };
 
-    let i=0;
+    let i=1;
     while(i < 32) {
-        output['red'][i] = bitflippin.bytesToUInt24(arr[i*6+1],arr[i*6+2],arr[i*6+3]);
-        output['ir'][i] = bitflippin.bytesToUInt24(arr[i*6+4],arr[i*6+5],arr[i*6+6]);
+        output['red'][i] = bitflippin.bytesToUInt24(arr[i*6],arr[i*6+1],arr[i*6+2]);
+        output['ir'][i] = bitflippin.bytesToUInt24(arr[i*6+3],arr[i*6+4],arr[i*6+5]);
         i+=6;
     }
 
