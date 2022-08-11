@@ -16,12 +16,13 @@ export function max3010xcodec(data:any) {
 
     let i=0;
     while(i < 32) {
-        output['red'][i] = bitflippin.bytesToUInt24(arr[i*6+1],arr[i*6+2],arr[i*6+3]);
-        output['ir'][i] = bitflippin.bytesToUInt24(arr[i*6+4],arr[i*6+5],arr[i*6+6]);
+        let idx = i*6;
+        output['red'][i] = (arr[idx+1] << 16 | arr[idx+2] << 8 | arr[idx+3]) & 0x7FFFF;
+        output['ir'][i] = (arr[idx+4] << 16 | arr[idx+5] << 8 | arr[idx+6]) & 0x7FFFF;
         i++;
     }
 
-    output['dt'] = bitflippin.get2sCompliment(arr[arr.length-4],8) + 0.0625 * arr[arr.length-3]
+    output['dt'] = bitflippin.get2sCompliment(arr[arr.length-2],8) + 0.0625 * arr[arr.length-1]
 
     return output;
 }

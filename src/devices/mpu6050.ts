@@ -19,12 +19,13 @@ export function mpu6050codec(data:any) {
     }
 
     for(let i = 0; i < 20; i++) {
-        output.ax[i] = bitflippin.bytesToInt16(arr[i*12+1],arr[i*12+2]);
-        output.ay[i] = bitflippin.bytesToInt16(arr[i*12+3],arr[i*12+4]);
-        output.az[i] = bitflippin.bytesToInt16(arr[i*12+5],arr[i*12+6]);
-        output.gx[i] = bitflippin.bytesToInt16(arr[i*12+7],arr[i*12+8]);
-        output.gy[i] = bitflippin.bytesToInt16(arr[i*12+9],arr[i*12+10]);
-        output.gz[i] = bitflippin.bytesToInt16(arr[i*12+11],arr[i*12+12]);
+        let idx = i*12;
+        output.ax[i] = bitflippin.bytesToInt16(arr[idx+1],arr[idx+2]);
+        output.ay[i] = bitflippin.bytesToInt16(arr[idx+3],arr[idx+4]);
+        output.az[i] = bitflippin.bytesToInt16(arr[idx+5],arr[idx+6]);
+        output.gx[i] = bitflippin.bytesToInt16(arr[idx+7],arr[idx+8]);
+        output.gy[i] = bitflippin.bytesToInt16(arr[idx+9],arr[idx+10]);
+        output.gz[i] = bitflippin.bytesToInt16(arr[idx+11],arr[idx+12]);
     }
 
     return output;
