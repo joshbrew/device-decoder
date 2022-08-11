@@ -3,6 +3,10 @@ import { WebglLinePlotProps } from "webgl-plot-utils";
 import { FilterSettings } from "../BiquadFilters";
 import { bitflippin } from "../bitflippin";
 
+export const cytonSerialSettings = {
+    baudRate:115200
+}
+
 //8 channels x 3 bytes per channel each line, plus 6x2 bytes for the IMU. First byte is counter byte;
 export function cytoncodec(data:any) {
     let arr; 

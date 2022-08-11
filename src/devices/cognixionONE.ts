@@ -7,6 +7,9 @@ import { FilterSettings } from '../BiquadFilters';
 //this codec assumes all 8 ADS1299 channels are running on the default settings. 
 
 //For the USB default stream, use the cyton codec
+export const cognixionONEBLESettings = {
+    primaryServiceUUIDs:[]
+}
 
 export function cognixionONE_EEG_codec(data:any) {
     let arr; 

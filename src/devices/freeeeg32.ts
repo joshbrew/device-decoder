@@ -3,6 +3,10 @@ import { WebglLinePlotProps } from "webgl-plot-utils";
 import { FilterSettings } from "../BiquadFilters";
 import { bitflippin } from "../bitflippin";
 
+export const freeeeg32SerialSettings = {
+    baudRate:921600
+}
+
 //32 channels x 3 bytes per channel each line, plus 6x2 bytes for the IMU. First byte is counter byte;
 export function freeeeg32codec(data:any) {
     let arr; 

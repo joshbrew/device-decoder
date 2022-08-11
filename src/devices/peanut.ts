@@ -6,6 +6,12 @@ import {bitflippin} from '../bitflippin'
 // write 'protocol 3\n'
 // use the search bytes 170,170 to find the newline after turning this mode on, in that order
 
+export const peanutSerialSettings = {
+    baudRate:38400,
+    init:'protocol 3\n', //need to send this on connect to initialize the output stream properly
+    searchBytes:new Uint8Array([170,170])
+};
+
 export const peanutStartCommand = 'protocol 3\n';
 export const peanutSearchBytes = new Uint8Array([170,170]);
 

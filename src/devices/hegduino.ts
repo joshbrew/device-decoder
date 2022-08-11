@@ -2,6 +2,17 @@ import { WebglLinePlotProps } from "webgl-plot-utils";
 
 let textdecoder = new TextDecoder();
 
+export const hegduinoSerialSettings = {
+    baudRate:115200
+}
+
+export const hegduinoBLESettings = {
+    primaryServiceUUIDs:[
+        "6E400001-B5A3-F393-E0A9-E50E24DCCA9E".toLowerCase(),
+        "6E400004-B5A3-F393-E0A9-E50E24DCCA9E".toLowerCase()
+    ]
+}
+
 export function hegduinocodec(value:any) {
     //hegduino format is utf8
     //Per line: timestamp, red, infrared, ratio, temperature
