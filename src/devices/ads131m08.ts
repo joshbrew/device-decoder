@@ -7,8 +7,8 @@
  * 
  */
 import { WebglLinePlotProps } from "webgl-plot-utils";
-import { FilterSettings } from "../BiquadFilters";
-import { bitflippin } from "../bitflippin";
+import { FilterSettings } from "../util/BiquadFilters";
+import { bitflippin } from "../util/bitflippin";
 
 export function ads131m08codec(data:any) {
     let arr; 

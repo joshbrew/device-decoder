@@ -1,6 +1,6 @@
-import {bitflippin} from '../bitflippin'
+import {bitflippin} from '../util/bitflippin'
 import { WebglLinePlotProps } from 'webgl-plot-utils';
-import { FilterSettings } from '../BiquadFilters';
+import { FilterSettings } from '../util/BiquadFilters';
 
 //BLE mode CNX_EEG_raw_data_struct packet structure: [ctr, [0,1,2],[3,4,5],[6,7,8],[9,10,11],[12,13,14],[15,16,17],[18,19,20],[21,22,23], 0x00], up to 7 per BLE packet but variable. 
 // Less channels pack less bytes inbetween rather than setting zeros which is kinda annoying and creates more work than necessary on the frontend, and that is not even touching the rest of the settings on this thing.
@@ -39,12 +39,27 @@ export function cognixionONE_EEG_codec(data:any) {
     return output;
 }
 
-//For the USB default stream, use the cyton codec
+//For the USB raw stream, use the cyton codec
 export const cognixionONEBLESettings = {
-    primaryServiceUUIDs:[
-        '0x82046698-6313-4BB1-9645-6BA28BF86DF5'.toLowerCase(), //data  --> raw data stream: '0x8204669A-6313-4BB1-9645-6BA28BF86DF5'.toLowerCase()
-        '0x82E12914-9AFA-4648-BD1B-8E2B3DC6DAAF'.toLowerCase()  //controls
-    ]
+    services:{
+        ['0x82046698-6313-4BB1-9645-6BA28BF86DF5'.toLowerCase()]:{
+            ['0x8204669A-6313-4BB1-9645-6BA28BF86DF5'.toLowerCase()]:{  //raw data stream
+                notify:true,
+                notifyCallback:undefined,
+                codec:cognixionONE_EEG_codec
+            },
+            //bunch more stuff
+        },
+        ['0x82E12914-9AFA-4648-BD1B-8E2B3DC6DAAF'.toLowerCase()]:{
+            ['0x82E12915-9AFA-4648-BD1B-8E2B3DC6DAAF'.toLowerCase()]:{
+                write:undefined //write commands with specific sequences based on the device spec (can't share... yet)
+            },
+            ['0x82E12916-9AFA-4648-BD1B-8E2B3DC6DAAF'.toLowerCase()]:{
+                read:true //read response
+            }
+        }  //controls
+        //more services for haptics etc.
+    }
 }
 
 export const cognixionONEChartSettings:Partial<WebglLinePlotProps> = {

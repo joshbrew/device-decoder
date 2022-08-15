@@ -1,13 +1,11 @@
 
 import { WebglLinePlotProps } from 'webgl-plot-utils';
-import {bitflippin} from '../bitflippin'
+import {bitflippin} from '../util/bitflippin'
 
 // baud: 38400
 // write 'protocol 3\n'
 // use the search bytes 170,170 to find the newline after turning this mode on, in that order
 
-export const peanutStartCommand = 'protocol 3\n';
-export const peanutSearchBytes = new Uint8Array([170,170]);
 
 export const PeanutCodes = { //bytecode struct formats
     0x02: {type: 'POOR_SIGNAL',   format:'<B',                byteLength:1},
@@ -25,11 +23,6 @@ export const PeanutCodes = { //bytecode struct formats
     0xB6: {type: 'rawdata27',     format:'<B'+'i'.repeat(26), byteLength:1+4*26}
 }
 
-export const peanutSerialSettings = {
-    baudRate:38400,
-    init:'protocol 3\n', //need to send this on connect to initialize the output stream properly
-    searchBytes:new Uint8Array([170,170])
-};
 
 export function peanutcodec(data:any) {
     let result:any = {}
@@ -64,6 +57,16 @@ export function peanutcodec(data:any) {
 
     return result;
 }
+
+export const peanutSerialSettings = {
+    baudRate:38400,
+    bufferSize:500, //less crashy
+    write:'protocol 3\n', //need to send this on connect to initialize the output stream properly
+    buffering:{
+        searchBytes:new Uint8Array([170,170]),
+    },
+    codec:peanutcodec
+};
 
 export const peanutChartSettings: Partial<WebglLinePlotProps> = {
     lines: {

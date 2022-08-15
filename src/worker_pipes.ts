@@ -2,7 +2,7 @@
 import {WorkerService, ServiceMessage} from 'graphscript'////'../../GraphServiceRouter/index' //
 import { WorkerInfo } from 'graphscript';
 import {WebSerial} from './serial/serialstream'
-import {BiquadChannelFilterer, FilterSettings} from './BiquadFilters'
+import {BiquadChannelFilterer, FilterSettings} from './util/BiquadFilters'
 import gsworker from './debugger.worker'
 
 export const workers = new WorkerService(); 

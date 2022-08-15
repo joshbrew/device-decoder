@@ -1,7 +1,7 @@
 
 import { WebglLinePlotProps } from "webgl-plot-utils";
-import { FilterSettings } from "../BiquadFilters";
-import { bitflippin } from "../bitflippin";
+import { FilterSettings } from "../util/BiquadFilters";
+import { bitflippin } from "../util/bitflippin";
 
 //32 channels x 3 bytes per channel each line, plus 6x2 bytes for the IMU. First byte is counter byte;
 export function freeeeg32codec(data:any) {
@@ -11,8 +11,9 @@ export function freeeeg32codec(data:any) {
 
     let output:any = {};
 
-    for(let i = 1; i < 97; i+=3) {
-        output[i] = bitflippin.bytesToUInt24(arr[i],arr[i+1],arr[i+2]);
+    for(let i = 0; i < 32; i++) {
+        let idx = i*3+1;
+        output[i] = bitflippin.bytesToUInt24(arr[idx],arr[idx+1],arr[idx+2]);
     }
 
     let accIdx = 97; //32*3 + 1
@@ -27,9 +28,18 @@ export function freeeeg32codec(data:any) {
 }
 
 export const freeeeg32SerialSettings = {
-    baudRate:921600
+    baudRate:921600, //921600 baud
+    bufferSize:2000,
+    frequency:1.9, //512sps
+    codec:freeeeg32codec
 }
 
+export const freeeeg32_optical_SerialSettings = {
+    baudRate:1000000, //1M baud, I forget why
+    bufferSize:2000,
+    frequency:1.9,
+    codec:freeeeg32codec
+}
 
 export const freeeeg32ChartSettings:Partial<WebglLinePlotProps> = {  //adding the rest below
     lines:{

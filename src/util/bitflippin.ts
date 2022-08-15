@@ -88,13 +88,13 @@ export class bitflippin {
                     value = new DataView(new ArrayBuffer(4));
                     value.setUint32(0,tmp);
                 }
-            } else if (value instanceof ArrayBuffer) {
+            } else if (value instanceof ArrayBuffer || (typeof SharedArrayBuffer !== 'undefined' && value instanceof SharedArrayBuffer)) {
                 value = new DataView(value); 
             } else if(Array.isArray(value)) { //assume it's an array-defined uint8 byte buffer that we need to convert
                 value = new DataView(Uint8Array.from(value).buffer);
             }
         }
-        return value;
+        return value as DataView;
     }
 
     //search a buffer for matching indices. Can limit the number of indices to find if the buffer is giant but this allows asynchronous number crunching between buffers and outputs to build buffers and then parse through them from the stream

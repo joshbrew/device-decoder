@@ -1,9 +1,9 @@
-import {StreamInfo, WebSerial} from './src/serial/serialstream'
-import {BLEClient, DeviceOptions} from './src/ble/ble_client'
+import {SerialStreamInfo, WebSerial} from './src/serial/serialstream'
+import {BLEClient, BLEDeviceOptions} from './src/ble/ble_client'
 import {Router, DOMService, proxyWorkerRoutes, workerCanvasRoutes, DOMElement } from 'graphscript'//'../GraphServiceRouter/index'//
 import { ElementInfo, ElementProps } from 'graphscript/dist/services/dom/types/element';
 import { DOMElementProps } from 'graphscript/dist/services/dom/types/component';
-import { decoders, chartSettings, SerialOptions, filterPresets } from './src/devices/index'
+import { decoders, chartSettings, filterPresets } from './src/devices/index'
 import { workers, cleanupWorkerStreamPipeline, createStreamRenderPipeline, initWorkerChart } from './src/worker_pipes'
 
 import './index.css'
@@ -191,7 +191,7 @@ const domtree = {
 
                                                         let disconnectCallbacks = {}
 
-                                                        const setupOpts:DeviceOptions = {
+                                                        const setupOpts:BLEDeviceOptions = {
                                                             services,
                                                             ondisconnect:(deviceId:string) => {
                                                                 console.log('disconnected', deviceId);
@@ -680,7 +680,7 @@ const domtree = {
 
                                                             class ConnectionTemplate extends DOMElement {
                                                                     
-                                                                stream:StreamInfo;
+                                                                stream:SerialStreamInfo;
                                                                 output:any;
                                                                 outputText:string='';
                                                                 settings:any;

@@ -34,13 +34,40 @@ export function nrf5x_usbcodec(data:any) {
 
 export const nrf5xSerialSettings = {
     baudRate:115200,
-    searchBytes:new Uint8Array([240,240])
+    buffering:{
+        searchBytes:new Uint8Array([240,240])
+    },
+    codec:nrf5x_usbcodec
 }
 
 export const nrf5xBLESettings = {
-    primaryServiceUUIDs:[
-        '0000cafe-b0ba-8bad-f00d-deadbeef0000'// each notification is for a different sensor
-    ]
+    services:{
+        '0000cafe-b0ba-8bad-f00d-deadbeef0000':{
+            '0x0001cafe-0xb0ba-0x8bad-0xf00d-0xdeadbeef0000':{
+                write:undefined
+            },
+            '0x0002cafe-0xb0ba-0x8bad-0xf00d-0xdeadbeef0000':{ //ads131m08
+                notify:true,
+                notifyCallback:undefined,
+                codec:ads131m08codec
+            },
+            '0x0003cafe-0xb0ba-0x8bad-0xf00d-0xdeadbeef0000':{ //max30102
+                notify:true,
+                notifyCallback:undefined,
+                codec:max3010xcodec
+            },
+            '0x0004cafe-0xb0ba-0x8bad-0xf00d-0xdeadbeef0000':{ //mpu6050
+                notify:true,
+                notifyCallback:undefined,
+                codec:mpu6050codec
+            },
+            '0x0006cafe-0xb0ba-0x8bad-0xf00d-0xdeadbeef0000':{ //ads131m08-2
+                notify:true,
+                notifyCallback:undefined,
+                codec:ads131m08codec
+            }
+        }// each notification is for a different sensor
+    }
 }
 
 export const nrf5x_usbChartSettings:Partial<WebglLinePlotProps> = {

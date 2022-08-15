@@ -1,16 +1,38 @@
 import { WebglLinePlotProps } from '../../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils';
 import { FilterSettings } from '../BiquadFilters';
 import {ads131m08codec, ads131m08ChartSettings, ads131m08FilterSettings} from './ads131m08';
-import {cytoncodec, cytonChartSettings, cytonFilterSettings} from './cyton';
-import {freeeeg128codec, freeeeg128ChartSettings, freeeeg128FilterSettings} from './freeeeg128';
-import {freeeeg32codec, freeeeg32ChartSettings, freeeeg32FilterSettings} from './freeeeg32';
-import {hegduinocodec, hegduinoChartSettings} from './hegduino';
+import {cytoncodec, cytonChartSettings, cytonFilterSettings, cytonSerialSettings} from './cyton';
+import {freeeeg128codec, freeeeg128ChartSettings, freeeeg128FilterSettings, freeeeg128SerialSettings} from './freeeeg128';
+import {freeeeg32codec, freeeeg32ChartSettings, freeeeg32FilterSettings, freeeeg32SerialSettings, freeeeg32_optical_SerialSettings} from './freeeeg32';
+import {hegduinocodec, hegduinoChartSettings, hegduinoBLESettings, hegduinoSerialSettings} from './hegduino';
 import { max3010xcodec, max3010xChartSettings } from './max30102';
 import { mpu6050codec, mpu6050ChartSettings } from './mpu6050';
-import { cognixionONE_EEG_codec, cognixionONEChartSettings, cognixionONEFilterSettings } from './cognixionONE';
-import { peanutcodec, peanutChartSettings } from './peanut';
-import { nrf5x_usbcodec, nrf5x_usbChartSettings, nrf5x_usbFilterSettings } from './nrf5x_usb';
-import { statechangerChartSettings, statechangercodec } from './statechanger';
+import { cognixionONE_EEG_codec, cognixionONEChartSettings, cognixionONEFilterSettings, cognixionONEBLESettings } from './cognixionONE';
+import { peanutcodec, peanutChartSettings, peanutSerialSettings } from './peanut';
+import { nrf5x_usbcodec, nrf5x_usbChartSettings, nrf5x_usbFilterSettings, nrf5xBLESettings, nrf5xSerialSettings } from './nrf5x_usb';
+import { statechangerBLESettings, statechangerChartSettings, statechangercodec, statechangerSerialSettings } from './statechanger';
+
+//containe unique (non-default) BLE and Serial device connection settings + codecs to parse key:value pairs from streamed data channels
+export const Devices = {
+    BLE:{
+        'nrf5x':nrf5xBLESettings,
+        'hegduino':hegduinoBLESettings,
+        'cognixionONE':cognixionONEBLESettings,
+        'statechanger':statechangerBLESettings,
+    },
+    Serial:{
+        'nrf5x':nrf5xSerialSettings,
+        'freeEEG32':freeeeg32SerialSettings,
+        'freeEEG32_optical':freeeeg32_optical_SerialSettings,
+        'freeEEG128':freeeeg128SerialSettings,
+        'hegduino':hegduinoSerialSettings,
+        'cyton':cytonSerialSettings,
+        'cyton_daisy':cytonSerialSettings,
+        'peanut':peanutSerialSettings,
+        'statechanger':statechangerSerialSettings,
+        'cognixionONE':cytonSerialSettings
+    }
+};
 
 const textdecoder = new TextDecoder();
 
@@ -96,3 +118,4 @@ export const SerialOptions:any = { //default is \r\n or 0x0D,0x0A
 
 
 //todo: update number of points in a slider or something on the frontend, just set nSec and reinit the plot
+

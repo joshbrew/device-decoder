@@ -1,4 +1,4 @@
-import { bitflippin } from '../bitflippin';
+import { bitflippin } from '../util/bitflippin';
 //bundle with tinybuild
 import { 
     BleClient, 
@@ -11,7 +11,7 @@ import {
 } from '@capacitor-community/bluetooth-le';
 
 
-export type DeviceOptions = {
+export type BLEDeviceOptions = {
     namePrefix?:string,
     deviceId?:string,
     onconnect?:()=>void,
@@ -34,17 +34,17 @@ export type DeviceOptions = {
     }
 }
 
-export type DeviceInfo = { device:BleDevice } & DeviceOptions
+export type BLEDeviceInfo = { device:BleDevice } & BLEDeviceOptions
 
 export class BLEClient extends bitflippin {
 
     client:BleClientInterface = BleClient;
-    devices:{[key:string]:DeviceInfo} = {};
+    devices:{[key:string]:BLEDeviceInfo} = {};
     location?:boolean=false;
     initialized:boolean = false;
 
     constructor(
-        options?:DeviceOptions,
+        options?:BLEDeviceOptions,
         location?:boolean //just tells android if it needs this permission enabled or not, usually false
     ) {
         super();
@@ -56,7 +56,7 @@ export class BLEClient extends bitflippin {
     }
 
     //request and setup a device based on options you input
-    setup(options?:DeviceOptions,location=this.location):Promise<DeviceInfo> {
+    setup(options?:BLEDeviceOptions,location=this.location):Promise<BLEDeviceInfo> {
         
         let services:any[] = [];
 
@@ -112,7 +112,7 @@ export class BLEClient extends bitflippin {
     }
     
     //get a device you can then connect to
-    requestDevice(request?:RequestBleDeviceOptions,options?:DeviceOptions):Promise<BleDevice> {
+    requestDevice(request?:RequestBleDeviceOptions,options?:BLEDeviceOptions):Promise<BleDevice> {
         return new Promise((res,rej) => {
             this.client.requestDevice(request)
                 .then((device) => {
@@ -127,10 +127,10 @@ export class BLEClient extends bitflippin {
     }
 
     //connect after requesting using the options
-    setupDevice = (device:BleDevice,options?:DeviceOptions):Promise<DeviceInfo> => {
+    setupDevice = (device:BleDevice,options?:BLEDeviceOptions):Promise<BLEDeviceInfo> => {
         return new Promise(async (res,rej) => {
             this.devices[device.deviceId] = {device, deviceId:device.deviceId,...options};
-            this.client.connect(device.deviceId,options?.ondisconnect,options?.connectOptions).then(async () => {
+            this.client.connect(device.deviceId,(deviceId:string)=>{ if(this.devices[device.deviceId]?.ondisconnect) this.devices[device.deviceId].ondisconnect(deviceId); },options?.connectOptions).then(async () => {
                 for(const service in options?.services) {
                     for(const characteristic in options.services[service]) {
                         let opt = options.services[service][characteristic];
@@ -151,9 +151,9 @@ export class BLEClient extends bitflippin {
         });
     }
 
-    connect(device:BleDevice,options?:DeviceOptions):Promise<BleDevice> {
+    connect(device:BleDevice,options?:BLEDeviceOptions):Promise<BleDevice> {
         return new Promise((res,rej) => {
-            this.client.connect(device.deviceId,options?.ondisconnect,options?.connectOptions)
+            this.client.connect(device.deviceId,(deviceId:string)=>{ if(options?.ondisconnect) options.ondisconnect(deviceId); },options?.connectOptions)
             .then(connected => {
                 res(device); //connected
             }).catch(rej);});

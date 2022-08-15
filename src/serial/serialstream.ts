@@ -1,11 +1,43 @@
-import { bitflippin } from '../bitflippin';
+import { bitflippin } from '../util/bitflippin';
 //Joshua Brewster. AGPL v3.0
 
 //Wrapper for
 //https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API
 
+export type SerialPortOptions = {
+    baudRate?:number,
+    stopBits?:1|2|number,
+    parity?:'none'|'even'|'odd'|ParityType,
+    bufferSize?:number,
+    flowControl?:'none'|'hardware'|FlowControlType,
+    onconnect?:(port:SerialPort)=>void,
+    ondisconnect?:(ev)=>void
+}
 
-export type StreamInfo = {
+export type SerialStreamProps = {
+    _id?:string,
+    port:SerialPort,
+    frequency:number,
+    ondata:(value:any)=>void, 
+    transforms?:{
+        [key:string]:{
+            transform:TransformerTransformCallback<DataView, any>,
+            start?:TransformerStartCallback<any>,
+            flush?:TransformerFlushCallback<any>,
+            writableStrategy?:QueuingStrategy<DataView>,
+            readableStrategy?:QueuingStrategy<DataView>,
+            streamPipeOptions?:StreamPipeOptions 
+        }|TransformStream
+    },
+    buffering?:{ //if defined the data will be buffered and a search applied to pass differentiable lines to ondata e.g. \r\n
+        searchBytes?:Uint8Array, //
+        buffer?:any[], //byte buffer
+        locked?:boolean, //locked on to search byte intervals?
+        lockIdx?:number //first found search buffer to lock onto stream
+    }|boolean
+}
+
+export type SerialStreamInfo = {
     _id:string,
     port:SerialPort,
     info:Partial<SerialPortInfo>,
@@ -35,7 +67,7 @@ export type StreamInfo = {
 
 export class WebSerial extends bitflippin {
 
-    streams:{[key:string]:StreamInfo} = {}
+    streams:{[key:string]:SerialStreamInfo} = {}
 
 
     getPorts() {
@@ -63,15 +95,7 @@ export class WebSerial extends bitflippin {
 
     openPort(
         port:SerialPort, 
-        options?:{
-            baudRate?:number,
-            stopBits?:1|2|number,
-            parity?:'none'|'even'|'odd'|ParityType,
-            bufferSize?:number,
-            flowControl?:'none'|'hardware'|FlowControlType,
-            onconnect?:(port:SerialPort)=>void,
-            ondisconnect?:(ev)=>void
-        }
+        options?:SerialPortOptions
     ) {
 
         if(options) options = Object.assign({},options);
@@ -117,28 +141,7 @@ export class WebSerial extends bitflippin {
 
     //get the readable/writable streams from the ports and set up optional transforms
     createStream = (
-        options:{
-            _id?:string,
-            port:SerialPort,
-            frequency:number,
-            ondata:(value:any)=>void, 
-            transforms?:{
-                [key:string]:{
-                    transform:TransformerTransformCallback<DataView, any>,
-                    start?:TransformerStartCallback<any>,
-                    flush?:TransformerFlushCallback<any>,
-                    writableStrategy?:QueuingStrategy<DataView>,
-                    readableStrategy?:QueuingStrategy<DataView>,
-                    streamPipeOptions?:StreamPipeOptions 
-                }|TransformStream
-            },
-            buffering?:{ //if defined the data will be buffered and a search applied to pass differentiable lines to ondata e.g. \r\n
-                searchBytes?:Uint8Array, //
-                buffer?:any[], //byte buffer
-                locked?:boolean, //locked on to search byte intervals?
-                lockIdx?:number //first found search buffer to lock onto stream
-            }|boolean
-        }
+        options:SerialStreamProps
     ) => {
 
         let stream:any = {
@@ -146,7 +149,7 @@ export class WebSerial extends bitflippin {
             info:options.port.getInfo(),
             running:false,
             ...options
-        } as StreamInfo;
+        } as SerialStreamInfo;
 
         if(options.port?.readable) {
             if(options.transforms) {
@@ -162,11 +165,11 @@ export class WebSerial extends bitflippin {
 
         this.streams[stream._id] = stream;
 
-        return stream as StreamInfo;
+        return stream as SerialStreamInfo;
     }
 
     readStream(
-        stream:StreamInfo
+        stream:SerialStreamInfo
     ) {
 
         if(stream.reader && !stream.running) {
@@ -233,7 +236,7 @@ export class WebSerial extends bitflippin {
     }
 
     //use this on an active stream instead of writePort
-    writeStream(stream:StreamInfo|string, message:any) {
+    writeStream(stream:SerialStreamInfo|string, message:any) {
         if(typeof stream === 'string') stream = this.streams[stream];
         if(stream.port.writable) {
             let writer = stream.port.writable.getWriter();
@@ -243,19 +246,19 @@ export class WebSerial extends bitflippin {
     }
 
     closeStream(
-        stream:StreamInfo|string,
-        onclose?:(info:StreamInfo)=>void
+        stream:SerialStreamInfo|string,
+        onclose?:(info:SerialStreamInfo)=>void
     ):Promise<boolean> {
-        if(typeof stream === 'string') stream = this.streams[stream] as StreamInfo;
+        if(typeof stream === 'string') stream = this.streams[stream] as SerialStreamInfo;
         stream.running = false;
         
         return new Promise((res,rej) => {
             setTimeout(async ()=>{
-                if((stream as StreamInfo).port.readable && (stream as StreamInfo).reader) {
+                if((stream as SerialStreamInfo).port.readable && (stream as SerialStreamInfo).reader) {
                     try {
-                        (stream as StreamInfo).reader.releaseLock()
+                        (stream as SerialStreamInfo).reader.releaseLock()
                         try {
-                            await (stream as StreamInfo).reader.cancel() 
+                            await (stream as SerialStreamInfo).reader.cancel() 
                         } catch(err) {}
                     } catch(er) {console.error(er)}
                 }
@@ -266,9 +269,9 @@ export class WebSerial extends bitflippin {
                 //     } catch(er) {}
                 // }
                 try {
-                    await (stream as StreamInfo).port.close().then(()=>{if(onclose) onclose(this.streams[(stream as StreamInfo)._id])});
+                    await (stream as SerialStreamInfo).port.close().then(()=>{if(onclose) onclose(this.streams[(stream as SerialStreamInfo)._id])});
                 } catch(er) { rej(er); }
-                delete this.streams[(stream as StreamInfo)._id];
+                delete this.streams[(stream as SerialStreamInfo)._id];
                 res(true);
                 },
                 300

@@ -1,5 +1,5 @@
 import { WebglLinePlotProps } from "webgl-plot-utils";
-import { bitflippin } from "../bitflippin";
+import { bitflippin } from "../util/bitflippin";
 
 
 //Packet format: ctr byte , 20 samples x 12 bytes , 16 bit die temp 
