@@ -131,20 +131,25 @@ export class BLEClient extends bitflippin {
         return new Promise(async (res,rej) => {
             this.devices[device.deviceId] = {device, deviceId:device.deviceId,...options};
             this.client.connect(device.deviceId,(deviceId:string)=>{ if(this.devices[device.deviceId]?.ondisconnect) this.devices[device.deviceId].ondisconnect(deviceId); },options?.connectOptions).then(async () => {
+                let services = await this.getServices(device.deviceId);
+                console.log(services);
                 for(const service in options?.services) {
-                    for(const characteristic in options.services[service]) {
-                        let opt = options.services[service][characteristic];
-                        if(opt.write) {
-                            await this.write(device,service,characteristic,opt.write,opt.writeCallback,opt.writeOptions);
+                    let svc = services.find((o) => {if(o.uuid === service) return true;});
+                    if(svc)
+                        for(const characteristic in options.services[service]) {
+                            if(!svc.characteristics.find((o) => {if(o.uuid === characteristic) return true;})) continue;
+                            let opt = options.services[service][characteristic];
+                            if(opt.write) {
+                                await this.write(device,service,characteristic,opt.write,opt.writeCallback,opt.writeOptions);
+                            }
+                            if(opt.read) {
+                                await this.read(device,service,characteristic,opt.readCallback,opt.readOptions)
+                            }
+                            if(opt.notify && opt.notifyCallback) {
+                                await this.subscribe(device, service, characteristic, opt.notifyCallback);
+                                opt.notifying = true;
+                            }
                         }
-                        if(opt.read) {
-                            await this.read(device,service,characteristic,opt.readCallback,opt.readOptions)
-                        }
-                        if(opt.notify && opt.notifyCallback) {
-                            await this.subscribe(device, service, characteristic, opt.notifyCallback);
-                            opt.notifying = true;
-                        }
-                    }
                 }
             }).catch(rej);
             res(this.devices[device.deviceId]);

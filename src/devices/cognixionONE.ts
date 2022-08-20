@@ -42,19 +42,19 @@ export function cognixionONE_EEG_codec(data:any) {
 //For the USB raw stream, use the cyton codec
 export const cognixionONEBLESettings = {
     services:{
-        ['0x82046698-6313-4BB1-9645-6BA28BF86DF5'.toLowerCase()]:{
-            ['0x8204669A-6313-4BB1-9645-6BA28BF86DF5'.toLowerCase()]:{  //raw data stream
+        ['82046698-6313-4BB1-9645-6BA28BF86DF5'.toLowerCase()]:{
+            ['8204669A-6313-4BB1-9645-6BA28BF86DF5'.toLowerCase()]:{  //raw data stream
                 notify:true,
                 notifyCallback:undefined,
                 codec:cognixionONE_EEG_codec
             },
             //bunch more stuff
         },
-        ['0x82E12914-9AFA-4648-BD1B-8E2B3DC6DAAF'.toLowerCase()]:{
-            ['0x82E12915-9AFA-4648-BD1B-8E2B3DC6DAAF'.toLowerCase()]:{
+        ['82E12914-9AFA-4648-BD1B-8E2B3DC6DAAF'.toLowerCase()]:{
+            ['82E12915-9AFA-4648-BD1B-8E2B3DC6DAAF'.toLowerCase()]:{
                 write:undefined //write commands with specific sequences based on the device spec (can't share... yet)
             },
-            ['0x82E12916-9AFA-4648-BD1B-8E2B3DC6DAAF'.toLowerCase()]:{
+            ['82E12916-9AFA-4648-BD1B-8E2B3DC6DAAF'.toLowerCase()]:{
                 read:true //read response
             }
         }  //controls

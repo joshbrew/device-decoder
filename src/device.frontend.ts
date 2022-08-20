@@ -23,7 +23,7 @@ export const workers = new WorkerService({
 
 //create streaming threads
 export function initDevice(
-    deviceType:'BLE'|'Serial',
+    deviceType:'BLE'|'USB',
     deviceName:string, //one of the supported settings in Devices
     ondecoded:((data:any) => void)|{[key:string]:(data:any)=>void}, //a single ondata function or an object with keys corresponding to BLE characteristics
     renderSettings?:{
@@ -32,13 +32,14 @@ export function initDevice(
         _id?:string,
         draw?:string|((
             self, canvas, context
-        ) => {}),
+        ) => void),
+        update?:string|((self, canvas, context, input)=>void),
         init?:string|((
             self, canvas, context
-        ) => {}),
+        ) => void),
         clear?:string|((
             self, canvas, context
-        ) => {}),
+        ) => void),
         animating?:boolean //can manually make draw calls if you post 'drawFrame' with the animation _id
     }
 ){
@@ -50,7 +51,20 @@ export function initDevice(
         renderworker = workers.addWorker({url:gsworker, _id:renderSettings._id});
         let portId = workers.establishMessageChannel(streamworker.worker,renderworker.worker);
 
-        // renderworker.post('subscribeToWorker',['decodeAndParseDevice',portId,'drawFrame']);
+        if(renderSettings) {
+            workers.run('transferCanvas',renderworker.worker,renderSettings);
+        }
+
+        workers.transferFunction(
+            renderworker,
+            function receiveParsedData(self,origin,parsed) {
+                self.run('runUpdate',undefined,parsed);
+                self.run('drawFrame');
+            },
+            'receiveParsedData'
+        )
+
+        renderworker.post('subscribeToWorker',['decodeAndParseDevice',portId,'receiveParsedData']);
     }
 
 
@@ -58,13 +72,14 @@ export function initDevice(
         //ble
         //if single ondecoded function provided, apply to the first characteristic with notify:true else specified
         for(const primaryUUID in (settings as BLEDeviceOptions).services) {
+            console.log(primaryUUID)
             for(const characteristic in (settings as any).services[primaryUUID]) {
                 if(typeof ondecoded === 'function') {
                     if((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.notify) {
                         (settings as any).services[primaryUUID][characteristic].notifyCallback = (data:any) => {
                             streamworker.run('decodeAndParseDevice',[data,'BLE',deviceName,primaryUUID,characteristic]).then(ondecoded);
                         }
-                        break; //only subscribe to one notification
+                        break; //only subscribe to first notification
                     }
                 } else if(typeof ondecoded === 'object') {
                     if(ondecoded[characteristic]) {
@@ -95,15 +110,20 @@ export function initDevice(
                         streamworker,
                         renderworker
                     },
-                    device:result
+                    device:result,
+                    disconnect:() => { BLE.disconnect(result.deviceId as string) }
                 }));
-            }).catch(console.error);
+            }).catch((er)=>{
+                console.error(er);
+                workers.terminate(streamworker._id);
+            });
         }) as Promise<{
             workers:{
                 streamworker:WorkerInfo,
                 renderworker?:WorkerInfo
             },
-            device:BLEDeviceInfo
+            device:BLEDeviceInfo,
+            disconnect:()=>void
         }>
         
     } else if ((settings as (SerialStreamProps & SerialPortOptions))?.baudRate) {
@@ -135,7 +155,7 @@ export function initDevice(
                     pipeTo:{
                         route:'decodeAndParseDevice',
                         _id:portId, //direct message port access to skip the main thread
-                        extraArgs:['Serial',deviceName]
+                        extraArgs:['USB',deviceName]
                     }
                 }) as Promise<{
                     _id:string,
@@ -148,7 +168,8 @@ export function initDevice(
                             renderworker,
                             serialworker
                         },
-                        device:result
+                        device:result,
+                        disconnect:() => {serialworker.post('closeStream',result._id);}
                     }));
                 });
             }).catch((er)=>{
@@ -165,7 +186,8 @@ export function initDevice(
                 _id:string,
                 settings:any,
                 info:Partial<SerialPortInfo>
-            }
+            },
+            disconnect:()=>void
         }>
         
     }
@@ -213,13 +235,21 @@ export function createStreamPipeline(
         renderworker = workers.addWorker({url:gsworker}) as WorkerInfo;
         renderPort = workers.establishMessageChannel(streamworker.worker, renderworker.worker); //returns the id of the port so we can orchestrate port communication
     
-        if(!renderSettings?._id) {
-            (renderSettings as any)._id = `render${Math.floor(Math.random()*1000000000000000)}`;
-        }
-
         if(renderSettings) {
             workers.run('transferCanvas',renderworker.worker,renderSettings);
         }
+
+        workers.transferFunction(
+            renderworker,
+            function receiveParsedData(self,origin,parsed) {
+                self.run('runUpdate',undefined,parsed);
+                self.run('drawFrame');
+            },
+            'receiveParsedData'
+        )
+
+        renderworker.post('subscribeToWorker',['decodeAndParseDevice',renderPort,'receiveParsedData']);
+        
     }
 
     // initWorkerChart(

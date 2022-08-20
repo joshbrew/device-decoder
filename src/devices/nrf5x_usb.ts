@@ -1,5 +1,5 @@
 import { WebglLinePlotProps } from 'webgl-plot-utils';
-import { FilterSettings } from '../BiquadFilters';
+import { FilterSettings } from '../util/BiquadFilters';
 import { ads131m08codec } from './ads131m08';
 import { max3010xcodec } from './max30102';
 import { mpu6050codec } from './mpu6050';
@@ -43,25 +43,25 @@ export const nrf5xSerialSettings = {
 export const nrf5xBLESettings = {
     services:{
         '0000cafe-b0ba-8bad-f00d-deadbeef0000':{
-            '0x0001cafe-0xb0ba-0x8bad-0xf00d-0xdeadbeef0000':{
+            '0001cafe-b0ba-8bad-f00d-deadbeef0000':{
                 write:undefined
             },
-            '0x0002cafe-0xb0ba-0x8bad-0xf00d-0xdeadbeef0000':{ //ads131m08
+            '0002cafe-b0ba-8bad-f00d-deadbeef0000':{ //ads131m08
                 notify:true,
                 notifyCallback:undefined,
                 codec:ads131m08codec
             },
-            '0x0003cafe-0xb0ba-0x8bad-0xf00d-0xdeadbeef0000':{ //max30102
+            '0003cafe-b0ba-8bad-f00d-deadbeef0000':{ //max30102
                 notify:true,
                 notifyCallback:undefined,
                 codec:max3010xcodec
             },
-            '0x0004cafe-0xb0ba-0x8bad-0xf00d-0xdeadbeef0000':{ //mpu6050
+            '0004cafe-b0ba-8bad-f00d-deadbeef0000':{ //mpu6050
                 notify:true,
                 notifyCallback:undefined,
                 codec:mpu6050codec
             },
-            '0x0006cafe-0xb0ba-0x8bad-0xf00d-0xdeadbeef0000':{ //ads131m08-2
+            '0006cafe-b0ba-8bad-f00d-deadbeef0000':{ //ads131m08-2
                 notify:true,
                 notifyCallback:undefined,
                 codec:ads131m08codec
