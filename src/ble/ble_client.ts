@@ -132,7 +132,7 @@ export class BLEClient extends bitflippin {
             this.devices[device.deviceId] = {device, deviceId:device.deviceId,...options};
             this.client.connect(device.deviceId,(deviceId:string)=>{ if(this.devices[device.deviceId]?.ondisconnect) this.devices[device.deviceId].ondisconnect(deviceId); },options?.connectOptions).then(async () => {
                 let services = await this.getServices(device.deviceId);
-                console.log(services);
+                //console.log(services);
                 for(const service in options?.services) {
                     let svc = services.find((o) => {if(o.uuid === service) return true;});
                     if(svc)
