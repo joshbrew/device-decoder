@@ -42,7 +42,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                 },
                 'receiveCodec':function receiveDeviceCodec(
                     decoder:any, 
-                    deviceType:'BLE'|'USB',
+                    deviceType:'BLE'|'USB'|'BLE_OTHER'|'USB_OTHER'|'OTHER',
                     device:string, //serial devices get one codec, ble devices get a codec per read/notify characteristic property
                     service?:string,
                     characteristic?:string
@@ -50,14 +50,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                     let codec = parseFunctionFromText(decoder);
 
                     if(codec) {
-                        if(deviceType === 'USB' && Devices[deviceType][device]?.codec) {
-                            if(Devices[deviceType][device])
-                                Devices[deviceType][device].codec = codec;
-                            else {
-                                Devices[deviceType][device] = {codec};
-                            }
-                        }
-                        else if (
+                        if (
                             deviceType === 'BLE' && 
                             service && 
                             characteristic
@@ -72,6 +65,13 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                                 } else {
                                     Devices[deviceType][device] = {[characteristic]: {codec}};
                                 }
+                            }
+                        }
+                        else if (Devices[deviceType][device]?.codec) {
+                            if(Devices[deviceType][device])
+                                Devices[deviceType][device].codec = codec;
+                            else {
+                                Devices[deviceType][device] = {codec};
                             }
                         }
                     }
@@ -106,9 +106,9 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                     //console.log(decoded, self.graph)
                     return decoded;
                 },
-                'setActiveDecoder':function setActiveDecoder(deviceType:'BLE'|'USB',device:string,service?:string,characteristic?:string) {
+                'setActiveDecoder':function setActiveDecoder(deviceType:'BLE'|'USB'|'BLE_OTHER'|'USB_OTHER'|'OTHER',device:string,service?:string,characteristic?:string) {
                     //console.log('received decoder:',decoderName)
-                    if(deviceType === 'USB' && Devices[deviceType][device]?.codec) 
+                    if(Devices[deviceType][device]?.codec) 
                         globalThis.decoder = Devices[deviceType][device]?.codec;
                     else if (deviceType === 'BLE' && service && characteristic && Devices[deviceType][device]?.[service as string]?.[characteristic as string]?.codec)
                         globalThis.decoder = Devices[deviceType][device][service][characteristic].codec;
@@ -122,7 +122,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                     service?:string,
                     characteristic?:string
                 ) {
-                    if(deviceType === 'USB' && Devices[deviceType][device]?.codec) 
+                    if(Devices[deviceType][device]?.codec) 
                         return Devices[deviceType][device].codec(data);
                     else if (deviceType === 'BLE' && service && characteristic && Devices[deviceType][device]?.[service as string]?.[characteristic as string]?.codec)
                         return Devices[deviceType][device][service][characteristic].codec(data);

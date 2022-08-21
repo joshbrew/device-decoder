@@ -35,32 +35,12 @@ export const Devices = {
         'statechanger':statechangerSerialSettings,
         'cognixionONE':cytonSerialSettings
     },
-    BLE_OTHER:{ //OTHER indicates drivers not written by us that do not fit into our format readily
+    BLE_OTHER:{ //OTHER indicates drivers not written by us that do not fit into our format readily, but we can generalize easily to get the multithreading benefits
         'muse':museSettings
-    }
+    },
+    USB_OTHER : {},
+    OTHER : {}
 };
-
-const textdecoder = new TextDecoder();
-
-export const decoders:any = {
-    'raw':(data:any) => { if(data?.buffer) return Array.from(new Uint8Array(data)); else return data; },
-    'utf8':(data:any) => { return textdecoder.decode(data); },
-    'console-f12':(data:any) => { if(data?.buffer) data = Array.from(new Uint8Array(data)); console.log(data); return data; },
-    'debug':(data:any,debugmessage:string) => { if(data?.buffer) data = Array.from(new Uint8Array(data)); console.log(debugmessage,data); return data; },
-    'ads131m08':ads131m08codec,
-    'max3010x':max3010xcodec,
-    'mpu6050':mpu6050codec,
-    'freeeeg32':freeeeg32codec, ///old code: https://github.com/joshbrew/freeeeg32.js
-    'freeeeg128':freeeeg128codec,
-    'cyton':cytoncodec, ///old code: https://github.com/joshbrew/cyton.js
-    'cognixionONE_BLE':cognixionONE_EEG_codec, //see the super secret docs
-    'hegduino':hegduinocodec, //old code: https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
-    'nrf5x_usb':nrf5x_usbcodec,
-    'peanut':peanutcodec, //old code: https://github.com/joshbrew/peanutjs/blob/main/peanut.js
-    'statechanger':statechangercodec,
-    'blueberry':blueberrycodec
-    //...custom?
-}
 
 export const defaultChartSettings:any = {
     lines:{
@@ -70,7 +50,25 @@ export const defaultChartSettings:any = {
     cleanGeneration:true
 }
 
+export const filterPresets:{[key:string]:{[key:string]:FilterSettings}} = {
+    'raw':undefined,
+    'utf8':undefined,
+    'console-f12':undefined,
+    'debug':undefined,
+    'ads131m08':ads131m08FilterSettings,
+    'max3010x':undefined,
+    'mpu6050':undefined,
+    'freeeeg32':freeeeg32FilterSettings, //https://github.com/joshbrew/freeeeg32.js
+    'freeeeg128':freeeeg128FilterSettings,
+    'cyton':cytonFilterSettings, //https://github.com/joshbrew/cyton.js
+    'cognixionONE_BLE':cognixionONEFilterSettings, //see the super secret docs
+    'hegduino':undefined, //https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
+    //'peanut':{} //https://github.com/joshbrew/peanutjs/blob/main/peanut.js
+    'nrf5x_usb':nrf5x_usbFilterSettings,
+    //...custom?
+}
 
+//this is for our debugger but provides a good model to build applications off of that have diverse device support
 export const chartSettings:{[key:string]:Partial<WebglLinePlotProps>} = {
     'raw':defaultChartSettings,
     'utf8':defaultChartSettings,
@@ -92,35 +90,28 @@ export const chartSettings:{[key:string]:Partial<WebglLinePlotProps>} = {
     //...custom?
 }
 
-export const filterPresets:{[key:string]:{[key:string]:FilterSettings}} = {
-    'raw':undefined,
-    'utf8':undefined,
-    'console-f12':undefined,
-    'debug':undefined,
-    'ads131m08':ads131m08FilterSettings,
-    'max3010x':undefined,
-    'mpu6050':undefined,
-    'freeeeg32':freeeeg32FilterSettings, //https://github.com/joshbrew/freeeeg32.js
-    'freeeeg128':freeeeg128FilterSettings,
-    'cyton':cytonFilterSettings, //https://github.com/joshbrew/cyton.js
-    'cognixionONE_BLE':cognixionONEFilterSettings, //see the super secret docs
-    'hegduino':undefined, //https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
-    //'peanut':{} //https://github.com/joshbrew/peanutjs/blob/main/peanut.js
-    'nrf5x_usb':nrf5x_usbFilterSettings,
-    //...custom?
-}
+//settings for device_debugger
+const textdecoder = new TextDecoder();
 
-export const SerialOptions:any = { //default is \r\n or 0x0D,0x0A
-    'nrf5x_usb': {
-        buffering:{
-            searchBytes:new Uint8Array([240,240])
-        }
-    },
-    'peanut': {
-        buffering:{
-            searchBytes:new Uint8Array([170,170])
-        }
-    }
+//decoders to transform any raw outputs not specified to a device
+export const decoders:any = {
+    'raw':(data:any) => { if(data?.buffer) return Array.from(new Uint8Array(data)); else return data; },
+    'utf8':(data:any) => { return textdecoder.decode(data); },
+    'console-f12':(data:any) => { if(data?.buffer) data = Array.from(new Uint8Array(data)); console.log(data); return data; },
+    'debug':(data:any,debugmessage:string) => { if(data?.buffer) data = Array.from(new Uint8Array(data)); console.log(debugmessage,data); return data; },
+    'ads131m08':ads131m08codec,
+    'max3010x':max3010xcodec,
+    'mpu6050':mpu6050codec,
+    'freeeeg32':freeeeg32codec, ///old code: https://github.com/joshbrew/freeeeg32.js
+    'freeeeg128':freeeeg128codec,
+    'cyton':cytoncodec, ///old code: https://github.com/joshbrew/cyton.js
+    'cognixionONE_BLE':cognixionONE_EEG_codec, //see the super secret docs
+    'hegduino':hegduinocodec, //old code: https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
+    'nrf5x_usb':nrf5x_usbcodec,
+    'peanut':peanutcodec, //old code: https://github.com/joshbrew/peanutjs/blob/main/peanut.js
+    'statechanger':statechangercodec,
+    'blueberry':blueberrycodec
+    //...custom?
 }
 
 

@@ -10,6 +10,50 @@ Live demo: https://devicedebugger.netlify.app
 
 `tinybuild` or `npm i -g tinybuild & tinybuild`
 
+### Built-in drivers:
+
+```ts
+export const Devices = {
+    BLE:{
+        'nrf5x':nrf5xBLESettings,
+        'hegduino':hegduinoBLESettings,
+        'cognixionONE':cognixionONEBLESettings,
+        'statechanger':statechangerBLESettings,
+        'blueberry':blueberryBLESettings
+    },
+    USB:{
+        'nrf5x':nrf5xSerialSettings,
+        'freeEEG32':freeeeg32SerialSettings,
+        'freeEEG32_optical':freeeeg32_optical_SerialSettings,
+        'freeEEG128':freeeeg128SerialSettings,
+        'hegduino':hegduinoSerialSettings,
+        'cyton':cytonSerialSettings,
+        'cyton_daisy':cytonSerialSettings,
+        'peanut':peanutSerialSettings,
+        'statechanger':statechangerSerialSettings,
+        'cognixionONE':cytonSerialSettings
+    },
+    BLE_OTHER:{ //OTHER indicates drivers not written by us that do not fit into our format readily, but we can generalize easily to get the multithreading benefits
+        'muse':museSettings
+    },
+    USB_OTHER : {},
+    OTHER : {}
+}
+
+```
+
+##### BLE and USB API wrappers:
+
+- [`ble_client.ts`](./src/ble/ble_client.ts) wraps @capacitor-community/bluetooth-le with easier handles
+- [`serialstream.ts`](./src/serial/serialstream.ts) wraps the Web Serial API with easy handles and buffering + transform stream support
+
+##### General wrapper: 
+
+- [`device.frontend.ts`](./src/device.frontend.ts)
+
+Use `initDevice` and provide settings based on the above Devices object to create a multithreaded decoding and rendering pipeline.
+
+See [`test.ts`](./test.ts) for an example of it in action.
 
 #### Features: 
 - Generate consoles and charts for each connected BLE and Serial device. Decode raw data using our presets or write-in your own decoders. Each serial device or notification stream gets dedicated workers for parsing and charting data. 

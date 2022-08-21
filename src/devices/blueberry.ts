@@ -1,4 +1,5 @@
 import { WebglLinePlotProps } from "webgl-plot-utils";
+import { BLEDeviceOptions } from "../ble/ble_client";
 
 export function blueberrycodec(value:DataView) {
 
@@ -13,6 +14,7 @@ export function blueberrycodec(value:DataView) {
 
 
 export const blueberryBLESettings = {
+    namePrefix:'blueberry',
     services:{
         '0f0e0d0c-0b0a-0908-0706-050403020100':{
             '1f1e1d1c-1b1a-1918-1716-151413121110':{
@@ -25,7 +27,7 @@ export const blueberryBLESettings = {
             }
         }
     }
-}
+} as BLEDeviceOptions
 
 
 export const blueberryChartSettings:Partial<WebglLinePlotProps> = {
