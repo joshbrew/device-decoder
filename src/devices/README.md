@@ -190,7 +190,10 @@ You may also add filter settings to apply in the debugger worker codecs
 
 ### Other
 
-Say we want to support a driver that does not give us the raw data but want to feed it into our multithreading pipeline and general application settings. Create an object like:
+Say we want to support a driver that does not give us the raw data but want to feed it into our multithreading pipeline and general application settings. See [`muse.ts`](./muse.ts) for an implementation with conditionally included dependencies.
+
+
+Create an object like:
 
 ```ts
 
