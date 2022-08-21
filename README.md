@@ -101,9 +101,13 @@ Live demo: https://devicedebugger.netlify.app
 
 #### Why?
 
-We need this for our own hardware but we wanted to produce a proper web benchmark and debugger tool for Serial and BLE sensors in general.
+We need this for our own hardware to remove any performance concerns with massive amounts of data. We we wanted to produce a proper web benchmark and debugger tool for Serial and BLE sensors in general as this is super useful stuff.
 
 Features [graphscript](https://github.com/brainsatplay/graphscript) to script the site efficiently.
 
 ![d](./debugger.png)
 
+
+License: AGPL v3.0
+
+Joshua Brewster
