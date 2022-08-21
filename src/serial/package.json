@@ -1,7 +1,7 @@
 {
-  "name": "tinybuildapp7332",
-  "version": "0.0.0",
-  "description": "Barebones esbuild and test node server implementation. For building",
+  "name": "webserial-wrapper",
+  "version": "0.1.0",
+  "description": "Convenience features for the Web Serial API.",
   "main": "index.js",
   "type": "module",
   "scripts": {

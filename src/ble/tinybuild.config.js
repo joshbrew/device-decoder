@@ -2,7 +2,7 @@
 const config = {
     bundler: { //esbuild settings, set false to skip build step or add bundle:true to config object to only bundle (alt methods)
         entryPoints: [ //entry point file(s). These can include .js, .mjs, .ts, .jsx, .tsx, or other javascript files. Make sure your entry point is a ts file if you want to generate types
-            "ble_client.js"
+            "ble_client.ts"
         ],
         outfile: "dist/ble_client", //exit point file, will append .js as well as indicators like .esm.js, .node.js for other build flags
         //outdir:[]               //exit point files, define for multiple bundle files
@@ -12,9 +12,9 @@ const config = {
         bundleNode: false, //create node platform plain js build, specify platform:'node' to do the rest of the files 
         bundleHTML: false, //wrap the first entry point file as a plain js script in a boilerplate html file, frontend scripts can be run standalone like a .exe! Server serves this as start page if set to true.
         minify: true,
-        sourcemap: false
+        sourcemap: false,
         //globalThis:null //'mymodule'
-        //globals:{'index.js':['Graph']}
+        globals:{'ble_client.ts':['BLEClient']}
         //init:{'index.js':function(bundle) { console.log('prepackaged bundle script!', bundle); }}      
      },
     server:  false//{  //node server settings, set false to skip server step or add serve:true to config object to only serve (alt methods)
