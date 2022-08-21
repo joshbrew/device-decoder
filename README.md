@@ -48,12 +48,12 @@ export const Devices = {
 
 ##### BLE and USB API wrappers:
 
-- [`ble_client.ts`](./src/ble/ble_client.ts) wraps @capacitor-community/bluetooth-le with easier handles
-- [`serialstream.ts`](./src/serial/serialstream.ts) wraps the Web Serial API with easy handles and buffering + transform stream support
+- [`ble_client.ts`](./src/ble) wraps @capacitor-community/bluetooth-le with easier handles
+- [`serialstream.ts`](./src/serial) wraps the Web Serial API with easy handles and buffering + transform stream support
 
 ##### General purpose wrapper: 
 
-- [`device.frontend.ts`](./src/device.frontend.ts)
+- [`device.frontend.ts`](./src)
 
 Use `initDevice` and provide settings based on the above Devices object to create a multithreaded decoding and rendering pipeline.
 
@@ -99,7 +99,6 @@ Live demo: https://devicedebugger.netlify.app
 #### TODO:
 - csvs on a data collection thread, use indexeddb to prevent memory overflows
 - more styling, bug proofing
-- modularize the frontend and worker construction better, package the standalone Serial and BLE wrappers
 
 #### Why?
 
