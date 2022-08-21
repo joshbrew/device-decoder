@@ -55,7 +55,7 @@ export function initDevice(
 
         workers.run('transferCanvas',renderworker.worker,renderSettings);
             
-        workers.run('startAnim');
+        //workers.run('startAnim');
 
         workers.transferFunction(
             renderworker,
@@ -299,7 +299,7 @@ export function createStreamPipeline(
         if(renderSettings) {
             workers.run('transferCanvas',renderworker.worker,renderSettings);
 
-            workers.run('startAnim');
+            //workers.run('startAnim');
             workers.transferFunction(
                 renderworker,
                 function receiveParsedData(self,origin,parsed) {
