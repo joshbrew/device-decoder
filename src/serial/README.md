@@ -2,7 +2,7 @@
 
 `npm i webserial-wrapper`
 
-Convenience features for the Web Serial API. See class usage below. Includes useful byte manipulation callbacks.
+Convenience features for the Web Serial API. See class usage below. Includes useful byte manipulation callbacks. 12kb dist
 
 Instantiate with `const Serial = new WebSerial()`. 
 

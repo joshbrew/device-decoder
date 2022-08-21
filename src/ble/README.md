@@ -3,7 +3,7 @@
 
 `npm i ble-wrapper`
 
-Convenience features for the @capacitor-community/bluetooth-le API for browser or native mobile. See class usage below. Includes useful byte manipulation callbacks.
+Convenience features for the @capacitor-community/bluetooth-le API for browser or native mobile. See class usage below. Includes useful byte manipulation callbacks. 19.5kb dist
 
 Instantiate with `const BLE = new BLEClient()`. See class details below.
 

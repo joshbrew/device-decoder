@@ -8,9 +8,11 @@ Supports Web Bluetooth API + Mobile Native (via `@capacitor-community/bluetooth-
 
 Easily add your own decoders to Devices by following the formats outlined at the above github link.
 
+<500kb dist, the worker is bundled into the main index for easier use, which doubles the size as it is a standalone compilation in a dataURL.
+
 ```ts
 
-import {initDevice, Devices} from 'device-decoder
+import {initDevice, Devices} from 'device-decoder'
 
 console.log(Devices); //see supported devices and customize callbacks before instantiating
 
@@ -37,4 +39,4 @@ if(info) { //returns a promise
 }
 ```
 
-It also exports `BLE`, `workers`, and `gsworker` as a usable dataUrl of stream.worker, which it uses internally, so you can control more about the API as you need.
+It also exports `BLE`, `workers` which are instances of utilities used internally. It also exports `gsworker` as a usable compiled dataUrl of stream.worker, which it uses internally, so you can control more about the API as you need without additional files from the main dist/device.frontend.js 
