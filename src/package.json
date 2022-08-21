@@ -1,10 +1,8 @@
 {
-  "name": "webserial-wrapper",
-  "version": "0.1.2",
-  "description": "Convenience features for the Web Serial API.",
-  "main": "dist/serialstream.js",
-  "module":"dist/serialstream.esm.js",
-  "types":"dist/serialstream.d.ts",
+  "name": "device-decoder",
+  "version": "0.1.0",
+  "description": "Customizable multithreaded BLE and USB (or other) device connecting, sensor decoding, and (threaded) output rendering",
+  "main": "dist/device.frontend.js",
   "type": "module",
   "scripts": {
     "start": "tinybuild",
@@ -21,10 +19,20 @@
   "keywords": [
     "esbuild"
   ],
-  "author": "Joshua Brewster",
+  "author": "yorsh yooster",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
-    "@types/dom-serial": "^1.0.2"
+    "@capacitor-community/bluetooth-le": "^1.8.3",
+    "graphscript": "~0.0.148",
+    "webgl-plot-utils": "~0.1.47"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^3.5.1",
+    "@capacitor/cli": "^3.5.1",
+    "@capacitor/core": "^3.5.1",
+    "@capacitor/ios": "^3.5.1",
+    "@types/dom-serial": "^1.0.2",
+    "@types/node": "^18.0.5"
   },
   "nodemonConfig": {
     "env": {

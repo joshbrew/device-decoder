@@ -1,4 +1,4 @@
-import { WebglLinePlotProps } from '../../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils';
+import { WebglLinePlotProps } from 'webgl-plot-utils';
 import { FilterSettings } from '../util/BiquadFilters';
 import {ads131m08codec, ads131m08ChartSettings, ads131m08FilterSettings} from './ads131m08';
 import {cytoncodec, cytonChartSettings, cytonFilterSettings, cytonSerialSettings} from './cyton';
