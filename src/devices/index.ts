@@ -12,6 +12,7 @@ import { peanutcodec, peanutChartSettings, peanutSerialSettings } from './peanut
 import { nrf5x_usbcodec, nrf5x_usbChartSettings, nrf5x_usbFilterSettings, nrf5xBLESettings, nrf5xSerialSettings } from './nrf5x_usb';
 import { statechangerBLESettings, statechangerChartSettings, statechangercodec, statechangerSerialSettings } from './statechanger';
 import { museSettings } from './muse';
+import { blueberryBLESettings, blueberryChartSettings, blueberrycodec } from './blueberry';
 
 //containe unique (non-default) BLE and Serial device connection settings + codecs to parse key:value pairs from streamed data channels
 export const Devices = {
@@ -20,6 +21,7 @@ export const Devices = {
         'hegduino':hegduinoBLESettings,
         'cognixionONE':cognixionONEBLESettings,
         'statechanger':statechangerBLESettings,
+        'blueberry':blueberryBLESettings
     },
     USB:{
         'nrf5x':nrf5xSerialSettings,
@@ -35,9 +37,6 @@ export const Devices = {
     },
     BLE_OTHER:{ //OTHER indicates drivers not written by us that do not fit into our format readily
         'muse':museSettings
-    },
-    OTHER:{ 
-        'blueberry':undefined //this comes from a cloud server
     }
 };
 
@@ -51,15 +50,15 @@ export const decoders:any = {
     'ads131m08':ads131m08codec,
     'max3010x':max3010xcodec,
     'mpu6050':mpu6050codec,
-    'freeeeg32':freeeeg32codec, //https://github.com/joshbrew/freeeeg32.js
+    'freeeeg32':freeeeg32codec, ///old code: https://github.com/joshbrew/freeeeg32.js
     'freeeeg128':freeeeg128codec,
-    'cyton':cytoncodec, //https://github.com/joshbrew/cyton.js
+    'cyton':cytoncodec, ///old code: https://github.com/joshbrew/cyton.js
     'cognixionONE_BLE':cognixionONE_EEG_codec, //see the super secret docs
-    'hegduino':hegduinocodec, //https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
-    //'peanut':peanutcodec //https://github.com/joshbrew/peanutjs/blob/main/peanut.js
+    'hegduino':hegduinocodec, //old code: https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
     'nrf5x_usb':nrf5x_usbcodec,
-    'peanut':peanutcodec,
-    'statechanger':statechangercodec
+    'peanut':peanutcodec, //old code: https://github.com/joshbrew/peanutjs/blob/main/peanut.js
+    'statechanger':statechangercodec,
+    'blueberry':blueberrycodec
     //...custom?
 }
 
@@ -88,7 +87,8 @@ export const chartSettings:{[key:string]:Partial<WebglLinePlotProps>} = {
     //'peanut':{} //https://github.com/joshbrew/peanutjs/blob/main/peanut.js
     'nrf5x_usb':nrf5x_usbChartSettings,
     'statechanger':statechangerChartSettings,
-    'peanut':peanutChartSettings
+    'peanut':peanutChartSettings,
+    'blueberry':blueberryChartSettings
     //...custom?
 }
 
