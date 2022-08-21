@@ -13,6 +13,7 @@ import { nrf5x_usbcodec, nrf5x_usbChartSettings, nrf5x_usbFilterSettings, nrf5xB
 import { statechangerBLESettings, statechangerChartSettings, statechangercodec, statechangerSerialSettings } from './statechanger';
 import { museSettings } from './muse';
 import { blueberryBLESettings, blueberryChartSettings, blueberrycodec } from './blueberry';
+import { blueberry2BLESettings, blueberry2ChartSettings } from './blueberry2';
 
 //containe unique (non-default) BLE and Serial device connection settings + codecs to parse key:value pairs from streamed data channels
 export const Devices = {
@@ -21,7 +22,8 @@ export const Devices = {
         'hegduino':hegduinoBLESettings,
         'cognixionONE':cognixionONEBLESettings,
         'statechanger':statechangerBLESettings,
-        'blueberry':blueberryBLESettings
+        'blueberry':blueberryBLESettings,
+        'blueberry2':blueberry2BLESettings
     },
     USB:{
         'nrf5x':nrf5xSerialSettings,
@@ -86,7 +88,8 @@ export const chartSettings:{[key:string]:Partial<WebglLinePlotProps>} = {
     'nrf5x_usb':nrf5x_usbChartSettings,
     'statechanger':statechangerChartSettings,
     'peanut':peanutChartSettings,
-    'blueberry':blueberryChartSettings
+    'blueberry':blueberryChartSettings,
+    'blueberry2':blueberry2ChartSettings
     //...custom?
 }
 
