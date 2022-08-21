@@ -53,15 +53,15 @@ export function initDevice(
         renderworker = workers.addWorker({url:gsworker, _id:renderSettings._id});
         let portId = workers.establishMessageChannel(streamworker.worker,renderworker.worker);
 
-        if(renderSettings) {
-            workers.run('transferCanvas',renderworker.worker,renderSettings);
-        }
+        workers.run('transferCanvas',renderworker.worker,renderSettings);
+            
+        workers.run('startAnim');
 
         workers.transferFunction(
             renderworker,
             function receiveParsedData(self,origin,parsed) {
                 self.run('runUpdate',undefined,parsed);
-                self.run('drawFrame');
+                //self.run('drawFrame');
             },
             'receiveParsedData'
         )
@@ -298,19 +298,19 @@ export function createStreamPipeline(
     
         if(renderSettings) {
             workers.run('transferCanvas',renderworker.worker,renderSettings);
+
+            workers.run('startAnim');
+            workers.transferFunction(
+                renderworker,
+                function receiveParsedData(self,origin,parsed) {
+                    self.run('runUpdate',undefined,parsed);
+                    //self.run('drawFrame');
+                },
+                'receiveParsedData'
+            )
+
+            renderworker.post('subscribeToWorker',['decodeAndParseDevice',renderPort,'receiveParsedData']);
         }
-
-        workers.transferFunction(
-            renderworker,
-            function receiveParsedData(self,origin,parsed) {
-                self.run('runUpdate',undefined,parsed);
-                self.run('drawFrame');
-            },
-            'receiveParsedData'
-        )
-
-        renderworker.post('subscribeToWorker',['decodeAndParseDevice',renderPort,'receiveParsedData']);
-
     }
 
     // initWorkerChart(
