@@ -185,7 +185,7 @@ export const nrf5x_usbFilterSettings:{[key:string]:FilterSettings} = {
 
 ```
 
-You may also add filter settings to apply in the worker codecs automatically. There are additional controls to toggle them on the fly if you dig into teh stream.worker
+You may also add filter settings to apply in the worker codecs automatically. There are additional controls to toggle them on the fly if you dig into the stream.worker's routes
 
 ### Other
 
