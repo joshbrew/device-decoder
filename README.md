@@ -12,6 +12,8 @@ Live demo: https://devicedebugger.netlify.app
 
 ### Built-in drivers:
 
+See [`src/devices/README.md`](./src/devices/README.md) for adding your own drivers or customizing existing ones
+
 ```ts
 export const Devices = {
     BLE:{
