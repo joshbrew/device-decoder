@@ -117,7 +117,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                 },
                 'decodeDevice':function decodeDevice( //run a decoder based on a supported device spec
                     data:any, 
-                    deviceType:'BLE'|'USB',
+                    deviceType:'BLE'|'USB'|'BLE_OTHER'|'USB_OTHER'|'OTHER',
                     device:string, //serial devices get one codec, ble devices get a codec per read/notify characteristic property
                     service?:string,
                     characteristic?:string
@@ -130,7 +130,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                 },
                 'decodeAndParseDevice':function decodeAndParseDevice(
                     data:any, 
-                    deviceType:'BLE'|'USB',
+                    deviceType:'BLE'|'USB'|'BLE_OTHER'|'USB_OTHER'|'OTHER',
                     device:string, //serial devices get one codec, ble devices get a codec per read/notify characteristic property
                     service?:string,
                     characteristic?:string
@@ -138,10 +138,12 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
 
                     let decoded;
 
-                    if(deviceType === 'USB' && Devices[deviceType][device]?.codec) 
-                        decoded = Devices[deviceType][device].codec(data);
-                    else if (deviceType === 'BLE' && service && characteristic && Devices[deviceType][device]?.services[service as string]?.[characteristic as string]?.codec)
+                    if (deviceType === 'BLE' && service && characteristic && Devices[deviceType][device]?.services[service as string]?.[characteristic as string]?.codec)
                         decoded = Devices[deviceType][device].services[service][characteristic].codec(data);
+                    else if(Devices[deviceType][device]?.codec) 
+                        decoded = Devices[deviceType][device].codec(data);
+                    else decoded = data;
+                    
                     if(decoded) {
                         let parsed = globalThis.ArrayManip.reformatData(decoded);
                     

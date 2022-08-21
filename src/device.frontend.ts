@@ -23,7 +23,7 @@ export const workers = new WorkerService({
 
 //create streaming threads
 export function initDevice(
-    deviceType:'BLE'|'USB',
+    deviceType:'BLE'|'USB'|'OTHER'|'BLE_OTHER', //other includes prewritten drivers that don't fit our format very well, e.g. cloud streaming drivers or the musejs driver as they are self contained
     deviceName:string, //one of the supported settings in Devices
     ondecoded:((data:any) => void)|{[key:string]:(data:any)=>void}, //a single ondata function or an object with keys corresponding to BLE characteristics
     renderSettings?:{
@@ -67,6 +67,39 @@ export function initDevice(
         renderworker.post('subscribeToWorker',['decodeAndParseDevice',portId,'receiveParsedData']);
     }
 
+    if(deviceType.includes('OTHER')) {
+
+        if(typeof ondecoded === 'function') {
+            settings.ondata = (data:any) => {
+                streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName]).then(ondecoded);
+            };
+        }
+
+        return new Promise ((res,rej) => {
+            let init = settings.connect(settings);
+            let info = {
+                workers: {
+                    streamworker,
+                    renderworker
+                },
+                disconnect:() => {settings.disconnect();},
+                device:init
+            }
+            res(info);
+        }).catch((er)=>{
+            console.error(er);
+            workers.terminate(streamworker._id);
+        }) as Promise<{
+            workers:{
+                streamworker:WorkerInfo,
+                renderworker?:WorkerInfo
+            },
+            device:any,
+            disconnect:()=>void
+        }>;
+
+    }
+    
 
     if((settings as BLEDeviceOptions)?.services) {
         //ble
@@ -77,20 +110,20 @@ export function initDevice(
                 if(typeof ondecoded === 'function') {
                     if((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.notify) {
                         (settings as any).services[primaryUUID][characteristic].notifyCallback = (data:any) => {
-                            streamworker.run('decodeAndParseDevice',[data,'BLE',deviceName,primaryUUID,characteristic]).then(ondecoded);
+                            (streamworker as WorkerInfo).run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],[data]).then(ondecoded);
                         }
-                        break; //only subscribe to first notification
+                        break; //only subscribe to first notification in our list if only one ondecoded function provided
                     }
                 } else if(typeof ondecoded === 'object') {
                     if(ondecoded[characteristic]) {
                         if((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.notify) {
                             (settings as any).services[primaryUUID][characteristic].notifyCallback = (data:any) => {
-                                streamworker.run('decodeAndParseDevice',[data,'BLE',deviceName,primaryUUID,characteristic]).then(ondecoded[characteristic]);
+                                streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],[data]).then(ondecoded[characteristic]);
                             }
                         } 
                         if ((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.read) {
                             (settings as any).services[characteristic].readCallback = (data:any) => {
-                                streamworker.run('decodeAndParseDevice',[data,'BLE',deviceName,primaryUUID,characteristic]).then(ondecoded[characteristic]);
+                                streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],[data]).then(ondecoded[characteristic]);
                             }
                         }
                     }
@@ -155,13 +188,15 @@ export function initDevice(
                     pipeTo:{
                         route:'decodeAndParseDevice',
                         _id:portId, //direct message port access to skip the main thread
-                        extraArgs:['USB',deviceName]
+                        extraArgs:[deviceType,deviceName]
                     }
                 }) as Promise<{
                     _id:string,
                     settings:any,
                     info:Partial<SerialPortInfo>
                 }>).then((result) => {
+                    if(settings.write) serialworker.run('writeStream', [result._id,settings.write]);
+
                     res(Object.assign({
                         workers:{
                             streamworker,
@@ -249,7 +284,7 @@ export function createStreamPipeline(
         )
 
         renderworker.post('subscribeToWorker',['decodeAndParseDevice',renderPort,'receiveParsedData']);
-        
+
     }
 
     // initWorkerChart(

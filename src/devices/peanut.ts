@@ -10,7 +10,7 @@ import {bitflippin} from '../util/bitflippin'
 export const PeanutCodes = { //bytecode struct formats
     0x02: {type: 'POOR_SIGNAL',   format:'<B',                byteLength:1},
     0x90: {type: 'unfilteredHEG', format:'<i',                byteLength:4},
-    0x91: {type: 'filteredHEG',   format:'<i',                byteLength:4},
+    0x91: {type: 'heg',   format:'<i',                byteLength:4}, //filteredHEG
     0x93: {type: 'rawdata4',      format:'<iiii',             byteLength:4*4},
     0x94: {type: 'rawdata6',      format:'<iiiiii',           byteLength:4*6},
     0xA0: {type: 'sampleNumber',  format:'<i',                byteLength:4},
@@ -37,7 +37,7 @@ export function peanutcodec(data:any) {
             )
             let code = PeanutCodes[data[i]].type;
 
-            if(code === 'unfilteredHEG' || code === 'filteredHEG')
+            if(code === 'unfilteredHEG' || code === 'heg')
                 unpacked = unpacked[0]/256;
             else if (code === 'POOR_SIGNAL' || code === 'sampleNumber' || code === 'debug0' || code === 'debug1' || code === 'debug2' || code === 'debug3') 
                 unpacked = unpacked[0];
@@ -70,7 +70,7 @@ export const peanutSerialSettings = {
 
 export const peanutChartSettings: Partial<WebglLinePlotProps> = {
     lines: {
-        filteredHEG:{sps:10.101, nSec:60}
+        heg:{sps:10.101, nSec:60} //filteredHEG
     },
     generateNewLines:false,
     cleanGeneration:false

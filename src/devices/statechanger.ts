@@ -6,18 +6,18 @@ let textdecoder = new TextDecoder();
 
 export function statechangercodec(value:any) {
     //statechanger format is utf8
-    //Per line: timestamp, red, infrared, ratio, temperature
+    //Per line: timestamp, lred, linfrared, lheg, cred, cir, cheg, rred, rir, rheg
     let output = { //https://github.com/joshbrew/HEG_ESP32_Delobotomizer/blob/main/Firmware/MAX86141_HEG/MAX86141_HEG.h
         timestamp: 0,
         left_red: 0,
         left_infrared: 0,
-        left_ratio: 0,
+        left_heg: 0,
         center_red: 0,
         center_infrared: 0,
-        center_ratio: 0,
+        center_heg: 0,
         right_red: 0,
         right_infrared: 0,
-        right_ratio: 0
+        right_heg: 0
     }
 
     let txt = textdecoder.decode(value);
@@ -26,13 +26,13 @@ export function statechangercodec(value:any) {
         output.timestamp = parseInt(line[0]);
         output.left_red = parseInt(line[1]);
         output.left_infrared = parseInt(line[2]);
-        output.left_ratio = parseFloat(line[3]);
+        output.left_heg = parseFloat(line[3]);
         output.center_red = parseInt(line[4]);
         output.center_infrared = parseInt(line[5]);
-        output.center_ratio = parseFloat(line[6]);
+        output.center_heg = parseFloat(line[6]);
         output.right_red = parseInt(line[7]);
         output.right_infrared = parseInt(line[8]);
-        output.right_ratio = parseFloat(line[9]);
+        output.right_heg = parseFloat(line[9]);
 
         return output;
 
@@ -77,12 +77,14 @@ export const statechangerChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
         left_red:{nSec:60, sps:20},
         left_infrared:{nSec:60, sps:20},
-        left_ratio:{nSec:60, sps:20},
+        left_heg:{nSec:60, sps:20},
         center_red:{nSec:60, sps:20},
         center_infrared:{nSec:60, sps:20},
-        center_ratio:{nSec:60, sps:20},
+        center_heg:{nSec:60, sps:20},
         right_red:{nSec:60, sps:20},
         right_infrared:{nSec:60, sps:20},
-        right_ratio:{nSec:60, sps:20},
+        right_heg:{nSec:60, sps:20},
     }
 }
+
+//todo: command protocols

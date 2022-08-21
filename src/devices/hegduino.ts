@@ -5,12 +5,12 @@ let textdecoder = new TextDecoder();
 
 export function hegduinocodec(value:any) {
     //hegduino format is utf8
-    //Per line: timestamp, red, infrared, ratio, temperature
+    //Per line: timestamp, red, infrared, heg ratio, temperature
     let output = { //https://github.com/joshbrew/HEG_ESP32_Delobotomizer/blob/main/Firmware/MAX86141_HEG/MAX86141_HEG.h
         timestamp: 0,
         red: 0,
         infrared: 0,
-        ratio: 0,
+        heg: 0,
         ambient: 0,
         temperature: 0 //temp on v2, nonsense on v1
     }
@@ -21,13 +21,13 @@ export function hegduinocodec(value:any) {
         output.timestamp = Date.now();
         output.red = parseInt(line[0]);
         output.infrared = parseInt(line[1]);
-        output.ratio = parseFloat(line[2]);
+        output.heg = parseFloat(line[2]);
 
     } else if(line.length >= 5) {
         output.timestamp = parseInt(line[0]);
         output.red = parseInt(line[1]);
         output.infrared = parseInt(line[2]);
-        output.ratio = parseFloat(line[3]);
+        output.heg = parseFloat(line[3]);
         output.ambient = parseFloat(line[4]);
         output.temperature = parseFloat(line[5]);
 
@@ -38,7 +38,7 @@ export function hegduinocodec(value:any) {
 
 export const hegduinoSerialSettings = {
     baudRate:115200,
-    write:'t', //old firmware needs this
+    write:'t\n', //old firmware needs this
     codec:hegduinocodec
 }
 
@@ -75,7 +75,7 @@ export const hegduinoChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
         red:{nSec:60, sps:40},
         ir:{nSec:60, sps:40},
-        ratio:{nSec:60, sps:40},
+        heg:{nSec:60, sps:40},
         ambient:{nSec:60, sps:40},
         temperature:{nSec:60, sps:40},
     }

@@ -11,6 +11,7 @@ import { cognixionONE_EEG_codec, cognixionONEChartSettings, cognixionONEFilterSe
 import { peanutcodec, peanutChartSettings, peanutSerialSettings } from './peanut';
 import { nrf5x_usbcodec, nrf5x_usbChartSettings, nrf5x_usbFilterSettings, nrf5xBLESettings, nrf5xSerialSettings } from './nrf5x_usb';
 import { statechangerBLESettings, statechangerChartSettings, statechangercodec, statechangerSerialSettings } from './statechanger';
+import { museSettings } from './muse';
 
 //containe unique (non-default) BLE and Serial device connection settings + codecs to parse key:value pairs from streamed data channels
 export const Devices = {
@@ -31,6 +32,12 @@ export const Devices = {
         'peanut':peanutSerialSettings,
         'statechanger':statechangerSerialSettings,
         'cognixionONE':cytonSerialSettings
+    },
+    BLE_OTHER:{ //OTHER indicates drivers not written by us that do not fit into our format readily
+        'muse':museSettings
+    },
+    OTHER:{ 
+        'blueberry':undefined //this comes from a cloud server
     }
 };
 
