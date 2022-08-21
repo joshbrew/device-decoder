@@ -1,9 +1,8 @@
 {
   "name": "device-decoder",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Customizable multithreaded BLE and USB (or other) device connecting, sensor decoding, and (threaded) output rendering",
   "main": "dist/device.frontend.js",
-  "type": "module",
   "scripts": {
     "start": "tinybuild",
     "build": "tinybuild build",
@@ -23,7 +22,7 @@
   "license": "AGPL-3.0-or-later",
   "dependencies": {
     "@capacitor-community/bluetooth-le": "^1.8.3",
-    "graphscript": "~0.0.148",
+    "graphscript": "~0.0.150",
     "webgl-plot-utils": "~0.1.47"
   },
   "devDependencies": {

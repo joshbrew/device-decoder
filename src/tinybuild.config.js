@@ -36,4 +36,4 @@ const config = {
     //     keypath: "node_modules/tinybuild/tinybuild/node_server/ssl/key.pem" //if using https, this is required. See cert.pfx.md for instructions
     // }
 }
-export default config; //module.exports = config; //es5
+module.exports = config; //es5

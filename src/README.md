@@ -8,7 +8,7 @@ Supports Web Bluetooth API + Mobile Native (via `@capacitor-community/bluetooth-
 
 Easily add your own decoders to Devices by following the formats outlined at the above github link.
 
-<500kb dist, the worker is bundled into the main index for easier use, which doubles the size as it is a standalone compilation in a dataURL.
+~350kb dist. The worker is bundled into the main file as a dataURL for easier reuse, which doubles the size.
 
 ```ts
 

@@ -6,7 +6,7 @@ import { decoders } from './devices/index';
 import { WebglLinePlotUtil } from 'webgl-plot-utils'//'webgl-plot-utils';
 import { bitflippin } from "./util/bitflippin";
 import { BiquadChannelFilterer } from './util/BiquadFilters';
-import * as bfs from './storage/BFSUtils'
+//import * as bfs from './storage/BFSUtils'
 
 declare var WorkerGlobalScope;
 
