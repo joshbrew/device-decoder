@@ -27,6 +27,8 @@ renderSettings?: {
     };
     device: any;
     disconnect: () => void;
+    read: (command?: any) => any;
+    write: (command?: any) => any;
 }>;
 export declare function createStreamPipeline(dedicatedSerialWorker?: boolean, dedicatedRenderWorker?: boolean, renderSettings?: {
     canvas: HTMLCanvasElement;

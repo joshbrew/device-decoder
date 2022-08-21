@@ -9,7 +9,8 @@ import { FilterSettings } from '../util/BiquadFilters';
 
 export function cognixionONE_EEG_codec(data:any) {
     let arr; 
-    if(!data.buffer) arr = new Uint8Array(data);
+    if((data as DataView).getInt8) arr = new Uint8Array(data.buffer);
+    else if(!data.buffer) arr = new Uint8Array(data);
     else arr = data;
 
     let output = { //up to 7 samples

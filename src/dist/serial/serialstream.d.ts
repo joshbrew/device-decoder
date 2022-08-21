@@ -70,7 +70,7 @@ export declare class WebSerial extends bitflippin {
     setSignals(port: SerialPort, signals: any): any;
     createStream: (options: SerialStreamProps) => SerialStreamInfo;
     readStream(stream: SerialStreamInfo): SerialStreamInfo;
-    writeStream(stream: SerialStreamInfo | string, message: any): any;
+    writeStream(stream: SerialStreamInfo | string, message: any): boolean;
     closeStream(stream: SerialStreamInfo | string, onclose?: (info: SerialStreamInfo) => void): Promise<boolean>;
     static setStreamTransforms(stream: ReadableStream, transforms: {
         [key: string]: {

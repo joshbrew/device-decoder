@@ -79,7 +79,7 @@ export class BLEClient extends bitflippin {
                 this.reconnect(options.deviceId)
                     .then((device)=>{
                         res(this.setupDevice(device,options));
-                    });
+                    }).catch(rej);
             } else {
                 if(options) {
                     let deviceRequest:any = {
@@ -91,13 +91,13 @@ export class BLEClient extends bitflippin {
                     this.client.requestDevice(deviceRequest)
                         .then((device) => {
                             res(this.setupDevice(device, options));
-                        });
+                        }).catch(rej);
                 }
                 else {
                     this.client.requestDevice()
                         .then((device) => {
                             res(this.setupDevice(device, options));
-                        });
+                        }).catch(rej);
                 }
             }
             

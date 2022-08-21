@@ -5,7 +5,8 @@ import { bitflippin } from "../util/bitflippin";
 //ctr byte, 2 24 bit numbers (18 bit actual) or 6 bytes x 32 samples per packet, then 2 die temp 
 export function max3010xcodec(data:any) {
     let arr; 
-    if(!data.buffer) arr = new Uint8Array(data);
+    if((data as DataView).getInt8) arr = new Uint8Array(data.buffer);
+    else if(!data.buffer) arr = new Uint8Array(data);
     else arr = data;
 
     const output:any = {

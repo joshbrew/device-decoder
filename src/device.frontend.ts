@@ -8,6 +8,7 @@ import { BLEClient, BLEDeviceOptions, BLEDeviceInfo } from './ble/ble_client';
 import { workerCanvasRoutes } from 'graphscript';
 import { SerialPortOptions, SerialStreamProps, WebSerial } from './serial/serialstream';
 import { Devices } from './devices';
+import { TimeoutOptions } from '@capacitor-community/bluetooth-le';
 
 export function isMobile() {
     let check = false;
@@ -83,9 +84,15 @@ export function initDevice(
                     streamworker,
                     renderworker
                 },
-                disconnect:() => {settings.disconnect();},
-                device:init
-            }
+                disconnect:() => {settings.disconnect(settings);},
+                device:init,
+                read:(command?:any) => {
+                    if(settings.read) return new Promise((res,rej) => {res(settings.read(settings,command))});    
+                },
+                write:(command?:any) => {
+                    if(settings.write) return  new Promise((res,rej) => {res(settings.write(settings,command))});
+                }
+            }   
             res(info);
         }).catch((er)=>{
             console.error(er);
@@ -96,7 +103,9 @@ export function initDevice(
                 renderworker?:WorkerInfo
             },
             device:any,
-            disconnect:()=>void
+            disconnect:()=>void,
+            read:(command?:any)=>any,
+            write:(command?:any)=>any
         }>;
 
     }
@@ -106,25 +115,25 @@ export function initDevice(
         //ble
         //if single ondecoded function provided, apply to the first characteristic with notify:true else specified
         for(const primaryUUID in (settings as BLEDeviceOptions).services) {
-            console.log(primaryUUID)
+            //console.log(primaryUUID)
             for(const characteristic in (settings as any).services[primaryUUID]) {
                 if(typeof ondecoded === 'function') {
                     if((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.notify) {
-                        (settings as any).services[primaryUUID][characteristic].notifyCallback = (data:any) => {
-                            (streamworker as WorkerInfo).run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],[data]).then(ondecoded);
+                        (settings as any).services[primaryUUID][characteristic].notifyCallback = (data:DataView) => {
+                            (streamworker as WorkerInfo).run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],[data.buffer]).then(ondecoded);
                         }
                         break; //only subscribe to first notification in our list if only one ondecoded function provided
                     }
                 } else if(typeof ondecoded === 'object') {
                     if(ondecoded[characteristic]) {
                         if((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.notify) {
-                            (settings as any).services[primaryUUID][characteristic].notifyCallback = (data:any) => {
-                                streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],[data]).then(ondecoded[characteristic]);
+                            (settings as any).services[primaryUUID][characteristic].notifyCallback = (data:DataView) => {
+                                streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],[data.buffer]).then(ondecoded[characteristic]);
                             }
                         } 
                         if ((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.read) {
-                            (settings as any).services[characteristic].readCallback = (data:any) => {
-                                streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],[data]).then(ondecoded[characteristic]);
+                            (settings as any).services[characteristic].readCallback = (data:DataView) => {
+                                streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],[data.buffer]).then(ondecoded[characteristic]);
                             }
                         }
                     }
@@ -137,7 +146,7 @@ export function initDevice(
             if(renderworker) workers.terminate(renderworker._id);
         }
 
-        return new Promise((res,rej) => {
+        return (new Promise((res,rej) => {
             BLE.setup(settings as BLEDeviceOptions).then((result) => {
                 res(Object.assign({
                     workers:{
@@ -145,11 +154,15 @@ export function initDevice(
                         renderworker
                     },
                     device:result,
-                    disconnect:() => { BLE.disconnect(result.deviceId as string) }
+                    disconnect:() => { BLE.disconnect(result.deviceId as string) },
+                    read:(command:{ service:string, characteristic:string, ondata?:(data:DataView)=>void, timeout?:TimeoutOptions }) => { return BLE.read(result.device, command.service, command.characteristic, command.ondata, command.timeout) },
+                    write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions}) => { return BLE.write(result.device, command.service, command.characteristic, command.data, command.callback, command.timeout) }
                 }));
             }).catch((er)=>{
                 console.error(er);
                 workers.terminate(streamworker._id);
+                if(renderworker) workers.terminate(renderworker._id);
+                rej(er);
             });
         }) as Promise<{
             workers:{
@@ -157,8 +170,10 @@ export function initDevice(
                 renderworker?:WorkerInfo
             },
             device:BLEDeviceInfo,
-            disconnect:()=>void
-        }>
+            disconnect:()=>void,
+            read:(command:{ service:string, characteristic:string, ondata?:(data:DataView)=>void, timeout?:TimeoutOptions }) => Promise<DataView>,
+            write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions})=>Promise<void>
+        }>)
         
     } else if ((settings as (SerialStreamProps & SerialPortOptions))?.baudRate) {
         //serial
@@ -172,7 +187,9 @@ export function initDevice(
                     if(renderworker) workers.terminate(renderworker._id);
                 }
             }
-        })
+        });
+
+        serialworker.post('setupSerial');
 
         let portId = workers.establishMessageChannel(streamworker.worker,serialworker.worker);
 
@@ -186,6 +203,8 @@ export function initDevice(
                     usbVendorId:info.usbVendorId,
                     usbProductId:info.usbProductId,
                     bufferSize:settings.bufferSize,
+                    buffering:settings.buffering ? settings.buffering : undefined,
+                    frequency:settings.frequency ? settings.frequency : undefined,
                     pipeTo:{
                         route:'decodeAndParseDevice',
                         _id:portId, //direct message port access to skip the main thread
@@ -196,7 +215,9 @@ export function initDevice(
                     settings:any,
                     info:Partial<SerialPortInfo>
                 }>).then((result) => {
-                    if(settings.write) serialworker.run('writeStream', [result._id,settings.write]);
+                    if(settings.write) serialworker.post('writeStream', [result._id,settings.write]);
+
+                    if(typeof ondecoded === 'function') streamworker.subscribe('decodeAndParseDevice',ondecoded);
 
                     res(Object.assign({
                         workers:{
@@ -205,7 +226,9 @@ export function initDevice(
                             serialworker
                         },
                         device:result,
-                        disconnect:() => {serialworker.post('closeStream',result._id);}
+                        disconnect:() => {serialworker.post('closeStream',result._id);},
+                        read:() => { return new Promise((res,rej) => { let sub; sub = streamworker.subscribe('decodeAndParseDevice',(result)=>{ serialworker.unsubscribe('decodeAndParseDevice',sub); res(result); });}); }, //we are already reading, just return the latest result from decodeAndParseDevice
+                        write:(command:any) => {return serialworker.run('writeStream', [result._id,command])}
                     }));
                 });
             }).catch((er)=>{
@@ -223,7 +246,9 @@ export function initDevice(
                 settings:any,
                 info:Partial<SerialPortInfo>
             },
-            disconnect:()=>void
+            disconnect:()=>void,
+            read:()=>Promise<any>,
+            write:(command:any)=>Promise<boolean>
         }>
         
     }

@@ -136,7 +136,9 @@ export const museSettings = { //include muse-js and import {MuseClient} from 'mu
     },
     ondata:(parsed:any)=>{
         console.log(parsed); //after transforming
-    }
+    },
+    //read:(info:any,command?:any)=>{},
+    //write:(info:any,command?:any)=>{}
 }
 
 

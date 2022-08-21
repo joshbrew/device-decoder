@@ -242,6 +242,7 @@ export class WebSerial extends bitflippin {
             let writer = stream.port.writable.getWriter();
             writer.write(WebSerial.toDataView(message));
             writer.releaseLock();
+            return true;
         } return undefined;
     }
 

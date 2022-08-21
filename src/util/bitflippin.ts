@@ -92,6 +92,8 @@ export class bitflippin {
                 value = new DataView(value); 
             } else if(Array.isArray(value)) { //assume it's an array-defined uint8 byte buffer that we need to convert
                 value = new DataView(Uint8Array.from(value).buffer);
+            } else if (typeof value === 'object') {
+                value = new TextEncoder().encode(JSON.stringify(value)); //try to force it
             }
         }
         return value as DataView;

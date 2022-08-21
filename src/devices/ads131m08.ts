@@ -12,7 +12,8 @@ import { bitflippin } from "../util/bitflippin";
 
 export function ads131m08codec(data:any) {
     let arr; 
-    if(!data.buffer) arr = new Uint8Array(data);
+    if((data as DataView).getInt8) arr = new Uint8Array(data.buffer);
+    else if(!data.buffer) arr = new Uint8Array(data);
     else arr = data;
 
     let output = {

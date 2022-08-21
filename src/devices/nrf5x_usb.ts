@@ -6,7 +6,8 @@ import { mpu6050codec } from './mpu6050';
 
 export function nrf5x_usbcodec(data:any) {
     let arr:Uint8Array; 
-    if(!data.buffer) arr = new Uint8Array(data); 
+    if((data as DataView).getInt8) arr = new Uint8Array(data.buffer);
+    else if(!data.buffer) arr = new Uint8Array(data);
     else arr = data as Uint8Array;
     //head of each byte packet is the search byte //240,240
     //packetID: 2: ads131m08 1, 3: ads131m08 2, 4: MPU6050, 5: MAX30102

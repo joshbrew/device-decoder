@@ -5,7 +5,8 @@ import { bitflippin } from "../util/bitflippin";
 //Packet format: ctr byte , 20 samples x 12 bytes , 16 bit die temp 
 export function mpu6050codec(data:any) {
     let arr; 
-    if(!data.buffer) arr = new Uint8Array(data);
+    if((data as DataView).getInt8) arr = new Uint8Array(data.buffer);
+    else if(!data.buffer) arr = new Uint8Array(data);
     else arr = data;
 
     let output = {

@@ -66,7 +66,7 @@ export const filterPresets:{[key:string]:{[key:string]:FilterSettings}} = {
     'cognixionONE_BLE':cognixionONEFilterSettings, //see the super secret docs
     'hegduino':undefined, //https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
     //'peanut':{} //https://github.com/joshbrew/peanutjs/blob/main/peanut.js
-    'nrf5x_usb':nrf5x_usbFilterSettings,
+    'nrf5x':nrf5x_usbFilterSettings,
     //...custom?
 }
 
@@ -85,7 +85,7 @@ export const chartSettings:{[key:string]:Partial<WebglLinePlotProps>} = {
     'cognixionONE_BLE':cognixionONEChartSettings, //see the super secret docs
     'hegduino':hegduinoChartSettings, //https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
     //'peanut':{} //https://github.com/joshbrew/peanutjs/blob/main/peanut.js
-    'nrf5x_usb':nrf5x_usbChartSettings,
+    'nrf5x':nrf5x_usbChartSettings,
     'statechanger':statechangerChartSettings,
     'peanut':peanutChartSettings,
     'blueberry':blueberryChartSettings,
@@ -110,7 +110,7 @@ export const decoders:any = {
     'cyton':cytoncodec, ///old code: https://github.com/joshbrew/cyton.js
     'cognixionONE_BLE':cognixionONE_EEG_codec, //see the super secret docs
     'hegduino':hegduinocodec, //old code: https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
-    'nrf5x_usb':nrf5x_usbcodec,
+    'nrf5x':nrf5x_usbcodec,
     'peanut':peanutcodec, //old code: https://github.com/joshbrew/peanutjs/blob/main/peanut.js
     'statechanger':statechangercodec,
     'blueberry':blueberrycodec

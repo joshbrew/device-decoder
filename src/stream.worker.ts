@@ -133,22 +133,24 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                 'decodeAndParseDevice':function decodeAndParseDevice(
                     data:any, 
                     deviceType:'BLE'|'USB'|'BLE_OTHER'|'USB_OTHER'|'OTHER',
-                    device:string, //serial devices get one codec, ble devices get a codec per read/notify characteristic property
+                    deviceName:string, //serial devices get one codec, ble devices get a codec per read/notify characteristic property
                     service?:string,
                     characteristic?:string
                 ) {
 
                     let decoded;
 
-                    if (deviceType === 'BLE' && service && characteristic && Devices[deviceType][device]?.services[service as string]?.[characteristic as string]?.codec)
-                        decoded = Devices[deviceType][device].services[service][characteristic].codec(data);
-                    else if(Devices[deviceType][device]?.codec) 
-                        decoded = Devices[deviceType][device].codec(data);
+                    if (deviceType === 'BLE' && service && characteristic && Devices[deviceType][deviceName]?.services[service as string]?.[characteristic as string]?.codec)
+                        decoded = Devices[deviceType][deviceName].services[service][characteristic].codec(data);
+                    else if(Devices[deviceType][deviceName]?.codec) 
+                        decoded = Devices[deviceType][deviceName].codec(data);
                     else decoded = data;
-                    
+
+                    //console.log(decoded);
+
                     if(decoded) {
                         let parsed = globalThis.ArrayManip.reformatData(decoded);
-                    
+
                         if(parsed) {
                             if(globalThis.filtering) {
                                 for(const prop in parsed) {

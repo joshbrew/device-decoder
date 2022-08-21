@@ -5,7 +5,8 @@ import { bitflippin } from "../util/bitflippin";
 //128 channels x 3 bytes per channel each line, plus 6x2 bytes for the IMU. First byte is counter byte;
 export function freeeeg128codec(data:any) {
     let arr; 
-    if(!data.buffer) arr = new Uint8Array(data);
+    if((data as DataView).getInt8) arr = new Uint8Array(data.buffer);
+    else if(!data.buffer) arr = new Uint8Array(data);
     else arr = data;
     
     let output:any = {};
