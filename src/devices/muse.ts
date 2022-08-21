@@ -17,7 +17,7 @@ export const museSettings = { //include muse-js and import {MuseClient} from 'mu
         return new Promise(async (res,rej) => {
             let _id = `muse${Math.floor(Math.random()*1000000000000000)}`;
 
-            if(!('MuseClient' in window)) { document.head.insertAdjacentHTML('beforeend',`<script src="https://cdn.jsdelivr.net/npm/muse-js-tinybuild@0.0.2/dist/muse.min.js"></script>`) }
+            if(!('MuseClient' in window)) { document.head.insertAdjacentHTML('beforeend',`<script src="https://cdn.jsdelivr.net/npm/muse-js-tinybuild@1.0.0/dist/muse.min.js"></script>`) }
 
             //@ts-ignore
             let client = new MuseClient();
