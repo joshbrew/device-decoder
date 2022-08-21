@@ -81,7 +81,7 @@ if(info) { //returns a promise
 
 See [`test.ts`](./test.ts) for an example of it in action.
 
-#### Features: 
+#### Debugger app Features: 
 - Generate consoles and charts for each connected BLE and Serial device. Decode raw data using our presets or write-in your own decoders. Each serial device or notification stream gets dedicated workers for parsing and charting data. 
 - See BLE services based on the primary service characteristics you provide (due to security rules in browser you need to know the UUIDs)
 - Apply digital filters and scalars to charts, toggle lines being viewed, attempt to generate lines in unknown streams
@@ -91,6 +91,8 @@ See [`test.ts`](./test.ts) for an example of it in action.
 
 - For BLE: @capacitor-community/ble library so this can be dropped right into native mobile applications without changing your code. 
 - For USB: Web Serial API, which is not available on mobile.
+
+Live demo: https://devicedebugger.netlify.app
 
 #### TODO:
 - csvs on a data collection thread, use indexeddb to prevent memory overflows
