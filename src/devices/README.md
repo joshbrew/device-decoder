@@ -222,6 +222,8 @@ export const customDevice = {
     ondata:(data:any)=>{ return customDevice.codec(data); }, //-> ondata callback you can customize
     ondisconnect:(info)=>{ console.log('disconnected!', info) }, //-> disconnect callback you can customize
     codec:(data:any)=>{ return JSON.stringify(data); } //-> optionally used to transform data e.g. on a separate thread, libraries like muse-js already do some of this for us so we can customize ondata to pass slightly modified outputs to threads, and use the codec to do some kind of special math on a thread
+    read?:(command:any)=>{ return device.read(command);}
+    write?:(command:any)=>{ return device.write(command); }
 }
 
 ```
