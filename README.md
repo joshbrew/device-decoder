@@ -15,13 +15,15 @@ Live demo: https://devicedebugger.netlify.app
 See [`src/devices/README.md`](./src/devices/README.md) for adding your own drivers or customizing existing ones
 
 ```ts
+//containe unique (non-default) BLE and Serial device connection settings + codecs to parse key:value pairs from streamed data channels
 export const Devices = {
     BLE:{
         'nrf5x':nrf5xBLESettings,
         'hegduino':hegduinoBLESettings,
         'cognixionONE':cognixionONEBLESettings,
         'statechanger':statechangerBLESettings,
-        'blueberry':blueberryBLESettings
+        'blueberry':blueberryBLESettings,
+        'blueberry2':blueberry2BLESettings
     },
     USB:{
         'nrf5x':nrf5xSerialSettings,
@@ -40,7 +42,7 @@ export const Devices = {
     },
     USB_OTHER : {},
     OTHER : {}
-}
+};
 
 ```
 

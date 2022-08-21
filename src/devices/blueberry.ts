@@ -4,9 +4,9 @@ import { BLEDeviceOptions } from "../ble/ble_client";
 export function blueberrycodec(value:DataView) {
 
     let output = {
-        LED1: value.getInt32(2),
-        LED2: value.getInt32(6),
-        LED3: value.getInt32(10)
+        red: value.getInt32(2),
+        ir: value.getInt32(6),
+        ir2: value.getInt32(10)
     }
 
     return output;
@@ -32,8 +32,8 @@ export const blueberryBLESettings = {
 
 export const blueberryChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
-        LED1:{nSec:60, sps:40},
-        LED2:{nSec:60, sps:40},
-        LED3:{nSec:60, sps:40}
+        red:{nSec:60, sps:40},
+        ir:{nSec:60, sps:40},
+        ir2:{nSec:60, sps:40}
     }
 }

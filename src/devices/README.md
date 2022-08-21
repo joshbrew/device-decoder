@@ -241,7 +241,8 @@ export const Devices = {
         'hegduino':hegduinoBLESettings,
         'cognixionONE':cognixionONEBLESettings,
         'statechanger':statechangerBLESettings,
-        'blueberry':blueberryBLESettings
+        'blueberry':blueberryBLESettings,
+        'blueberry2':blueberry2BLESettings
     },
     USB:{
         'nrf5x':nrf5xSerialSettings,
@@ -257,8 +258,8 @@ export const Devices = {
     },
     BLE_OTHER:{ //OTHER indicates drivers not written by us that do not fit into our format readily, but we can generalize easily to get the multithreading benefits
         'muse':museSettings
-    }
-    USB_OTHER : {}
+    },
+    USB_OTHER : {},
     OTHER : {}
 };
 
