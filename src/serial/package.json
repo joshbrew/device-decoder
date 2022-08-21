@@ -1,8 +1,10 @@
 {
   "name": "webserial-wrapper",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Convenience features for the Web Serial API.",
-  "main": "index.js",
+  "main": "dist/serialstream.js",
+  "module":"dist/serialstream.esm.js",
+  "types":"dist/serialstream.d.ts",
   "type": "module",
   "scripts": {
     "start": "tinybuild",
