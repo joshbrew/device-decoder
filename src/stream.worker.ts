@@ -1,4 +1,6 @@
-import { WorkerService, unsafeRoutes, proxyWorkerRoutes, workerCanvasRoutes, GPUService, parseFunctionFromText } from 'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
+import { WorkerService, unsafeRoutes, proxyWorkerRoutes, workerCanvasRoutes, 
+    //GPUService, 
+    parseFunctionFromText } from 'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
 import { WebSerial } from './serial/serialstream'; //extended classes need to be imported for compilation
 import { decoders, Devices } from './devices/index';
 //import { WebglLinePlotUtil } from '../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils'//'webgl-plot-utils';
@@ -32,7 +34,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
     (self as any).SERVICE = new WorkerService({
         //props:{} //could set the props instead of globalThis but it really does not matter unless you want to bake in for more complex service modules
         routes:[
-            GPUService as any,
+            //GPUService as any,
             proxyWorkerRoutes,
             workerCanvasRoutes,
             unsafeRoutes, //allows dynamic route loading
