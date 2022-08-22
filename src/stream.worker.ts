@@ -1,4 +1,7 @@
-import { WorkerService, unsafeRoutes, proxyWorkerRoutes, workerCanvasRoutes, 
+import { 
+    WorkerService, 
+    unsafeRoutes, 
+    workerCanvasRoutes, 
     //GPUService, 
     parseFunctionFromText } from 'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
 import { WebSerial } from './serial/serialstream'; //extended classes need to be imported for compilation
@@ -23,19 +26,18 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
     globalThis.decoder = 'raw';
     globalThis.bitflippin = bitflippin;
     globalThis.devices = Devices;
-    //globalThis.WebglLinePlotUtil = WebglLinePlotUtil;
-    //globalThis.runningAnim = true;
     globalThis.filtering = true;
     globalThis.filters = {};
     globalThis.BiquadChannelFilterer = BiquadChannelFilterer;
     globalThis.ArrayManip = ArrayManip; //static array manipulation methods
+    //globalThis.WebglLinePlotUtil = WebglLinePlotUtil;
+    //globalThis.runningAnim = true;
     //console.log(self.SERVICE)
 
     (self as any).SERVICE = new WorkerService({
         //props:{} //could set the props instead of globalThis but it really does not matter unless you want to bake in for more complex service modules
         routes:[
             //GPUService as any,
-            proxyWorkerRoutes,
             workerCanvasRoutes,
             unsafeRoutes, //allows dynamic route loading
             { //serial API routes

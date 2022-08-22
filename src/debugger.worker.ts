@@ -1,4 +1,7 @@
-import { WorkerService, unsafeRoutes, proxyWorkerRoutes, workerCanvasRoutes,
+import { 
+    WorkerService, 
+    unsafeRoutes, 
+    workerCanvasRoutes,
      //GPUService 
     } from 'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
 import { WebSerial } from './serial/serialstream'; //extended classes need to be imported for compilation
@@ -14,7 +17,6 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
     (self as any).SERVICE = new WorkerService({
         routes:[
             //GPUService as any,
-            proxyWorkerRoutes,
             workerCanvasRoutes,
             unsafeRoutes //allows dynamic route loading
         ],

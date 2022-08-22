@@ -32,6 +32,8 @@ export function initDevice(
         canvas:HTMLCanvasElement,
         context:string,
         _id?:string,
+        width?:number,
+        height?:number,
         draw?:string|((
             self, canvas, context
         ) => void),
@@ -42,7 +44,8 @@ export function initDevice(
         clear?:string|((
             self, canvas, context
         ) => void),
-        animating?:boolean //can manually make draw calls if you post 'drawFrame' with the animation _id
+        animating?:boolean, //can manually make draw calls if you post 'drawFrame' with the animation _id
+        renderworker?:WorkerInfo
     }
 ){
     let settings = Devices[deviceType][deviceName];
@@ -50,21 +53,28 @@ export function initDevice(
     let streamworker, renderworker;
     if(settings) streamworker = workers.addWorker({url:gsworker});
     if(renderSettings) {
-        renderworker = workers.addWorker({url:gsworker, _id:renderSettings._id});
-        let portId = workers.establishMessageChannel(streamworker.worker,renderworker.worker);
-
-        workers.run('transferCanvas',renderworker.worker,renderSettings);
+        if(!renderSettings.renderworker) {
+            renderworker = workers.addWorker({url:gsworker});
             
-        //workers.run('startAnim');
+            //workers.run('startAnim');
+    
+            workers.transferFunction(
+                renderworker,
+                function receiveParsedData(self,origin,parsed) {
+                    self.run('runUpdate',undefined,parsed);
+                    //self.run('drawFrame');
+                },
+                'receiveParsedData'
+            )
+        }
+        else {
+            renderworker = renderSettings.renderworker;
+            delete renderSettings.renderworker;
+        }
 
-        workers.transferFunction(
-            renderworker,
-            function receiveParsedData(self,origin,parsed) {
-                self.run('runUpdate',undefined,parsed);
-                //self.run('drawFrame');
-            },
-            'receiveParsedData'
-        )
+        if(renderSettings.canvas || renderSettings._id) workers.run('transferCanvas',renderworker.worker,renderSettings);
+
+        let portId = workers.establishMessageChannel(streamworker.worker,renderworker.worker);
 
         renderworker.post('subscribeToWorker',['decodeAndParseDevice',portId,'receiveParsedData']);
     }

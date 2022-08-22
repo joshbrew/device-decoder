@@ -1,6 +1,6 @@
 import {SerialStreamInfo, WebSerial} from './src/serial/serialstream'
 import {BLEClient, BLEDeviceOptions} from './src/ble/ble_client'
-import {Router, DOMService, proxyWorkerRoutes, workerCanvasRoutes, DOMElement } from 'graphscript'//'../GraphServiceRouter/index'//
+import {Router, DOMService, workerCanvasRoutes, DOMElement } from 'graphscript'//'../GraphServiceRouter/index'//
 import { ElementInfo, ElementProps } from 'graphscript/dist/services/dom/types/element';
 import { ComponentProps } from 'graphscript/dist/services/dom/types/component';
 import { decoders, chartSettings, filterPresets } from './src/devices/index'
@@ -1387,7 +1387,6 @@ const domtree = {
 
 const router = new Router([
     workers,
-    proxyWorkerRoutes, 
     workerCanvasRoutes,
     new DOMService({routes:domtree})
 ]);
