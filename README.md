@@ -38,7 +38,8 @@ export const Devices = {
         'cognixionONE':cytonSerialSettings
     },
     BLE_OTHER:{ //OTHER indicates drivers not written by us that do not fit into our format readily, but we can generalize easily to get the multithreading benefits
-        'muse':museSettings
+        'muse':museSettings,
+        'ganglion':ganglionSettings
     },
     USB_OTHER : {},
     OTHER : {}
