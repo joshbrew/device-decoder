@@ -132,6 +132,30 @@ export declare const Devices: {
             ondisconnect: (info: any) => void;
             ondata: (parsed: any) => void;
         };
+        ganglion: {
+            connect: (settings?: any) => Promise<unknown>;
+            codec: (reading: any) => {
+                0: any;
+                1: any;
+                2: any;
+                3: any;
+                ax?: undefined;
+                ay?: undefined;
+                az?: undefined;
+            } | {
+                ax: any;
+                ay: any;
+                az: any;
+                0?: undefined;
+                1?: undefined;
+                2?: undefined;
+                3?: undefined;
+            };
+            disconnect: (info: any) => void;
+            onconnect: (info: any) => void;
+            ondisconnect: (info: any) => void;
+            ondata: (parsed: any) => void;
+        };
     };
     USB_OTHER: {};
     OTHER: {};

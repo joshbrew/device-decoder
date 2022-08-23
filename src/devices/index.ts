@@ -14,6 +14,7 @@ import { statechangerBLESettings, statechangerChartSettings, statechangercodec, 
 import { museSettings } from './muse';
 import { blueberryBLESettings, blueberryChartSettings, blueberrycodec } from './blueberry';
 import { blueberry2BLESettings, blueberry2ChartSettings } from './blueberry2';
+import { ganglionSettings, ganglionFilterSettings, ganglionChartSettings } from './ganglion';
 
 //containe unique (non-default) BLE and Serial device connection settings + codecs to parse key:value pairs from streamed data channels
 export const Devices = {
@@ -38,7 +39,8 @@ export const Devices = {
         'cognixionONE':cytonSerialSettings
     },
     BLE_OTHER:{ //OTHER indicates drivers not written by us that do not fit into our format readily, but we can generalize easily to get the multithreading benefits
-        'muse':museSettings
+        'muse':museSettings,
+        'ganglion':ganglionSettings
     },
     USB_OTHER : {},
     OTHER : {}
@@ -67,6 +69,7 @@ export const filterPresets:{[key:string]:{[key:string]:FilterSettings}} = {
     'hegduino':undefined, //https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
     //'peanut':{} //https://github.com/joshbrew/peanutjs/blob/main/peanut.js
     'nrf5x':nrf5x_usbFilterSettings,
+    'ganglion':ganglionFilterSettings
     //...custom?
 }
 
@@ -89,7 +92,8 @@ export const chartSettings:{[key:string]:Partial<WebglLinePlotProps>} = {
     'statechanger':statechangerChartSettings,
     'peanut':peanutChartSettings,
     'blueberry':blueberryChartSettings,
-    'blueberry2':blueberry2ChartSettings
+    'blueberry2':blueberry2ChartSettings,
+    'ganglion':ganglionChartSettings
     //...custom?
 }
 
