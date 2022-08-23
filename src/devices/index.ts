@@ -15,6 +15,7 @@ import { museSettings } from './muse';
 import { blueberryBLESettings, blueberryChartSettings, blueberrycodec } from './blueberry';
 import { blueberry2BLESettings, blueberry2ChartSettings } from './blueberry2';
 import { ganglionSettings, ganglionFilterSettings, ganglionChartSettings } from './ganglion';
+import { heartRateBLESettings, hrcodec } from './genericBLE';
 
 //containe unique (non-default) BLE and Serial device connection settings + codecs to parse key:value pairs from streamed data channels
 export const Devices = {
@@ -24,7 +25,8 @@ export const Devices = {
         'cognixionONE':cognixionONEBLESettings,
         'statechanger':statechangerBLESettings,
         'blueberry':blueberryBLESettings,
-        'blueberry2':blueberry2BLESettings
+        'blueberry2':blueberry2BLESettings,
+        'heartrate':heartRateBLESettings
     },
     USB:{
         'nrf5x':nrf5xSerialSettings,
@@ -117,7 +119,8 @@ export const decoders:any = {
     'nrf5x':nrf5x_usbcodec,
     'peanut':peanutcodec, //old code: https://github.com/joshbrew/peanutjs/blob/main/peanut.js
     'statechanger':statechangercodec,
-    'blueberry':blueberrycodec
+    'blueberry':blueberrycodec,
+    'heart_rate':hrcodec
     //...custom?
 }
 

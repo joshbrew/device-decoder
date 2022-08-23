@@ -11,6 +11,7 @@ import { cognixionONE_EEG_codec } from './cognixionONE';
 import { peanutcodec } from './peanut';
 import { nrf5x_usbcodec } from './nrf5x_usb';
 import { statechangercodec } from './statechanger';
+import { hrcodec } from './genericBLE';
 export declare const Devices: {
     BLE: {
         nrf5x: {
@@ -65,6 +66,17 @@ export declare const Devices: {
         statechanger: import("../ble/ble_client").BLEDeviceOptions;
         blueberry: import("../ble/ble_client").BLEDeviceOptions;
         blueberry2: import("../ble/ble_client").BLEDeviceOptions;
+        heartrate: {
+            services: {
+                heart_rate: {
+                    heart_rate_measurement: {
+                        notify: boolean;
+                        notifyCallback: any;
+                        codec: typeof hrcodec;
+                    };
+                };
+            };
+        };
     };
     USB: {
         nrf5x: {
