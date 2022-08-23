@@ -3,22 +3,26 @@ import { BLEDeviceOptions } from "../ble/ble_client";
 
 export function blueberryshortcodec(value:DataView) {
 
-    let output = {
+    let output:any = {
         sred: value.getInt32(2),
         sir: value.getInt32(6),
         sir2: value.getInt32(10)
     }
+
+    output.sheg = output.sred / (0.5*(output.sir + output.sir2));
 
     return output;
 }
 
 export function blueberrylongcodec(value:DataView) {
 
-    let output = {
-        lred: value.getInt32(2),
-        lir: value.getInt32(6),
-        lir2: value.getInt32(10)
+    let output:any = {
+        red: value.getInt32(2),
+        ir: value.getInt32(6),
+        ir2: value.getInt32(10)
     }
+
+    output.heg = output.sred / (0.5*(output.ir + output.ir2));
 
     return output;
 }
@@ -48,11 +52,13 @@ export const blueberry2BLESettings = {
 
 export const blueberry2ChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
+        red:{nSec:60, sps:40},
+        ir:{nSec:60, sps:40},
+        ir2:{nSec:60, sps:40},
+        heg:{nSec:60, sps:40},
         sred:{nSec:60, sps:40},
         sir:{nSec:60, sps:40},
         sir2:{nSec:60, sps:40},
-        lred:{nSec:60, sps:40},
-        lir:{nSec:60, sps:40},
-        lir2:{nSec:60, sps:40}
+        sheg:{nSec:60, sps:40}
     }
 }
