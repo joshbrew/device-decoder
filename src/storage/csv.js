@@ -170,10 +170,6 @@ export function toISOLocal(d) {
  *      FP1_FFT: [[0,1,2,3],[...],...], //e.g. periodic FFT data with different timing. Arrays of arrays get multiple columns
  *      FP2:[etc],...   
  *    }]
- *  },
- *  existing: {
- *      header:[], //header: data.substring(0,data.indexOf('\\n')) //
- *      data:'' //the rest of the data 
  *  }
  * }
  * 
