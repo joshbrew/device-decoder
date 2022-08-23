@@ -14,6 +14,8 @@ Live demo: https://devicedebugger.netlify.app
 
 See [`src/devices/README.md`](./src/devices/README.md) for adding your own drivers or customizing existing ones
 
+
+
 ```ts
 //containe unique (non-default) BLE and Serial device connection settings + codecs to parse key:value pairs from streamed data channels
 export const Devices = {
@@ -23,7 +25,8 @@ export const Devices = {
         'cognixionONE':cognixionONEBLESettings,
         'statechanger':statechangerBLESettings,
         'blueberry':blueberryBLESettings,
-        'blueberry2':blueberry2BLESettings
+        'blueberry2':blueberry2BLESettings,
+        'heart_rate':heartRateBLESettings //generic bluetooth heart rate characteristic (compatible with many devices)
     },
     USB:{
         'nrf5x':nrf5xSerialSettings,
@@ -57,6 +60,11 @@ export const Devices = {
 - [`device.frontend.ts`](./src)
 
 Use `initDevice` and provide settings based on the above Devices object to create a multithreaded decoding and rendering pipeline.
+
+You can also import initDevice and Devices directly into browser from the cdnjs link (installed to window.initDevice and window.Devices) via 
+```html
+<script src="https://cdn.jsdelivr.net/npm/device-decoder@latest/dist/device.frontend.js"></script>
+```
 
 ```ts
 let info = initDevice(

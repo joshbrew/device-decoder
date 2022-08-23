@@ -243,7 +243,8 @@ export const Devices = {
         'cognixionONE':cognixionONEBLESettings,
         'statechanger':statechangerBLESettings,
         'blueberry':blueberryBLESettings,
-        'blueberry2':blueberry2BLESettings
+        'blueberry2':blueberry2BLESettings,
+        'heart_rate':heartRateBLESettings //generic bluetooth heart rate characteristic (compatible with many devices)
     },
     USB:{
         'nrf5x':nrf5xSerialSettings,

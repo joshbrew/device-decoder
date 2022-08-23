@@ -13,9 +13,9 @@ const config = {
         bundleHTML: false, //wrap the first entry point file as a plain js script in a boilerplate html file, frontend scripts can be run standalone like a .exe! Server serves this as start page if set to true.
         //minify: false, //https://esbuild.github.io/api/#minify
         minifyWhitespace:true,
-        sourcemap: false
+        sourcemap: false,
         //globalThis:null //'mymodule'
-        //globals:{'index.js':['Graph']}
+        globals:{'device.frontend.ts':['initDevice','Devices']} //installed to window specifically
         //init:{'index.js':function(bundle) { console.log('prepackaged bundle script!', bundle); }}      
         
     },
