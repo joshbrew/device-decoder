@@ -313,7 +313,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                         }
                     }
                 },
-                'createAlgorithmContext': function createAlgorithmContext( //returns id of algorithm for calling it on server
+                'createAlgorithmContext': function creatalg( //returns id of algorithm for calling it on server
                     options:AlgorithmContextProps|string,
                     inputs?:{[key:string]:any} //e.g. set the sample rate for this run
                 ){
