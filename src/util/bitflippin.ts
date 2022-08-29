@@ -117,6 +117,70 @@ export class bitflippin {
         return indices;
     }
 
+    static genTimestamps(ct,sps) {
+        let now = Date.now();
+        let toInterp = [now - ct*1000/sps, now];
+        return bitflippin.upsample(toInterp, ct);
+    }
+
+    //absolute value maximum of array (for a +/- valued array)
+    static absmax(array) {
+        return Math.max(Math.abs(Math.min(...array)),Math.max(...array));
+    }
+
+    //averages values when downsampling.
+    static downsample(array, fitCount, scalar=1) {
+
+        if(array.length > fitCount) {        
+            let output = new Array(fitCount);
+            let incr = array.length/fitCount;
+            let lastIdx = array.length-1;
+            let last = 0;
+            let counter = 0;
+            for(let i = incr; i < array.length; i+=incr) {
+                let rounded = Math.round(i);
+                if(rounded > lastIdx) rounded = lastIdx;
+                for(let j = last; j < rounded; j++) {
+                    output[counter] += array[j];
+                }
+                output[counter] /= (rounded-last)*scalar;
+                counter++;
+                last = rounded;
+            }
+            return output;
+        } else return array; //can't downsample a smaller array
+    }
+
+    //Linear upscaling interpolation from https://stackoverflow.com/questions/26941168/javascript-interpolate-an-array-of-numbers. Input array and number of samples to fit the data to
+	static upsample(array, fitCount, scalar=1) {
+
+		var linearInterpolate = function (before, after, atPoint) {
+			return (before + (after - before) * atPoint)*scalar;
+		};
+
+		var newData = new Array(fitCount);
+		var springFactor = (array.length - 1) / (fitCount - 1);
+		newData[0] = array[0]; // for new allocation
+		for ( var i = 1; i < fitCount - 1; i++) {
+			var tmp = i * springFactor;
+			var before = Math.floor(tmp);
+			var after =  Math.ceil(tmp);
+			var atPoint = tmp - before;
+			newData[i] = linearInterpolate(array[before], array[after], atPoint);
+		}
+		newData[fitCount - 1] = array[array.length - 1]; // for new allocation
+		return newData;
+	};
+
+    static interpolate(array:number[], fitCount:number, scalar=1) {
+        if(array.length > fitCount) {
+            return bitflippin.downsample(array, fitCount, scalar);
+        } else if(array.length < fitCount) {
+            return bitflippin.upsample(array, fitCount, scalar);
+        }
+        return array;
+    }
+
     //signed int conversions
     static bytesToInt16(x0:number,x1:number){
 		let int16 = ((0xFF & x0) << 8) | (0xFF & x1);

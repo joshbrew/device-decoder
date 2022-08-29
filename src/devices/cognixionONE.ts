@@ -21,7 +21,8 @@ export function cognixionONE_EEG_codec(data:any) {
         4:new Array(),
         5:new Array(),
         6:new Array(),
-        7:new Array()
+        7:new Array(),
+        timestamp:Date.now()
     };
 
     for(let i = 0; i < 7; i++) { //hard coded packet iteration, 9 sample sets x 8 channels per packet 

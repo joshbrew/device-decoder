@@ -22,8 +22,9 @@ export function statechangercodec(value:any) {
 
     let txt = textdecoder.decode(value);
     let line = txt.split('|'); //serial will stream in as utf8 lines, we use | separators
-     if(line.length >= 5) {
-        output.timestamp = parseInt(line[0]);
+    if(line.length >= 5) {
+        //output.timestamp = parseInt(line[0]);
+        output.timestamp = Date.now();
         output.left_red = parseInt(line[1]);
         output.left_infrared = parseInt(line[2]);
         output.left_heg = parseFloat(line[3]);

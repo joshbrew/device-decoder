@@ -1,5 +1,5 @@
 import { Devices } from "./src/devices";
-import { BLE, initDevice } from "./src/device.frontend";
+import { initDevice } from "./src/device.frontend";
 import { DOMService } from 'graphscript';
 import { ElementProps } from "graphscript/dist/services/dom/types/element";
 
@@ -98,7 +98,6 @@ let DOM = new DOMService({
                                                     ev.target.parentNode.appendChild(disc);
                                                 })
                                             }
-
                                         }
                                     }
                                 } as ElementProps

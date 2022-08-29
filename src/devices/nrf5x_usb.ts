@@ -3,6 +3,7 @@ import { FilterSettings } from '../util/BiquadFilters';
 import { ads131m08codec } from './ads131m08';
 import { max3010xcodec } from './max30102';
 import { mpu6050codec } from './mpu6050';
+import { bme280codec } from './bme280';
 
 export function nrf5x_usbcodec(data:any) {
     let arr:Uint8Array; 
@@ -26,6 +27,8 @@ export function nrf5x_usbcodec(data:any) {
     } else if (arr[0] === 5) {
         //Object.assign(output,max3010xcodec(arr.subarray(1)));
         Object.assign(output,max3010xcodec(arr.subarray(2)));
+    } else if (arr[0] === 6) {
+        Object.assign(output,bme280codec(arr.subarray(2)));
     } else {
         Object.assign(output,ads131m08codec(arr));
     }
@@ -62,10 +65,15 @@ export const nrf5xBLESettings = {
                 notifyCallback:undefined,
                 codec:mpu6050codec
             },
-            '0006cafe-b0ba-8bad-f00d-deadbeef0000':{ //ads131m08-2
+            '0005cafe-b0ba-8bad-f00d-deadbeef0000':{ //ads131m08-2
                 notify:true,
                 notifyCallback:undefined,
                 codec:ads131m08codec
+            },
+            '0006cafe-b0ba-8bad-f00d-deadbeef0000':{ //bme280
+                notify:true,
+                notifyCallback:undefined,
+                codec:bme280codec
             }
         }// each notification is for a different sensor
     }

@@ -11,6 +11,7 @@ import { bitflippin } from "./util/bitflippin";
 import { BiquadChannelFilterer, FilterSettings } from './util/BiquadFilters';
 //import * as bfs from './storage/BFSUtils'
 import { ArrayManip } from './util/arraymanip';
+import { AlgorithmContextProps, algorithms, createAlgorithmContext } from './algorithms/index';
 
 declare var WorkerGlobalScope;
 
@@ -32,9 +33,9 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
     globalThis.ArrayManip = ArrayManip; //static array manipulation methods
     //globalThis.WebglLinePlotUtil = WebglLinePlotUtil;
     //globalThis.runningAnim = true;
-    //console.log(self.SERVICE)
+    //console.log(this.SERVICE)
 
-    (self as any).SERVICE = new WorkerService({
+    const worker = new WorkerService({
         //props:{} //could set the props instead of globalThis but it really does not matter unless you want to bake in for more complex service modules
         routes:[
             //GPUService as any,
@@ -85,8 +86,8 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                     return globalThis.decoder(data);
                     //return globalThis.decoders[globalThis.decoder](data);
                 },
-                'decodeAndParse':function decodeAndParse(self, origin, data:any) {
-                    let decoded = self.graph.run('decode',data);
+                'decodeAndParse':function decodeAndParse(data:any) {
+                    let decoded = this.graph.run('decode',data);
                     if(decoded) {
                         let parsed = globalThis.ArrayManip.reformatData(decoded);
                     
@@ -107,7 +108,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                             return parsed;
                         }
                     }
-                    //console.log(decoded, self.graph)
+                    //console.log(decoded, this.graph)
                     return decoded;
                 },
                 'setActiveDecoder':function setActiveDecoder(deviceType:'BLE'|'USB'|'BLE_OTHER'|'USB_OTHER'|'OTHER',device:string,service?:string,characteristic?:string) {
@@ -170,7 +171,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                             return parsed;
                         }
                     }
-                    //console.log(decoded, self.graph)
+                    //console.log(decoded, this.graph)
                     return decoded;
                 },
                 'toggleAnim':function toggleAnim() {
@@ -222,8 +223,6 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                     return true;
                 },
                 'openPort':function openPort(
-                    self, 
-                    origin, 
                     settings:SerialOptions & { 
                         usbVendorId:number, 
                         usbProductId:number, 
@@ -232,7 +231,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                         buffering?:{searchBytes:Uint8Array} 
                     }) {
             
-                    const WorkerService = self.graph as WorkerService;
+                    const WorkerService = this.graph as WorkerService;
                     if(!globalThis.Serial) WorkerService.run('setupSerial');
                     return new Promise((res,rej) => {
                         globalThis.Serial.getPorts().then((ports)=>{
@@ -261,7 +260,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                                                     WorkerService.transmit({route:stream.settings.pipeTo.route, args }, stream.settings.pipeTo._id,  [value.buffer] as any);
                                                 }
                                             } else {
-                                                WorkerService.transmit(value, origin, [value.buffer] as any);
+                                                WorkerService.transmit(value, undefined, [value.buffer] as any);
                                                 //we can subscribe on the other end to this worker output by id
                                             }
                                         }
@@ -287,7 +286,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                     })
                     
                 },
-                'closeStream':function closeStream(self, origin, streamId) {
+                'closeStream':function closeStream(streamId) {
                     return new Promise((res,rej) => {
         
                         const Serial = globalThis.Serial as WebSerial;
@@ -298,13 +297,13 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
 
                     });
                 },
-                'writeStream':function writeStream(self, origin, streamId, message:any) {
+                'writeStream':function writeStream(streamId, message:any) {
 
                     (globalThis.Serial as WebSerial).writeStream(globalThis.Serial.streams[streamId], message);
         
                     return true;
                 },
-                'updateStreamSettings':function updateStreamSettings(self,origin, streamId:string, settings:any) {
+                'updateStreamSettings':function updateStreamSettings(streamId:string, settings:any) {
                     if(globalThis.Serial?.streams[streamId]) {
                         for(const key in settings) {
                             if(typeof settings[key] === 'object') {
@@ -313,6 +312,37 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                             else globalThis.Serial.streams[streamId][key] = settings[key];
                         }
                     }
+                },
+                'createAlgorithmContext': function createAlgorithmContext( //returns id of algorithm for calling it on server
+                    options:AlgorithmContextProps|string,
+                    inputs?:{[key:string]:any} //e.g. set the sample rate for this run
+                ){
+                    if(!this.graph.ALGORITHMS) this.graph.ALGORITHMS = {};
+                    if(typeof options === 'string') {
+                        options = algorithms[options];
+                    }
+                    if(typeof options.ondata === 'string') options.ondata = parseFunctionFromText(options.ondata);
+
+                    let ctx;
+                    if(typeof options?.ondata === 'function') ctx = createAlgorithmContext(options,inputs);
+                    if(ctx) this.graph.ALGORITHMS[ctx._id] = ctx;
+
+                    return ctx?._id;
+                },
+                'runAlgorithm':function runAlgorithm(data:{[key:string]:any}, _id?:string){
+                    if(!this.graph.ALGORITHMS) this.graph.ALGORITHMS = {};
+
+                    if(!_id) _id = Object.keys(this.graph.ALGORITHMS)[0]; //run the first key if none specified
+
+                    let res = this.graph.ALGORITHMS[_id].run(data); 
+
+                    if(res !== undefined) this.graph.setState({[_id]:res}); 
+                    //results subscribable by algorithm ID for easier organizing, 
+                    //  algorithms returning undefined will not set state so you can have them only trigger 
+                    //      behaviors conditionally e.g. on forward pass algorithms that run each sample but only 
+                    //          report e.g. every 100 samples or when an anomaly is identified
+
+                    return res;
                 }
             }
         ],

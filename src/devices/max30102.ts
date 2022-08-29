@@ -10,9 +10,10 @@ export function max3010xcodec(data:any) {
     else arr = data;
 
     const output:any = {
-        red:new Array(32),
-        ir:new Array(32),
-        dt:0
+        'red':new Array(32),
+        'ir':new Array(32),
+        'max_dietemp':bitflippin.get2sCompliment(arr[193],8) + 0.0625 * arr[194],
+        'timestamp': Date.now()
     };
 
     let i=0;
@@ -33,15 +34,13 @@ export function max3010xcodec(data:any) {
         i++;
     }
 
-    output['dt'] = bitflippin.get2sCompliment(arr[193],8) + 0.0625 * arr[194]
-
     return output;
 }
 
 export const max3010xChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
-        red:{nSec:10, sps:100},
-        ir:{nSec:10, sps:100},
-        dt:{nSec:10, sps:3.33}
+        'red':{nSec:10, sps:100},
+        'ir':{nSec:10, sps:100},
+        'max_dietemp':{nSec:10, sps:3.33}
     }
 }

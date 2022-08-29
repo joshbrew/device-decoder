@@ -24,7 +24,8 @@ export function hegduinocodec(value:any) {
         output.heg = parseFloat(line[2]);
 
     } else if(line.length >= 5) {
-        output.timestamp = parseInt(line[0]);
+        //output.timestamp = parseInt(line[0]);
+        output.timestamp = Date.now();
         output.red = parseInt(line[1]);
         output.infrared = parseInt(line[2]);
         output.heg = parseFloat(line[3]);

@@ -16,7 +16,8 @@ export function mpu6050codec(data:any) {
         'gx':new Array(20),
         'gy':new Array(20),
         'gz':new Array(20),
-        'temp':(bitflippin.bytesToInt16(arr[241],arr[242])+521)/340 + 35 //temp sensor
+        'mpu_dietemp':(bitflippin.bytesToInt16(arr[241],arr[242])+521)/340 + 35, //temp sensor,
+        timestamp: Date.now()
     }
 
     for(let i = 0; i < 20; i++) {
@@ -40,6 +41,6 @@ export const mpu6050ChartSettings:Partial<WebglLinePlotProps> = {
         'gx':{nSec:10, sps:100},
         'gy':{nSec:10, sps:100},
         'gz':{nSec:10, sps:100},
-        'temp':{nSec:10, sps:5}
+        'mpu_dietemp':{nSec:10, sps:5}
     }
 }

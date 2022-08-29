@@ -6,7 +6,8 @@ export function blueberryshortcodec(value:DataView) {
     let output:any = {
         sred: value.getInt32(2),
         sir: value.getInt32(6),
-        sir2: value.getInt32(10)
+        sir2: value.getInt32(10),
+        timestamp: Date.now()
     }
 
     output.sheg = output.sred / (0.5*(output.sir + output.sir2));
@@ -19,7 +20,8 @@ export function blueberrylongcodec(value:DataView) {
     let output:any = {
         red: value.getInt32(2),
         ir: value.getInt32(6),
-        ir2: value.getInt32(10)
+        ir2: value.getInt32(10),
+        timestamp: Date.now()
     }
 
     output.heg = output.sred / (0.5*(output.ir + output.ir2));

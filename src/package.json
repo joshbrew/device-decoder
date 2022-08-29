@@ -21,17 +21,18 @@
   "author": "Joshua Brewster",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
-    "@capacitor-community/bluetooth-le": "^1.8.3",
-    "graphscript": "~0.0.163",
-    "webgl-plot-utils": "~0.1.47"
+    "@capacitor-community/bluetooth-le": "~2.0.0",
+    "brainsatplay-math": "^0.0.22",
+    "graphscript": "~0.1.5",
+    "webgl-plot-utils": "~0.1.49"
   },
   "devDependencies": {
-    "@capacitor/android": "^3.5.1",
-    "@capacitor/cli": "^3.5.1",
-    "@capacitor/core": "^3.5.1",
-    "@capacitor/ios": "^3.5.1",
-    "@types/dom-serial": "^1.0.2",
-    "@types/node": "^18.0.5"
+    "@capacitor/android": "~4.1.0",
+    "@capacitor/cli": "~4.1.0",
+    "@capacitor/core": "~4.1.0",
+    "@capacitor/ios": "~4.1.0",
+    "@types/dom-serial": "~1.0.2",
+    "@types/node": "~18.0.5"
   },
   "nodemonConfig": {
     "env": {

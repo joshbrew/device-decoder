@@ -24,7 +24,8 @@ export function ads131m08codec(data:any) {
         4:new Array(9),
         5:new Array(9),
         6:new Array(9),
-        7:new Array(9)
+        7:new Array(9),
+        timestamp:Date.now()
     };
 
     for(let i = 0; i < 9; i++) { //hard coded packet iteration, 9 sample sets x 8 channels per packet 

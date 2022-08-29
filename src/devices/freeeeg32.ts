@@ -24,6 +24,7 @@ export function freeeeg32codec(data:any) {
     output['gx'] = bitflippin.bytesToInt16(arr[accIdx+6],arr[accIdx+7]);
     output['gy'] = bitflippin.bytesToInt16(arr[accIdx+8],arr[accIdx+9]);
     output['gz'] = bitflippin.bytesToInt16(arr[accIdx+10],arr[accIdx+11]);
+    output.timestamp = Date.now();
 
     return output;
 }

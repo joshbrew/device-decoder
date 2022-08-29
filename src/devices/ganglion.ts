@@ -62,14 +62,16 @@ export const ganglionSettings = { //include muse-js and import {MuseClient} from
                 0:reading.data[0],
                 1:reading.data[1],
                 2:reading.data[2],
-                3:reading.data[3]
+                3:reading.data[3],
+                timestamp: Date.now()
             }
         } 
         else if (origin === 'accelerometer') {
             return {
                 ax:reading.data[0],
                 ay:reading.data[1],
-                az:reading.data[2]
+                az:reading.data[2],
+                timestamp: Date.now()
             }
         }
     },

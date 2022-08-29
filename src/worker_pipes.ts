@@ -1,13 +1,12 @@
 
-import {WorkerService, ServiceMessage} from 'graphscript'////'../../GraphServiceRouter/index' //
-import { WorkerInfo } from 'graphscript';
+import {WorkerService, ServiceMessage, WorkerInfo} from '../../GraphServiceRouter/index' //'graphscript'////
 import {WebSerial} from './serial/serialstream'
 import {BiquadChannelFilterer, FilterSettings} from './util/BiquadFilters'
 import gsworker from './debugger.worker'
 
 export const workers = new WorkerService(); 
 
-import { WebglLinePlotUtil, WebglLinePlotProps, WebglLinePlotInfo, WebglLineProps } from '../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils'//'webgl-plot-utils';
+import { WebglLinePlotUtil, WebglLinePlotProps, WebglLinePlotInfo, WebglLineProps } from 'webgl-plot-utils'//'webgl-plot-utils';
 
 
 
@@ -209,9 +208,9 @@ export function transferStreamAPI(worker:WorkerInfo) {
 
     transferFunction(
         worker,
-        function openPort(self, origin, settings:SerialOptions & { usbVendorId:number, usbProductId:number, pipeTo?:string|{route:string, _id:string, extraArgs:any[]}, frequency?:number, buffering?:{searchBytes:Uint8Array} }) {
+        function openPort(settings:SerialOptions & { usbVendorId:number, usbProductId:number, pipeTo?:string|{route:string, _id:string, extraArgs:any[]}, frequency?:number, buffering?:{searchBytes:Uint8Array} }) {
             
-            const WorkerService = self.graph as WorkerService;
+            const WorkerService = this.graph as WorkerService;
             if(!globalThis.Serial) WorkerService.run('setupSerial');
             return new Promise((res,rej) => {
                 globalThis.Serial.getPorts().then((ports)=>{
@@ -240,7 +239,7 @@ export function transferStreamAPI(worker:WorkerInfo) {
                                             WorkerService.transmit({route:stream.settings.pipeTo.route, args }, stream.settings.pipeTo._id,  [value.buffer] as any);
                                         }
                                     } else {
-                                        WorkerService.transmit(value, origin, [value.buffer] as any);
+                                        WorkerService.transmit(value, undefined, [value.buffer] as any);
                                         //we can subscribe on the other end to this worker output by id
                                     }
                                 }
@@ -269,7 +268,7 @@ export function transferStreamAPI(worker:WorkerInfo) {
    
     transferFunction(
         worker,
-        function closeStream(self, origin, streamId) {
+        function closeStream(streamId) {
             return new Promise((res,rej) => {
 
                 const Serial = globalThis.Serial as WebSerial;
@@ -284,7 +283,7 @@ export function transferStreamAPI(worker:WorkerInfo) {
     );
     transferFunction(
         worker,
-        function writeStream(self, origin, streamId, message:any) {
+        function writeStream(streamId, message:any) {
 
             (globalThis.Serial as WebSerial).writeStream(globalThis.Serial.streams[streamId], message);
 
@@ -294,7 +293,7 @@ export function transferStreamAPI(worker:WorkerInfo) {
     );
     transferFunction(
         worker,
-        function updateStreamSettings(self,origin, streamId:string, settings:any) {
+        function updateStreamSettings( streamId:string, settings:any) {
             if(globalThis.Serial?.streams[streamId]) {
                 for(const key in settings) {
                     if(typeof settings[key] === 'object') {
@@ -318,7 +317,7 @@ export function initWorkerChart(
     chartworker:WorkerInfo, 
     settings:Partial<WebglLinePlotProps>, //default graph one line
     parentDiv:string|HTMLElement,
-    streamworker?:WorkerInfo //for setting filers on outputs
+    streamworker:WorkerInfo //for setting filers on outputs
 ) {
     transferChartCommands(chartworker);
 
@@ -382,14 +381,14 @@ export function initWorkerChart(
                 //console.log(filters);
                 controls.style.display = '';
                 setSignalControls(settings._id, chartsettings, filters, streamworker, chartworker);
-                document.getElementById(settings._id+'window').oninput = (ev) => {
+                (document.getElementById(settings._id+'window') as any).oninput = (ev) => {
                     for(const line in chartsettings.lines) {
                         let nSec = document.getElementById(settings._id+line+'nSec') as HTMLInputElement;
                         nSec.value = (ev.target as HTMLInputElement).value;
                     }
                 }
 
-                document.getElementById(settings._id + 'setchartsettings').onclick = () => {
+                (document.getElementById(settings._id + 'setchartsettings') as any).onclick = () => {
                     let linesettings = {};
                     for(const line in chartsettings.lines) {
                         let sps = document.getElementById(settings._id+line+'sps') as HTMLInputElement;
@@ -493,12 +492,12 @@ export function setSignalControls(
         }
         controls.innerHTML = html;
 
-        let usescalar = document.getElementById(plotId+'useScaling');
-        let usen50 = document.getElementById(plotId+'useNotch50');
-        let usen60 = document.getElementById(plotId+'useNotch60');
-        let usedcb = document.getElementById(plotId+'useDCBlock');
-        let uselp = document.getElementById(plotId+'useLowpass');
-        let usebp = document.getElementById(plotId+'useBandpass');
+        let usescalar = document.getElementById(plotId+'useScaling') as HTMLInputElement;
+        let usen50 = document.getElementById(plotId+'useNotch50') as HTMLInputElement;
+        let usen60 = document.getElementById(plotId+'useNotch60') as HTMLInputElement;
+        let usedcb = document.getElementById(plotId+'useDCBlock') as HTMLInputElement;
+        let uselp = document.getElementById(plotId+'useLowpass') as HTMLInputElement;
+        let usebp = document.getElementById(plotId+'useBandpass') as HTMLInputElement;
 
         let headeronchange = (checked, idsuffix) => {
             for(const prop in chartSettings.lines) {
@@ -543,9 +542,9 @@ export function setSignalControls(
 
             viewing.onchange = () => {
 
-                if((!Array.isArray(chartSettings.lines[prop] as WebglLineProps))) {
+                if((!Array.isArray(chartSettings.lines?.[prop] as WebglLineProps))) {
 
-                    (chartSettings.lines[prop] as WebglLineProps).viewing = viewing.checked;
+                    (chartSettings.lines?.[prop] as WebglLineProps).viewing = viewing.checked;
                     (chartSettings as WebglLinePlotProps).generateNewLines = false; //make sure the lines don't regenerate automatically
                     chartworker.run('resetChart', [plotId,chartSettings]);
 
@@ -619,8 +618,8 @@ export function createStreamRenderPipeline(dedicatedSerialWorker=false) {
 
     transferFunction(
         streamworker,
-        function decodeAndPassToChart(self, origin, data:any, chartPortId:string) {
-            let decoded = self.graph.run('decode',data);
+        function decodeAndPassToChart(data:any, chartPortId:string) {
+            let decoded = this.graph.run('decode',data);
             if(decoded) {
                 let parsed = globalThis.WebglLinePlotUtil.formatDataForCharts(decoded);
             
@@ -641,7 +640,7 @@ export function createStreamRenderPipeline(dedicatedSerialWorker=false) {
                     //console.log('parsed', parsed);
             
                     if(globalThis.runningAnim) {
-                        self.graph.workers[chartPortId].send(
+                        this.graph.workers[chartPortId].send(
                             {
                                 route:'updateChartData',
                                 args:[chartPortId,parsed]
@@ -653,7 +652,7 @@ export function createStreamRenderPipeline(dedicatedSerialWorker=false) {
                     return parsed;
                 }
             }
-            //console.log(decoded, self.graph)
+            //console.log(decoded, this.graph)
             return decoded;
         },
         'decodeAndPassToChart'
@@ -696,7 +695,8 @@ export function initWorkerSerialStream(
     initWorkerChart(
         chartworker, 
         chartSettings, 
-        chartParent
+        chartParent,
+        streamworker
     );
 }
 
@@ -746,7 +746,7 @@ export function cleanupWorkerStreamPipeline(streamworker, chartworker, plotDiv?:
 //     {
 //         route:'setRoute',
 //         args:[
-//             function setupSerial(self) {
+//             function setupSerial() {
 //                 globalThis.Serial = new globalThis.WebSerial() as WebSerial; 
 //                 console.log('worker: Setting up Serial', globalThis.Serial)
 

@@ -2,7 +2,8 @@
 
 export function hrcodec(data:DataView) {
     return {
-        hr:data.getInt8(1)
+        hr:data.getInt8(1),
+        timestamp: Date.now()
     };
 }
 

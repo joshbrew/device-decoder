@@ -60,9 +60,9 @@ export function initDevice(
     
             workers.transferFunction(
                 renderworker,
-                function receiveParsedData(self,origin,parsed) {
-                    self.run('runUpdate',undefined,parsed);
-                    //self.run('drawFrame');
+                function receiveParsedData(parsed) {
+                    this.run('updateCanvas',parsed);
+                    //this.run('drawFrame');
                 },
                 'receiveParsedData'
             )
@@ -189,7 +189,7 @@ export function initDevice(
         //serial
         let serialworker = workers.addWorker({url:gsworker});
 
-        serialworker.worker.addEventListener('message',(ev) => {
+        serialworker.worker.addEventListener('message',(ev:any) => {
             if(typeof ev.data === 'string') {
                 if(ev.data.includes('disconnected')) {
                     workers.terminate(serialworker._id as string);
@@ -312,9 +312,9 @@ export function createStreamPipeline(
             //workers.run('startAnim');
             workers.transferFunction(
                 renderworker,
-                function receiveParsedData(self,origin,parsed) {
-                    self.run('runUpdate',undefined,parsed);
-                    //self.run('drawFrame');
+                function receiveParsedData(parsed) {
+                    this.run('runUpdate',undefined,parsed);
+                    //this.run('drawFrame');
                 },
                 'receiveParsedData'
             )

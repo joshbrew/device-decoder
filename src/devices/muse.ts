@@ -11,6 +11,7 @@
 
 import { WebglLinePlotProps } from "webgl-plot-utils";
 import { FilterSettings } from "../util/BiquadFilters";
+import { bitflippin } from "../util/bitflippin";
 
 export const museSettings = { //include muse-js and import {MuseClient} from 'muse-js' for this to work
     connect:(settings:any={}) => {
@@ -32,6 +33,8 @@ export const museSettings = { //include muse-js and import {MuseClient} from 'mu
             await client.connect();
             await client.start();
 
+            let eegts;
+
             client.eegReadings.subscribe((reading:{
                 index: number;
                 electrode: number; // 0 to 4
@@ -39,6 +42,11 @@ export const museSettings = { //include muse-js and import {MuseClient} from 'mu
                 samples: number[]; // 12 samples each time
             }) => {
                 (reading as any).origin = 'eeg';
+                if(reading.electrode === 0) {
+                    eegts = bitflippin.genTimestamps(12,250);
+                }
+                if(!eegts) eegts = bitflippin.genTimestamps(12,250);
+                reading.timestamp = eegts; //sync timestamps across samples
                 info.settings.ondata(reading);
             });
 
@@ -93,12 +101,13 @@ export const museSettings = { //include muse-js and import {MuseClient} from 'mu
 
         if(origin === 'eeg') {
             return {
-                [reading.electrode]:reading.samples
+                [reading.electrode]:reading.samples,
+                timestamp:Date.now()
             }
         }
         else if (origin === 'gyro') {
             
-            let transformed = {gx:[] as any,gy:[] as any,gz:[] as any};
+            let transformed = {gx:[] as any,gy:[] as any,gz:[] as any, timestamp:Date.now()};
             reading.samples.forEach((s:any) => {
                 transformed.gx.push(s.x);
                 transformed.gy.push(s.y);
@@ -109,7 +118,7 @@ export const museSettings = { //include muse-js and import {MuseClient} from 'mu
         }  
         else if (origin === 'accelerometer') {
             
-            let transformed = {ax:[] as any,ay:[] as any,az:[] as any};
+            let transformed = {ax:[] as any,ay:[] as any,az:[] as any, timestamp:Date.now()};
             reading.samples.forEach((s:any) => {
                 transformed.ax.push(s.x);
                 transformed.ay.push(s.y);
@@ -119,7 +128,8 @@ export const museSettings = { //include muse-js and import {MuseClient} from 'mu
             return transformed;
         } else if (origin === 'ppg') {
             return {
-                [`ppg${reading.ppgChannel}`]:reading.samples
+                [`ppg${reading.ppgChannel}`]:reading.samples,
+                timestamp:Date.now()
             };
         } else if (origin === 'telemetry') {
             return reading;

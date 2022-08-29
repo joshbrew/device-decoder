@@ -6,7 +6,8 @@ export function blueberrycodec(value:DataView) {
     let output:any = {
         red: value.getInt32(2),
         ir: value.getInt32(6),
-        ir2: value.getInt32(10)
+        ir2: value.getInt32(10),
+        timestamp: Date.now()
     }
 
     output.heg = output.red / (0.5*(output.ir + output.ir2));

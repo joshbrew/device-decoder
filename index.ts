@@ -1385,11 +1385,13 @@ const domtree = {
 
 
 
-const router = new Router([
-    workers,
-    workerCanvasRoutes,
-    new DOMService({routes:domtree})
-]);
+const router = new Router({
+    routes:[
+        workers,
+        workerCanvasRoutes,
+        new DOMService({routes:domtree})
+    ]
+});
 
 
 console.log(router)

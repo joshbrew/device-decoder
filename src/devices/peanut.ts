@@ -54,6 +54,7 @@ export function peanutcodec(data:any) {
     }
 
     //console.log(result);
+    result.timestamp = Date.now();
 
     return result;
 }

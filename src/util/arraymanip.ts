@@ -1,6 +1,6 @@
 export class ArrayManip {
     //autoscale array to -1 and 1
-    static autoscale(array, lineIdx=0, nLines=1, centerZero=false, ymin?:number,ymax?:number) {
+    static autoscale(array, lineIdx=0, nLines=1, centerZero=false, ymin?:number, ymax?:number) {
         if(array?.length === 0 ) return array;
         let max = ymax ? ymax : Math.max(...array)
         let min = ymin ? ymin : Math.min(...array);
@@ -23,6 +23,11 @@ export class ArrayManip {
         }
     }
 
+    static genTimestamps(ct,sps) {
+        let now = Date.now();
+        let toInterp = [now - ct*1000/sps, now];
+        return ArrayManip.upsample(toInterp, ct);
+    }
 
     //absolute value maximum of array (for a +/- valued array)
     static absmax(array) {

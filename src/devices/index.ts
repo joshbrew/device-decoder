@@ -16,6 +16,7 @@ import { blueberryBLESettings, blueberryChartSettings, blueberrycodec } from './
 import { blueberry2BLESettings, blueberry2ChartSettings } from './blueberry2';
 import { ganglionSettings, ganglionFilterSettings, ganglionChartSettings } from './ganglion';
 import { heartRateBLESettings, hrcodec } from './genericBLE';
+import { bme280codec } from './bme280';
 
 //containe unique (non-default) BLE and Serial device connection settings + codecs to parse key:value pairs from streamed data channels
 export const Devices = {
@@ -26,7 +27,7 @@ export const Devices = {
         'statechanger':statechangerBLESettings,
         'blueberry':blueberryBLESettings,
         'blueberry2':blueberry2BLESettings,
-        'heartrate':heartRateBLESettings
+        'heart_rate':heartRateBLESettings
     },
     USB:{
         'nrf5x':nrf5xSerialSettings,
@@ -111,6 +112,7 @@ export const decoders:any = {
     'ads131m08':ads131m08codec,
     'max3010x':max3010xcodec,
     'mpu6050':mpu6050codec,
+    'bme280':bme280codec,
     'freeeeg32':freeeeg32codec, ///old code: https://github.com/joshbrew/freeeeg32.js
     'freeeeg128':freeeeg128codec,
     'cyton':cytoncodec, ///old code: https://github.com/joshbrew/cyton.js
