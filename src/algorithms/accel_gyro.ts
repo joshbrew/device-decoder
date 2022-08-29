@@ -1,4 +1,4 @@
-import { Math2 } from 'brainsatplay-math/dist/Math2';
+import { Math2 } from 'brainsatplay-math';
 import { AlgorithmContextProps } from './index';
 //convert accelerometer and gyro data into cartesian position changes
 //https://howtomechatronics.com/tutorials/arduino/arduino-and-mpu6050-accelerometer-and-gyroscope-tutorial/

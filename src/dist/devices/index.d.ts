@@ -35,10 +35,15 @@ export declare const Devices: {
                         notifyCallback: any;
                         codec: typeof mpu6050codec;
                     };
-                    '0006cafe-b0ba-8bad-f00d-deadbeef0000': {
+                    '0005cafe-b0ba-8bad-f00d-deadbeef0000': {
                         notify: boolean;
                         notifyCallback: any;
                         codec: typeof ads131m08codec;
+                    };
+                    '0006cafe-b0ba-8bad-f00d-deadbeef0000': {
+                        notify: boolean;
+                        notifyCallback: any;
+                        codec: (data: any) => any;
                     };
                 };
             };
@@ -66,7 +71,7 @@ export declare const Devices: {
         statechanger: import("../ble/ble_client").BLEDeviceOptions;
         blueberry: import("../ble/ble_client").BLEDeviceOptions;
         blueberry2: import("../ble/ble_client").BLEDeviceOptions;
-        heartrate: {
+        heart_rate: {
             services: {
                 heart_rate: {
                     heart_rate_measurement: {
@@ -151,6 +156,7 @@ export declare const Devices: {
                 1: any;
                 2: any;
                 3: any;
+                timestamp: number;
                 ax?: undefined;
                 ay?: undefined;
                 az?: undefined;
@@ -158,6 +164,7 @@ export declare const Devices: {
                 ax: any;
                 ay: any;
                 az: any;
+                timestamp: number;
                 0?: undefined;
                 1?: undefined;
                 2?: undefined;

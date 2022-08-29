@@ -6,6 +6,7 @@ export declare function mpu6050codec(data: any): {
     gx: any[];
     gy: any[];
     gz: any[];
-    temp: number;
+    mpu_dietemp: number;
+    timestamp: number;
 };
 export declare const mpu6050ChartSettings: Partial<WebglLinePlotProps>;

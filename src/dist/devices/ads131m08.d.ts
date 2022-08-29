@@ -16,6 +16,7 @@ export declare function ads131m08codec(data: any): {
     5: any[];
     6: any[];
     7: any[];
+    timestamp: number;
 };
 export declare const ads131m08ChartSettings: Partial<WebglLinePlotProps>;
 export declare const ads131m08FilterSettings: {

@@ -1,5 +1,6 @@
 export declare function hrcodec(data: DataView): {
     hr: number;
+    timestamp: number;
 };
 export declare const heartRateBLESettings: {
     services: {

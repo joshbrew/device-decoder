@@ -1,5 +1,6 @@
 export declare class ArrayManip {
     static autoscale(array: any, lineIdx?: number, nLines?: number, centerZero?: boolean, ymin?: number, ymax?: number): any;
+    static genTimestamps(ct: any, sps: any): any[];
     static absmax(array: any): number;
     static downsample(array: any, fitCount: any, scalar?: number): any;
     static upsample(array: any, fitCount: any, scalar?: number): any[];

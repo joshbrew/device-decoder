@@ -32,10 +32,15 @@ export declare const nrf5xBLESettings: {
                 notifyCallback: any;
                 codec: typeof mpu6050codec;
             };
-            '0006cafe-b0ba-8bad-f00d-deadbeef0000': {
+            '0005cafe-b0ba-8bad-f00d-deadbeef0000': {
                 notify: boolean;
                 notifyCallback: any;
                 codec: typeof ads131m08codec;
+            };
+            '0006cafe-b0ba-8bad-f00d-deadbeef0000': {
+                notify: boolean;
+                notifyCallback: any;
+                codec: (data: any) => any;
             };
         };
     };

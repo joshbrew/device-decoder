@@ -9,6 +9,7 @@ export declare function cognixionONE_EEG_codec(data: any): {
     5: any[];
     6: any[];
     7: any[];
+    timestamp: number;
 };
 export declare const cognixionONEBLESettings: {
     services: {

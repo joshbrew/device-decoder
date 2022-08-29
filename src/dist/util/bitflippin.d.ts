@@ -10,6 +10,11 @@ export declare class bitflippin {
     };
     static toDataView(value: string | number | ArrayBufferLike | DataView | number[]): DataView;
     static searchBuffer(buffer: number[] | ArrayBuffer, searchString: Uint8Array, limit?: number): any[];
+    static genTimestamps(ct: any, sps: any): any[];
+    static absmax(array: any): number;
+    static downsample(array: any, fitCount: any, scalar?: number): any;
+    static upsample(array: any, fitCount: any, scalar?: number): any[];
+    static interpolate(array: number[], fitCount: number, scalar?: number): any;
     static bytesToInt16(x0: number, x1: number): number;
     static bytesToUInt16(x0: number, x1: number): number;
     static Uint16ToBytes(y: number): number[];

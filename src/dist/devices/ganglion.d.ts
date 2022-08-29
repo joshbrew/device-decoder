@@ -7,6 +7,7 @@ export declare const ganglionSettings: {
         1: any;
         2: any;
         3: any;
+        timestamp: number;
         ax?: undefined;
         ay?: undefined;
         az?: undefined;
@@ -14,6 +15,7 @@ export declare const ganglionSettings: {
         ax: any;
         ay: any;
         az: any;
+        timestamp: number;
         0?: undefined;
         1?: undefined;
         2?: undefined;
