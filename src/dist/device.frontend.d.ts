@@ -11,7 +11,7 @@ deviceName: string, //one of the supported settings in Devices
 ondecoded: ((data: any) => void) | {
     [key: string]: (data: any) => void;
 }, //a single ondata function or an object with keys corresponding to BLE characteristics
-renderSettings?: {
+onconnect?: ((device: any) => void), ondisconnect?: ((device: any) => void), renderSettings?: {
     canvas: HTMLCanvasElement;
     context: string;
     _id?: string;

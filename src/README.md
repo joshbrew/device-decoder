@@ -28,7 +28,9 @@ let info = initDevice(
     'hegduino', //e.g. selected from lists, or we can only support specific devices as needed
     (data)=>{ //data received back from codec thread
         console.log(data)
-    }//,
+    },
+    function onconnect(deviceInfo) {}, //optionally specify an onconnect handler
+    function ondisconnect(deviceInfo) {}, //optionally specify an ondisconnect handler
     //renderSettings //e.g. specify a thread with rendering functions that receives data directly from the decoder thread (no round trip to main thread)
 ) as DeviceInfo;
 //devices are subscribed to automatically when passing an ondecoded callback or object e.g. with specifics for different BLE notifications

@@ -28,6 +28,8 @@ export function initDevice(
     deviceType:'BLE'|'USB'|'OTHER'|'BLE_OTHER'|'USB_OTHER', //other includes prewritten drivers that don't fit our format very well, e.g. cloud streaming drivers or the musejs driver as they are self contained
     deviceName:string, //one of the supported settings in Devices
     ondecoded:((data:any) => void)|{[key:string]:(data:any)=>void}, //a single ondata function or an object with keys corresponding to BLE characteristics
+    onconnect?:((device:any) => void),
+    ondisconnect?:((device:any) => void),
     renderSettings?:{
         canvas:HTMLCanvasElement,
         context:string,
@@ -94,7 +96,7 @@ export function initDevice(
                     streamworker,
                     renderworker
                 },
-                disconnect:() => {settings.disconnect(settings);},
+                disconnect:() => {settings.disconnect(settings); if(ondisconnect) ondisconnect(info); },
                 device:init,
                 read:(command?:any) => {
                     if(settings.read) return new Promise((res,rej) => {res(settings.read(settings,command))});    
@@ -103,6 +105,7 @@ export function initDevice(
                     if(settings.write) return  new Promise((res,rej) => {res(settings.write(settings,command))});
                 }
             }   
+            if(onconnect) onconnect(info);
             res(info);
         }).catch((er)=>{
             console.error(er);
@@ -158,16 +161,18 @@ export function initDevice(
 
         return (new Promise((res,rej) => {
             BLE.setup(settings as BLEDeviceOptions).then((result) => {
-                res(Object.assign({
+                let info = {
                     workers:{
                         streamworker,
                         renderworker
                     },
                     device:result,
-                    disconnect:() => { BLE.disconnect(result.deviceId as string) },
+                    disconnect:async () => { await BLE.disconnect(result.deviceId as string);  if(ondisconnect) ondisconnect(info);  },
                     read:(command:{ service:string, characteristic:string, ondata?:(data:DataView)=>void, timeout?:TimeoutOptions }) => { return BLE.read(result.device, command.service, command.characteristic, command.ondata, command.timeout) },
                     write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions}) => { return BLE.write(result.device, command.service, command.characteristic, command.data, command.callback, command.timeout) }
-                }));
+                }
+                if(onconnect) onconnect(info);
+                res(info as any);
             }).catch((er)=>{
                 console.error(er);
                 workers.terminate(streamworker._id);
@@ -228,18 +233,19 @@ export function initDevice(
                     if(settings.write) serialworker.post('writeStream', [result._id,settings.write]);
 
                     if(typeof ondecoded === 'function') streamworker.subscribe('decodeAndParseDevice',ondecoded);
-
-                    res(Object.assign({
+                    let info = {
                         workers:{
                             streamworker,
                             renderworker,
                             serialworker
                         },
                         device:result,
-                        disconnect:() => {serialworker.post('closeStream',result._id);},
+                        disconnect:() => {serialworker.post('closeStream',result._id); if(ondisconnect) ondisconnect(info); },
                         read:() => { return new Promise((res,rej) => { let sub; sub = streamworker.subscribe('decodeAndParseDevice',(result)=>{ serialworker.unsubscribe('decodeAndParseDevice',sub); res(result); });}); }, //we are already reading, just return the latest result from decodeAndParseDevice
                         write:(command:any) => {return serialworker.run('writeStream', [result._id,command])}
-                    }));
+                    };
+                    if(onconnect) onconnect(info);
+                    res(info);
                 });
             }).catch((er)=>{
                 console.error(er);
