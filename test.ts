@@ -1,7 +1,7 @@
 import { Devices } from "./src/devices";
 import { initDevice } from "./src/device.frontend";
 import { DOMService } from 'graphscript';
-import { ElementProps } from "graphscript/dist/services/dom/types/element";
+import { ElementProps } from "graphscript/dist/services/dom/types/index";
 
 // let selectBLE = document.createElement('select');
 // let selectUSB = document.createElement('select');
