@@ -3,7 +3,7 @@ import { WebglLinePlotProps } from 'webgl-plot-utils';
 import { FilterSettings } from '../util/BiquadFilters';
 
 //BLE mode CNX_EEG_raw_data_struct packet structure: [ctr, [0,1,2],[3,4,5],[6,7,8],[9,10,11],[12,13,14],[15,16,17],[18,19,20],[21,22,23], 0x00], up to 7 per BLE packet but variable. 
-// Less channels pack less bytes inbetween rather than setting zeros which is kinda annoying and creates more work than necessary on the frontend, and that is not even touching the rest of the settings on this thing.
+// Less channels pack less bytes inbetween rather than setting zeros??
 //this codec assumes all 8 ADS1299 channels are running on the default settings. 
 
 
