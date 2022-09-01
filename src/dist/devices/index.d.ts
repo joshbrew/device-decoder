@@ -55,6 +55,12 @@ export declare const Devices: {
             };
         };
         hegduino: import("../ble/ble_client").BLEDeviceOptions;
+        hegduinoV1: {
+            baudRate: number;
+            write: string;
+            codec: typeof hegduinocodec;
+            sps: number;
+        };
         cognixionONE: {
             services: {
                 [x: string]: {
@@ -122,6 +128,12 @@ export declare const Devices: {
             sps: number;
         };
         hegduino: {
+            baudRate: number;
+            write: string;
+            codec: typeof hegduinocodec;
+            sps: number;
+        };
+        hegduinoV1: {
             baudRate: number;
             write: string;
             codec: typeof hegduinocodec;

@@ -4,7 +4,7 @@ import {ads131m08codec, ads131m08ChartSettings, ads131m08FilterSettings, ads131m
 import {cytoncodec, cytonChartSettings, cytonFilterSettings, cytonSerialSettings} from './cyton';
 import {freeeeg128codec, freeeeg128ChartSettings, freeeeg128FilterSettings, freeeeg128SerialSettings} from './freeeeg128';
 import {freeeeg32codec, freeeeg32ChartSettings, freeeeg32FilterSettings, freeeeg32SerialSettings, freeeeg32_optical_SerialSettings} from './freeeeg32';
-import {hegduinocodec, hegduinoChartSettings, hegduinoBLESettings, hegduinoSerialSettings} from './hegduino';
+import {hegduinocodec, hegduinoChartSettings, hegduinoBLESettings, hegduinoSerialSettings, hegduinoV2FilterSettings, hegduinoV1FilterSettings, hegduinoV1SerialSettings, hegduinoV1BLESettings} from './hegduino';
 import { max3010xcodec, max3010xChartSettings } from './max30102';
 import { mpu6050codec, mpu6050ChartSettings } from './mpu6050';
 import { cognixionONE_EEG_codec, cognixionONEChartSettings, cognixionONEFilterSettings, cognixionONEBLESettings } from './cognixionONE';
@@ -23,6 +23,7 @@ export const Devices = {
     BLE:{
         'nrf5x':nrf5xBLESettings,
         'hegduino':hegduinoBLESettings,
+        'hegduinoV1':hegduinoV1BLESettings,
         'cognixionONE':cognixionONEBLESettings,
         'statechanger':statechangerBLESettings,
         'blueberry':blueberryBLESettings,
@@ -35,6 +36,7 @@ export const Devices = {
         'freeEEG32_optical':freeeeg32_optical_SerialSettings,
         'freeEEG128':freeeeg128SerialSettings,
         'hegduino':hegduinoSerialSettings,
+        'hegduinoV1':hegduinoV1SerialSettings,
         'cyton':cytonSerialSettings,
         'cyton_daisy':cytonSerialSettings,
         'peanut':peanutSerialSettings,
@@ -69,7 +71,8 @@ export const filterPresets:{[key:string]:{[key:string]:FilterSettings}} = {
     'freeeeg128':freeeeg128FilterSettings,
     'cyton':cytonFilterSettings, //https://github.com/joshbrew/cyton.js
     'cognixionONE_BLE':cognixionONEFilterSettings, //see the super secret docs
-    'hegduino':undefined, //https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
+    'hegduino':hegduinoV2FilterSettings, //https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
+    'hegduinoV1':hegduinoV1FilterSettings, //https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
     //'peanut':{} //https://github.com/joshbrew/peanutjs/blob/main/peanut.js
     'nrf5x':nrf5x_usbFilterSettings,
     'ganglion':ganglionFilterSettings,
@@ -91,6 +94,7 @@ export const chartSettings:{[key:string]:Partial<WebglLinePlotProps>} = {
     'cyton':cytonChartSettings, //https://github.com/joshbrew/cyton.js
     'cognixionONE_BLE':cognixionONEChartSettings, //see the super secret docs
     'hegduino':hegduinoChartSettings, //https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
+    'hegduinoV1':hegduinoChartSettings, //https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
     //'peanut':{} //https://github.com/joshbrew/peanutjs/blob/main/peanut.js
     'nrf5x':nrf5x_usbChartSettings,
     'statechanger':statechangerChartSettings,

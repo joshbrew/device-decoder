@@ -1,5 +1,6 @@
 import { WebglLinePlotProps } from "webgl-plot-utils";
 import { BLEDeviceOptions } from "../ble/ble_client";
+import { FilterSettings } from "../util/BiquadFilters";
 
 let textdecoder = new TextDecoder();
 
@@ -46,6 +47,9 @@ export const hegduinoSerialSettings = {
     sps
 }
 
+export const hegduinoV1SerialSettings = Object.assign({}, hegduinoSerialSettings);
+hegduinoV1SerialSettings.sps = 19;
+
 export const hegduinoBLESettings = {
     sps, //only one output, so we can put an easier to find reference here 
     services:{
@@ -77,6 +81,10 @@ export const hegduinoBLESettings = {
     androidWebBLE:'o' //shortens the byte stream for android web ble compatibility (ugh)
 } as BLEDeviceOptions
 
+
+export const hegduinoV1BLESettings = Object.assign({}, hegduinoSerialSettings);
+hegduinoV1BLESettings.sps = 19;
+
 export const hegduinoChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
         red:{nSec:60, sps},
@@ -85,6 +93,19 @@ export const hegduinoChartSettings:Partial<WebglLinePlotProps> = {
         ambient:{nSec:60, sps},
         temperature:{nSec:60, sps, units:'C'},
     }
+}
+
+let v1sps = 19;
+export const hegduinoV1FilterSettings:{[key:string]:FilterSettings} = {
+    red:{sps:v1sps, lowpassHz:2, useLowpass:true},
+    ir:{sps:v1sps, lowpassHz:2, useLowpass:true},
+    heg:{sps:v1sps, lowpassHz:2, useLowpass:true},
+}
+
+export const hegduinoV2FilterSettings:{[key:string]:FilterSettings} = {
+    red:{sps, lowpassHz:4, useLowpass:true},
+    ir:{sps, lowpassHz:4, useLowpass:true},
+    heg:{sps, lowpassHz:4, useLowpass:true},
 }
 
 

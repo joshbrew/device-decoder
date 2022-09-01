@@ -1,6 +1,6 @@
 {
   "name": "webserial-wrapper",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Convenience features for the Web Serial API.",
   "main": "dist/serialstream.js",
   "module":"dist/serialstream.esm.js",
