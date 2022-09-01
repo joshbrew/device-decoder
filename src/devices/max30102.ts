@@ -1,5 +1,5 @@
 import { WebglLinePlotProps } from "webgl-plot-utils";
-import { bitflippin } from "../util/bitflippin";
+import { ByteParser } from "../util/ByteParser";
 
 
 //ctr byte, 2 24 bit numbers (18 bit actual) or 6 bytes x 32 samples per packet, then 2 die temp 
@@ -12,7 +12,7 @@ export function max3010xcodec(data:any) {
     const output:any = {
         'red':new Array(32),
         'ir':new Array(32),
-        'max_dietemp':bitflippin.get2sCompliment(arr[193],8) + 0.0625 * arr[194],
+        'max_dietemp':ByteParser.get2sCompliment(arr[193],8) + 0.0625 * arr[194],
         'timestamp': Date.now()
     };
 

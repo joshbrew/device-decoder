@@ -206,7 +206,7 @@ const domtree = {
                                                             setupOpts.deviceId = (parent.querySelector('#deviceId') as HTMLInputElement).value;
                                                         }
                                                         else if((parent.querySelector('#namePrefix') as HTMLInputElement).value) {
-                                                            setupOpts.namePrefix = (parent.querySelector('#namePrefix') as HTMLInputElement).value;
+                                                            setupOpts.name = (parent.querySelector('#namePrefix') as HTMLInputElement).value;
                                                         }
                                                         console.log((parent.querySelector('#namePrefix') as HTMLInputElement).value)
 
@@ -325,11 +325,14 @@ const domtree = {
 
                                                                     const xconnectEvent = (ev) => {
                                                                         BLE.disconnect(this.stream.device).then(() => {
+                                                                            this.output = 'Disconnected from ' + this.stream.deviceId;
                                                                             (self.querySelector('[id="'+this.stream.deviceId+'xconnect"]') as HTMLButtonElement).innerHTML = 'Reconnect';
                                                                             (self.querySelector('[id="'+this.stream.deviceId+'xconnect"]') as HTMLButtonElement).onclick = (ev) => {  
                                                                                 BLE.reconnect(this.stream.deviceId).then((device) => {
                                                                                     this.output = 'Reconnected to ' + device.deviceId;
+                                                                                    (self.querySelector('[id="'+this.stream.deviceId+'xconnect"]') as HTMLButtonElement).innerHTML = 'Disconnect';
                                                                                     //self.render(); //re-render, will trigger oncreate again to reset this button and update the template 
+                                                                                    (self.querySelector('[id="'+this.stream.deviceId+'xconnect"]') as HTMLButtonElement).onclick = xconnectEvent;
                                                                                 })
                                                                             }
                                                                         });
@@ -1221,7 +1224,7 @@ const domtree = {
                             'testinput':{
                                 tagName:'textarea',
                                 attributes:{
-                                    value:'[24,52,230,125,243,112,0,0,10,2,30]',
+                                    value:'new DataView(new Uint8Array([24,52,230,125,243,112,0,0,10,2,30]).buffer)',
                                     onchange:(ev:Event)=>{
                                         let elm = (ev.target as HTMLInputElement);
                                         let value = (ev.target as HTMLInputElement).value;
@@ -1254,9 +1257,9 @@ const domtree = {
                                     
                                 },
                                 attributes:{
-                                    value:`//value is an ArrayBuffer
+                                    value:`//value is a DataView
 (value) => {
-    return value;
+    return value.buffer;
 }`,
                                     onchange:(ev:Event) => { //when you click away
                                         let elm = (ev.target as HTMLInputElement);
@@ -1267,7 +1270,7 @@ const domtree = {
                                             if(typeof fn === 'function') {
                                                 let testvalue = (elm.parentNode.querySelector('#testinput') as HTMLInputElement).value;
                                                 if(testvalue.includes(',') && !testvalue.includes('[')) {
-                                                    testvalue = `[${testvalue}]`;
+                                                    testvalue = `new DataView(new Uint8Array([${testvalue}]).buffer)`;
                                                 }
                                                 try {
                                                     testvalue = JSON.parse(testvalue);  

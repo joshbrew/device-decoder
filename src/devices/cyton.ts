@@ -1,7 +1,7 @@
 
 import { WebglLinePlotProps } from "webgl-plot-utils";
 import { FilterSettings } from "../util/BiquadFilters";
-import { bitflippin } from "../util/bitflippin";
+import { ByteParser } from "../util/ByteParser";
 
 //8 channels x 3 bytes per channel each line, plus 6x2 bytes for the IMU. First byte is counter byte;
 export function cytoncodec(data:any) {
@@ -13,16 +13,16 @@ export function cytoncodec(data:any) {
 
     for(let i = 0; i < 8; i++) {
         let idx = 1+3*i;
-        output[i] = bitflippin.bytesToInt24(arr[idx],arr[idx+1],arr[idx+2]); //signed ints
+        output[i] = ByteParser.bytesToInt24(arr[idx],arr[idx+1],arr[idx+2]); //signed ints
     }
 
     let accIdx = 25; //8*3 + 1
-    output.ax = bitflippin.bytesToInt16(arr[accIdx],arr[accIdx+1]);
-    output.ay = bitflippin.bytesToInt16(arr[accIdx+2],arr[accIdx+3]);
-    output.az = bitflippin.bytesToInt16(arr[accIdx+4],arr[accIdx+5]);
-    output.gx = bitflippin.bytesToInt16(arr[accIdx+6],arr[accIdx+7]);
-    output.gy = bitflippin.bytesToInt16(arr[accIdx+8],arr[accIdx+9]);
-    output.gz = bitflippin.bytesToInt16(arr[accIdx+10],arr[accIdx+11]);
+    output.ax = ByteParser.bytesToInt16(arr[accIdx],arr[accIdx+1]);
+    output.ay = ByteParser.bytesToInt16(arr[accIdx+2],arr[accIdx+3]);
+    output.az = ByteParser.bytesToInt16(arr[accIdx+4],arr[accIdx+5]);
+    output.gx = ByteParser.bytesToInt16(arr[accIdx+6],arr[accIdx+7]);
+    output.gy = ByteParser.bytesToInt16(arr[accIdx+8],arr[accIdx+9]);
+    output.gz = ByteParser.bytesToInt16(arr[accIdx+10],arr[accIdx+11]);
     output.timestamp = Date.now();
 
     return output;
@@ -39,17 +39,17 @@ export function daisycytoncodec(data:any) {
 
     for(let i = 0; i < 8; i++) {
         let idx = 1+3*i;
-        if(arr[0]%2 === 0) output[i+7] = bitflippin.bytesToInt24(arr[idx],arr[idx+1],arr[idx+2]); //signed ints 
-        else output[i] = bitflippin.bytesToInt24(arr[idx],arr[idx+1],arr[idx+2]); //signed ints
+        if(arr[0]%2 === 0) output[i+7] = ByteParser.bytesToInt24(arr[idx],arr[idx+1],arr[idx+2]); //signed ints 
+        else output[i] = ByteParser.bytesToInt24(arr[idx],arr[idx+1],arr[idx+2]); //signed ints
     }
 
     let accIdx = 25; //8*3 + 1
-    output.ax = bitflippin.bytesToInt16(arr[accIdx],arr[accIdx+1]);
-    output.ay = bitflippin.bytesToInt16(arr[accIdx+2],arr[accIdx+3]);
-    output.az = bitflippin.bytesToInt16(arr[accIdx+4],arr[accIdx+5]);
-    output.gx = bitflippin.bytesToInt16(arr[accIdx+6],arr[accIdx+7]);
-    output.gy = bitflippin.bytesToInt16(arr[accIdx+8],arr[accIdx+9]);
-    output.gz = bitflippin.bytesToInt16(arr[accIdx+10],arr[accIdx+11]);
+    output.ax = ByteParser.bytesToInt16(arr[accIdx],arr[accIdx+1]);
+    output.ay = ByteParser.bytesToInt16(arr[accIdx+2],arr[accIdx+3]);
+    output.az = ByteParser.bytesToInt16(arr[accIdx+4],arr[accIdx+5]);
+    output.gx = ByteParser.bytesToInt16(arr[accIdx+6],arr[accIdx+7]);
+    output.gy = ByteParser.bytesToInt16(arr[accIdx+8],arr[accIdx+9]);
+    output.gz = ByteParser.bytesToInt16(arr[accIdx+10],arr[accIdx+11]);
 
     return output;
 }

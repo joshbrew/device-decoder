@@ -11,7 +11,7 @@
 
 import { WebglLinePlotProps } from "webgl-plot-utils";
 import { FilterSettings } from "../util/BiquadFilters";
-import { bitflippin } from "../util/bitflippin";
+import { ByteParser } from "../util/ByteParser";
 
 const sps = 250;
 
@@ -46,9 +46,9 @@ export const museSettings = { //include muse-js and import {MuseClient} from 'mu
             }) => {
                 (reading as any).origin = 'eeg';
                 if(reading.electrode === 0) {
-                    eegts = bitflippin.genTimestamps(12,250);
+                    eegts = ByteParser.genTimestamps(12,250);
                 }
-                if(!eegts) eegts = bitflippin.genTimestamps(12,250);
+                if(!eegts) eegts = ByteParser.genTimestamps(12,250);
                 reading.timestamp = eegts; //sync timestamps across samples
                 info.settings.ondata(reading);
             });

@@ -1,5 +1,5 @@
 /// <reference types="dom-serial" />
-import { bitflippin } from '../util/bitflippin';
+import { ByteParser } from '../util/ByteParser';
 export declare type SerialPortOptions = {
     baudRate?: number;
     stopBits?: 1 | 2 | number;
@@ -57,7 +57,7 @@ export declare type SerialStreamInfo = {
     running: boolean;
     [key: string]: any;
 };
-export declare class WebSerial extends bitflippin {
+export declare class WebSerial extends ByteParser {
     streams: {
         [key: string]: SerialStreamInfo;
     };

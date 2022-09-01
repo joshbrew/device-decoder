@@ -1,5 +1,5 @@
 import { WebglLinePlotProps } from "webgl-plot-utils";
-import { bitflippin } from "../util/bitflippin";
+import { ByteParser } from "../util/ByteParser";
 
 
 //Packet format: ctr byte , 20 samples x 12 bytes , 16 bit die temp 
@@ -16,18 +16,18 @@ export function mpu6050codec(data:any) {
         'gx':new Array(20),
         'gy':new Array(20),
         'gz':new Array(20),
-        'mpu_dietemp':(bitflippin.bytesToInt16(arr[241],arr[242])+521)/340 + 35, //temp sensor,
+        'mpu_dietemp':(ByteParser.bytesToInt16(arr[241],arr[242])+521)/340 + 35, //temp sensor,
         timestamp: Date.now()
     }
 
     for(let i = 0; i < 20; i++) {
         let idx = i*12;
-        output.ax[i] = bitflippin.bytesToInt16(arr[idx+1],arr[idx+2]);
-        output.ay[i] = bitflippin.bytesToInt16(arr[idx+3],arr[idx+4]);
-        output.az[i] = bitflippin.bytesToInt16(arr[idx+5],arr[idx+6]);
-        output.gx[i] = bitflippin.bytesToInt16(arr[idx+7],arr[idx+8]);
-        output.gy[i] = bitflippin.bytesToInt16(arr[idx+9],arr[idx+10]);
-        output.gz[i] = bitflippin.bytesToInt16(arr[idx+11],arr[idx+12]);
+        output.ax[i] = ByteParser.bytesToInt16(arr[idx+1],arr[idx+2]);
+        output.ay[i] = ByteParser.bytesToInt16(arr[idx+3],arr[idx+4]);
+        output.az[i] = ByteParser.bytesToInt16(arr[idx+5],arr[idx+6]);
+        output.gx[i] = ByteParser.bytesToInt16(arr[idx+7],arr[idx+8]);
+        output.gy[i] = ByteParser.bytesToInt16(arr[idx+9],arr[idx+10]);
+        output.gz[i] = ByteParser.bytesToInt16(arr[idx+11],arr[idx+12]);
     }
 
     return output;

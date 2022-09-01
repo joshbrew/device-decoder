@@ -1,4 +1,4 @@
-import {bitflippin} from '../util/bitflippin'
+import {ByteParser} from '../util/ByteParser'
 import { WebglLinePlotProps } from 'webgl-plot-utils';
 import { FilterSettings } from '../util/BiquadFilters';
 
@@ -28,14 +28,14 @@ export function cognixionONE_EEG_codec(data:any) {
     for(let i = 0; i < 7; i++) { //hard coded packet iteration, 8 sample sets x 8 channels per packet 
         let j = i * 26 + 1; //every 0th byte is a counter and every 26th byte is 0x00 so skip those
         if(!arr[j+23]) break;
-        output[0][i] = bitflippin.bytesToUInt24(arr[j],arr[j+1],arr[j+2]); //signed or unsigned? assuming unsigned
-        output[1][i] = bitflippin.bytesToUInt24(arr[j+3],arr[j+4],arr[j+5]);
-        output[2][i] = bitflippin.bytesToUInt24(arr[j+6],arr[j+7],arr[j+8]);
-        output[3][i] = bitflippin.bytesToUInt24(arr[j+9],arr[j+10],arr[j+11]);
-        output[4][i] = bitflippin.bytesToUInt24(arr[j+12],arr[j+13],arr[j+14]);
-        output[5][i] = bitflippin.bytesToUInt24(arr[j+15],arr[j+16],arr[j+17]);
-        output[6][i] = bitflippin.bytesToUInt24(arr[j+18],arr[j+19],arr[j+20]);
-        output[7][i] = bitflippin.bytesToUInt24(arr[j+21],arr[j+22],arr[j+23]);
+        output[0][i] = ByteParser.bytesToUInt24(arr[j],arr[j+1],arr[j+2]); //signed or unsigned? assuming unsigned
+        output[1][i] = ByteParser.bytesToUInt24(arr[j+3],arr[j+4],arr[j+5]);
+        output[2][i] = ByteParser.bytesToUInt24(arr[j+6],arr[j+7],arr[j+8]);
+        output[3][i] = ByteParser.bytesToUInt24(arr[j+9],arr[j+10],arr[j+11]);
+        output[4][i] = ByteParser.bytesToUInt24(arr[j+12],arr[j+13],arr[j+14]);
+        output[5][i] = ByteParser.bytesToUInt24(arr[j+15],arr[j+16],arr[j+17]);
+        output[6][i] = ByteParser.bytesToUInt24(arr[j+18],arr[j+19],arr[j+20]);
+        output[7][i] = ByteParser.bytesToUInt24(arr[j+21],arr[j+22],arr[j+23]);
     }
     
     return output;

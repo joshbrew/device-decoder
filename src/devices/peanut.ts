@@ -1,6 +1,6 @@
 
 import { WebglLinePlotProps } from 'webgl-plot-utils';
-import {bitflippin} from '../util/bitflippin'
+import {ByteParser} from '../util/ByteParser'
 
 // baud: 38400
 // search bytes: 170,170
@@ -32,7 +32,7 @@ export function peanutcodec(data:any) {
         if(PeanutCodes[data[i]] && i + 1 + PeanutCodes[data[i]].byteLength <= data.length) {
             let slice = data.slice(i+1, i+1+PeanutCodes[data[i]].byteLength).buffer
             //console.log(data, i, PeanutCodes[data[i]].byteLength, PeanutCodes[data[i]].type, slice)
-            let unpacked:any = bitflippin.struct(PeanutCodes[data[i]].format).unpack(
+            let unpacked:any = ByteParser.struct(PeanutCodes[data[i]].format).unpack(
                 slice
             )
             let code = PeanutCodes[data[i]].type;

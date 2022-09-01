@@ -25,7 +25,7 @@
     "@capacitor-community/bluetooth-le": "~2.0.0",
     "brainsatplay-math": "^0.0.22",
     "graphscript": "~0.1.19",
-    "webgl-plot-utils": "~0.2.0"
+    "webgl-plot-utils": "~0.2.1"
   },
   "devDependencies": {
     "@capacitor/android": "~4.1.0",

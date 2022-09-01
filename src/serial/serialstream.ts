@@ -1,4 +1,4 @@
-import { bitflippin } from '../util/bitflippin';
+import { ByteParser } from '../util/ByteParser';
 //Joshua Brewster. AGPL v3.0
 
 //Wrapper for
@@ -65,7 +65,7 @@ export type SerialStreamInfo = {
     [key:string]:any
 }
 
-export class WebSerial extends bitflippin {
+export class WebSerial extends ByteParser {
 
     streams:{[key:string]:SerialStreamInfo} = {}
 

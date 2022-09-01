@@ -7,7 +7,7 @@ import {
 import { WebSerial } from './src/serial/serialstream'; //extended classes need to be imported for compilation
 import { decoders } from './src/devices/index';
 import { WebglLinePlotUtil } from 'webgl-plot-utils'//'../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils'//
-import { bitflippin } from "./src/util/bitflippin";
+import { ByteParser } from "./src/util/ByteParser";
 import { BiquadChannelFilterer } from './src/util/BiquadFilters';
 //import * as bfs from './storage/BFSUtils'
 
@@ -26,7 +26,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
     globalThis.WebSerial = WebSerial;
     globalThis.decoders = decoders;
     globalThis.decoder = 'raw';
-    globalThis.bitflippin = bitflippin;
+    globalThis.bitflippin = ByteParser;
     globalThis.WebglLinePlotUtil = WebglLinePlotUtil;
     globalThis.runningAnim = true;
     globalThis.filtering = true;

@@ -1,6 +1,6 @@
 //byte manipulation math utils
 
-
+import { ArrayManip } from "./ArrayManip"
 
 
 //struct packing/unpacking by https://github.com/lyngklip/structjs (MIT License)
@@ -44,7 +44,7 @@ module.exports = {
 */
 
 
-export class bitflippin {
+export class ByteParser extends ArrayManip {
     
     static codes = { //common codes
         '\\n':0x0A, //newline
@@ -63,7 +63,7 @@ export class bitflippin {
             if(typeof value === 'string') {
                 let enc = new TextEncoder();
                 let hascodes = {};
-                for(const code in bitflippin.codes) {
+                for(const code in ByteParser.codes) {
                     while(value.indexOf(code) > -1) {
                         let idx = value.indexOf(code);
                         value = value.replace(code,'');
@@ -72,7 +72,7 @@ export class bitflippin {
                 }
                 let encoded = Array.from(enc.encode(value));
                 for(const key in hascodes) {
-                    encoded.splice(parseInt(key),0,bitflippin.codes[hascodes[key]]);
+                    encoded.splice(parseInt(key),0,ByteParser.codes[hascodes[key]]);
                 }
                 value = new DataView(new Uint8Array(encoded).buffer);
             } else if (typeof value === 'number') {
@@ -104,7 +104,7 @@ export class bitflippin {
         
 		var needle = searchString
 		var haystack = buffer;
-		var search = bitflippin.boyerMoore(needle);
+		var search = ByteParser.boyerMoore(needle);
 		var skip = search.byteLength;
 
         var indices:any[] = [];
@@ -117,69 +117,6 @@ export class bitflippin {
         return indices;
     }
 
-    static genTimestamps(ct,sps) {
-        let now = Date.now();
-        let toInterp = [now - ct*1000/sps, now];
-        return bitflippin.upsample(toInterp, ct);
-    }
-
-    //absolute value maximum of array (for a +/- valued array)
-    static absmax(array) {
-        return Math.max(Math.abs(Math.min(...array)),Math.max(...array));
-    }
-
-    //averages values when downsampling.
-    static downsample(array, fitCount, scalar=1) {
-
-        if(array.length > fitCount) {        
-            let output = new Array(fitCount);
-            let incr = array.length/fitCount;
-            let lastIdx = array.length-1;
-            let last = 0;
-            let counter = 0;
-            for(let i = incr; i < array.length; i+=incr) {
-                let rounded = Math.round(i);
-                if(rounded > lastIdx) rounded = lastIdx;
-                for(let j = last; j < rounded; j++) {
-                    output[counter] += array[j];
-                }
-                output[counter] /= (rounded-last)*scalar;
-                counter++;
-                last = rounded;
-            }
-            return output;
-        } else return array; //can't downsample a smaller array
-    }
-
-    //Linear upscaling interpolation from https://stackoverflow.com/questions/26941168/javascript-interpolate-an-array-of-numbers. Input array and number of samples to fit the data to
-	static upsample(array, fitCount, scalar=1) {
-
-		var linearInterpolate = function (before, after, atPoint) {
-			return (before + (after - before) * atPoint)*scalar;
-		};
-
-		var newData = new Array(fitCount);
-		var springFactor = (array.length - 1) / (fitCount - 1);
-		newData[0] = array[0]; // for new allocation
-		for ( var i = 1; i < fitCount - 1; i++) {
-			var tmp = i * springFactor;
-			var before = Math.floor(tmp);
-			var after =  Math.ceil(tmp);
-			var atPoint = tmp - before;
-			newData[i] = linearInterpolate(array[before], array[after], atPoint);
-		}
-		newData[fitCount - 1] = array[array.length - 1]; // for new allocation
-		return newData;
-	};
-
-    static interpolate(array:number[], fitCount:number, scalar=1) {
-        if(array.length > fitCount) {
-            return bitflippin.downsample(array, fitCount, scalar);
-        } else if(array.length < fitCount) {
-            return bitflippin.upsample(array, fitCount, scalar);
-        }
-        return array;
-    }
 
     //signed int conversions
     static bytesToInt16(x0:number,x1:number){
@@ -313,7 +250,7 @@ export class bitflippin {
 				indices.push(i);
 			}
 		*/
-		var pattern = bitflippin.asUint8Array(patternBuffer);
+		var pattern = ByteParser.asUint8Array(patternBuffer);
 		var M = pattern.length;
 		if (M === 0) {
 			throw new TypeError("patternBuffer must be at least 1 byte long");
@@ -332,7 +269,7 @@ export class bitflippin {
 		}
 		var boyerMooreSearch = (txtBuffer, start?, end?) => {
 			// Return offset of first match, -1 if no match.
-			var txt = bitflippin.asUint8Array(txtBuffer);
+			var txt = ByteParser.asUint8Array(txtBuffer);
 			if (start === undefined) start = 0;
 			if (end === undefined) end = txt.length;
 			var pat = pattern;

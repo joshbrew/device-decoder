@@ -1,25 +1,61 @@
+
+export type TypedArray =
+| Int8Array
+| Uint8Array
+| Uint8ClampedArray
+| Int16Array
+| Uint16Array
+| Int32Array
+| Uint32Array
+| Float32Array
+| Float64Array;
+
 export class ArrayManip {
     //autoscale array to -1 and 1
-    static autoscale(array, lineIdx=0, nLines=1, centerZero=false, ymin?:number, ymax?:number) {
+    static autoscale(
+        array, 
+        lineIdx=0, 
+        nLines=1, 
+        centerZero=false, 
+        ymin?:number,
+        ymax?:number,
+        clamp?:boolean //clamp values to within their line segment (that is, no overlapping other lines)
+    ) {
         if(array?.length === 0 ) return array;
-        let max = ymax ? ymax : Math.max(...array)
+        let max = ymax ? ymax : Math.max(...array);
         let min = ymin ? ymin : Math.min(...array);
+
+        //console.log(max,min)
 
         let _lines = 1/nLines;
         let scalar = 1;
         if(centerZero) {
             let absmax = Math.max(Math.abs(min),Math.abs(max));
             if(absmax !== 0) scalar = _lines/absmax;
-            return array.map(y => (y*scalar+(_lines*(lineIdx+1)*2-1-_lines))); //scaled array
+            return array.map(y => {
+                if(clamp) {
+                    if(y < min) y = min;
+                    if(y > max) y = max; //clamp
+                }
+                return (y*scalar+(_lines*(lineIdx+1)*2-1-_lines))
+            }); //scaled array
         }
         else {
             if(max === min) {
                 if(max !== 0) {
                     scalar = _lines/max;
+                } else if (min !== 0) {
+                    scalar = _lines/Math.abs(min);
                 }
             }
             else scalar = _lines/(max-min);
-            return array.map(y => (2*((y-min)*scalar-(1/(2*nLines)))+(_lines*(lineIdx+1)*2-1-_lines))); //scaled array
+            return array.map(y => {
+                if(clamp) {
+                    if(y < min) y = min;
+                    if(y > max) y = max; //clamp
+                }
+                return (2*((y-min)*scalar-(1/(2*nLines)))+(_lines*(lineIdx+1)*2-1-_lines))
+            }); //scaled array
         }
     }
 
@@ -121,23 +157,26 @@ export class ArrayManip {
 
     //push new entries to end of array and roll over starting entries with a set array length
     static circularBuffer(arr:any[],newEntries:any[]) {
-        if(newEntries.length < arr.length)
+        if(newEntries.length < arr.length) {
+            let slice = arr.slice(newEntries.length);
+            let len = arr.length;
             arr.splice(
                 0,
-                arr.length-newEntries.length,
-                ...arr.slice(newEntries.length)
-            ).splice(
-                    newEntries.length,
-                    arr.length,
-                    ...newEntries
-                );
+                len,
+                ...slice,...newEntries
+            );
+        }
         else if (newEntries.length > arr.length) {
-            arr.splice(0,arr.length,newEntries.slice(newEntries.length-arr.length));
+            let len = arr.length;
+            arr.splice(
+                0,
+                len,
+                newEntries.slice(len-newEntries.length)
+            );
         }
         else { 
             arr.splice(0,arr.length,...newEntries);
         }
-        
         return arr;
     }
 
@@ -179,11 +218,37 @@ export class ArrayManip {
         }
         else if (typeof data === 'string') { //let's parse different string formats 
             let split:any;
-            if(data.includes('\t')) {
+            if(data.includes('\r\n')) { 
+                let lines = data.split('\r\n');
+                data = {};
+                lines.forEach((l,j) => {
+                    if(l.includes('\t')) {
+                        split = l.split('\t');
+                    } else if (l.includes(',')) {
+                        split = l.split(',');
+                    } else if (l.includes('|')) {
+                        split = l.split('|');
+                    }
+                    split.forEach((val,i) => {
+                        if(val.includes(':')) {
+                            let [key,v] = val.split(':');
+                            let fl = parseFloat(v);
+                            if(fl) data[key] = [fl];
+                            else return undefined;
+                        } else {
+                            let fl = parseFloat(val);
+                            if(fl) data[i] = [fl];
+                            else return undefined;
+                        }
+                    });
+                })
+            } else if(data.includes('\t')) {
                 split = data.split('\t');
             } else if (data.includes(',')) {
                 split = data.split(',');
-            } 
+            } else if (data.includes('|')) {
+                split = data.split('|');
+            }
             data = {};
             if(split) {
                 split.forEach((val,i) => {
@@ -227,4 +292,79 @@ export class ArrayManip {
     ) {
         return ArrayManip.interpolate(data, Math.ceil(targetSPS*time));
     }
+
+    //buffer numbers stored on common objects, including iterable objects or arrays. 
+    //  It's much faster to buffer and use transfer than sending the objects raw over threads as things are jsonified inbetween otherwise, 
+    //    and even faster to store everything in typed arrays altogether and use common objects to index array locations
+    static bufferValues = (
+        objects:{[key:string]:{[key:string]:any}},  
+        property:string, //e.g. 'position'
+        keys?:string[]|{[key:string]:any}, //e,g, ['x','y','z'] or {x,y,z}, pass an array to ensure the correct order
+        buffer?:ArrayBufferLike //if you pass a premade buffer, make sure it's the right size
+    ) => {
+        if(!Array.isArray(keys) && typeof keys === 'object') 
+            keys = Object.keys(keys); 
+        if(!buffer) {
+            let object_keys = Object.keys(objects);
+            if(keys)
+                buffer = new Float32Array(object_keys.length*keys.length)
+            else {
+                if(typeof objects[object_keys[0]][property] === 'object') {
+                    keys = Object.keys(objects[object_keys[0]][property]);
+                    buffer = new Float32Array(object_keys.length*keys.length);
+                }
+                else buffer = new Float32Array(object_keys.length);
+            }
+        }
+        let i = 0;
+        for(const key in objects) {
+           if(objects[key][property]) {
+            if(keys) {
+                for(let j = 0; j < keys.length; j++) {
+                    buffer[i] = objects[key][property][keys[j]];
+                    i++;
+                }
+            }
+            else {
+                buffer[i] = objects[key][property];
+                i++
+            }
+           }
+        }   
+
+        return buffer;
+    }
+
+    isTypedArray(x:any) { //https://stackoverflow.com/a/40319428
+        return (ArrayBuffer.isView(x) && Object.prototype.toString.call(x) !== "[object DataView]");
+    }
+
+    recursivelyAssign = (target,obj) => {
+        for(const key in obj) {
+            if(typeof obj[key] === 'object') {
+                if(typeof target[key] === 'object') this.recursivelyAssign(target[key], obj[key]);
+                else target[key] = this.recursivelyAssign({},obj[key]); 
+            } else target[key] = obj[key];
+        }
+
+        return target;
+    }
+    
+    //splice out a section of a typed array. If end is undefined we'll splice all values from the starting position to the end
+    //if you want to replace values, just use .set, this is for quickly removing values to trim arrays e.g. if an entity is popped
+    spliceTypedArray(arr:TypedArray,start:number,end?:number) {
+        let s = arr.subarray(0,start)
+        let e;
+        if(end) {
+            e = arr.subarray(end+1);
+        }
+
+        let n:TypedArray;
+        if(s.length > 0 || e?.length > 0) n = new (arr as any).constructor(s.length+e.length); //use the same constructor
+        if(s.length > 0) n.set(s);
+        if(e && e.length > 0) n.set(e,s.length);
+
+        return n;
+    }
+
 }

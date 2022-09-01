@@ -8,7 +8,7 @@
  */
 import { WebglLinePlotProps } from "webgl-plot-utils";
 import { FilterSettings } from "../util/BiquadFilters";
-import { bitflippin } from "../util/bitflippin";
+import { ByteParser } from "../util/ByteParser";
 
 export function ads131m08codec(data:any) {
     let arr; 
@@ -30,14 +30,14 @@ export function ads131m08codec(data:any) {
 
     for(let i = 0; i < 9; i++) { //hard coded packet iteration, 9 sample sets x 8 channels per packet 
         let j = i * 25; //every 25th byte is a counter so skip those
-        output[0][i] = bitflippin.bytesToUInt24(arr[j],arr[j+1],arr[j+2]);
-        output[1][i] = bitflippin.bytesToUInt24(arr[j+3],arr[j+4],arr[j+5]);
-        output[2][i] = bitflippin.bytesToUInt24(arr[j+6],arr[j+7],arr[j+8]);
-        output[3][i] = bitflippin.bytesToUInt24(arr[j+9],arr[j+10],arr[j+11]);
-        output[4][i] = bitflippin.bytesToUInt24(arr[j+12],arr[j+13],arr[j+14]);
-        output[5][i] = bitflippin.bytesToUInt24(arr[j+15],arr[j+16],arr[j+17]);
-        output[6][i] = bitflippin.bytesToUInt24(arr[j+18],arr[j+19],arr[j+20]);
-        output[7][i] = bitflippin.bytesToUInt24(arr[j+21],arr[j+22],arr[j+23]);
+        output[0][i] = ByteParser.bytesToUInt24(arr[j],arr[j+1],arr[j+2]);
+        output[1][i] = ByteParser.bytesToUInt24(arr[j+3],arr[j+4],arr[j+5]);
+        output[2][i] = ByteParser.bytesToUInt24(arr[j+6],arr[j+7],arr[j+8]);
+        output[3][i] = ByteParser.bytesToUInt24(arr[j+9],arr[j+10],arr[j+11]);
+        output[4][i] = ByteParser.bytesToUInt24(arr[j+12],arr[j+13],arr[j+14]);
+        output[5][i] = ByteParser.bytesToUInt24(arr[j+15],arr[j+16],arr[j+17]);
+        output[6][i] = ByteParser.bytesToUInt24(arr[j+18],arr[j+19],arr[j+20]);
+        output[7][i] = ByteParser.bytesToUInt24(arr[j+21],arr[j+22],arr[j+23]);
     }
     
     return output;
