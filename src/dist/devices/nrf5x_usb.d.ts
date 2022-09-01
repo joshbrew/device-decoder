@@ -10,8 +10,10 @@ export declare const nrf5xSerialSettings: {
         searchBytes: Uint8Array;
     };
     codec: typeof nrf5x_usbcodec;
+    sps: number;
 };
 export declare const nrf5xBLESettings: {
+    sps: number;
     services: {
         '0000cafe-b0ba-8bad-f00d-deadbeef0000': {
             '0001cafe-b0ba-8bad-f00d-deadbeef0000': {
@@ -21,26 +23,31 @@ export declare const nrf5xBLESettings: {
                 notify: boolean;
                 notifyCallback: any;
                 codec: typeof ads131m08codec;
+                sps: number;
             };
             '0003cafe-b0ba-8bad-f00d-deadbeef0000': {
                 notify: boolean;
                 notifyCallback: any;
                 codec: typeof max3010xcodec;
+                sps: number;
             };
             '0004cafe-b0ba-8bad-f00d-deadbeef0000': {
                 notify: boolean;
                 notifyCallback: any;
                 codec: typeof mpu6050codec;
+                sps: number;
             };
             '0005cafe-b0ba-8bad-f00d-deadbeef0000': {
                 notify: boolean;
                 notifyCallback: any;
                 codec: typeof ads131m08codec;
+                sps: number;
             };
             '0006cafe-b0ba-8bad-f00d-deadbeef0000': {
                 notify: boolean;
                 notifyCallback: any;
                 codec: (data: any) => any;
+                sps: number;
             };
         };
     };

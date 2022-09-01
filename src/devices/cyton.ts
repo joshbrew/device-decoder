@@ -54,44 +54,49 @@ export function daisycytoncodec(data:any) {
     return output;
 }
 
+const sps = 250;
+
 export const cytonSerialSettings = {
     baudRate:115200,
-    codec:cytoncodec
+    codec:cytoncodec,
+    sps
 };
 
 export const daisycytonSerialSettings = {
     baudRate:115200,
-    codec:daisycytoncodec
+    codec:daisycytoncodec,
+    sps
 }
 
+const defaultChartSetting = {nSec:10, sps, units:'mV'}
 export const cytonChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
-        '0':{nSec:10, sps:250},
-        '1':{nSec:10, sps:250},
-        '2':{nSec:10, sps:250},
-        '3':{nSec:10, sps:250},
-        '4':{nSec:10, sps:250},
-        '5':{nSec:10, sps:250},
-        '6':{nSec:10, sps:250},
-        '7':{nSec:10, sps:250},
-        'ax':{nSec:10, sps:250},
-        'ay':{nSec:10, sps:250},
-        'az':{nSec:10, sps:250},
-        'gx':{nSec:10, sps:250},
-        'gy':{nSec:10, sps:250},
-        'gz':{nSec:10, sps:250},
+        '0':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '1':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '2':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '3':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '4':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '5':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '6':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '7':JSON.parse(JSON.stringify(defaultChartSetting)),
+        'ax':JSON.parse(JSON.stringify(defaultChartSetting)),
+        'ay':JSON.parse(JSON.stringify(defaultChartSetting)),
+        'az':JSON.parse(JSON.stringify(defaultChartSetting)),
+        'gx':JSON.parse(JSON.stringify(defaultChartSetting)),
+        'gy':JSON.parse(JSON.stringify(defaultChartSetting)),
+        'gz':JSON.parse(JSON.stringify(defaultChartSetting)),
     },
     generateNewLines:true //to add the additional 16 channels
 };
 
 let defaultsetting = {
-    sps:250, 
+    sps, 
     useDCBlock:true, 
     useBandpass:true, 
     bandpassLower:3, 
     bandpassUpper:45, 
     useScaling:true, 
-    scalar:4.5/(24*(Math.pow(2,23)-1))
+    scalar:1000*4.5/(24*(Math.pow(2,23)-1))
 };
 
 export const cytonFilterSettings:{[key:string]:FilterSettings} = {

@@ -33,14 +33,16 @@ export function mpu6050codec(data:any) {
     return output;
 }
 
+const sps = 100;
+
 export const mpu6050ChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
-        'ax':{nSec:10, sps:100},
-        'ay':{nSec:10, sps:100},
-        'az':{nSec:10, sps:100},
-        'gx':{nSec:10, sps:100},
-        'gy':{nSec:10, sps:100},
-        'gz':{nSec:10, sps:100},
-        'mpu_dietemp':{nSec:10, sps:5}
+        'ax':{nSec:10, sps},
+        'ay':{nSec:10, sps},
+        'az':{nSec:10, sps},
+        'gx':{nSec:10, sps},
+        'gy':{nSec:10, sps},
+        'gz':{nSec:10, sps},
+        'mpu_dietemp':{nSec:10, sps:5, units:'C'}
     }
 }

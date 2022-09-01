@@ -41,10 +41,12 @@ export const nrf5xSerialSettings = {
     buffering:{
         searchBytes:new Uint8Array([240,240])
     },
-    codec:nrf5x_usbcodec
+    codec:nrf5x_usbcodec,
+    sps:250 //base eeg/emg sps, peripheral sensors are different
 }
 
 export const nrf5xBLESettings = {
+    sps:250, //base eeg/emg sps, peripheral sensors are different
     services:{
         '0000cafe-b0ba-8bad-f00d-deadbeef0000':{
             '0001cafe-b0ba-8bad-f00d-deadbeef0000':{
@@ -53,42 +55,48 @@ export const nrf5xBLESettings = {
             '0002cafe-b0ba-8bad-f00d-deadbeef0000':{ //ads131m08
                 notify:true,
                 notifyCallback:undefined,
-                codec:ads131m08codec
+                codec:ads131m08codec,
+                sps:250
             },
             '0003cafe-b0ba-8bad-f00d-deadbeef0000':{ //max30102
                 notify:true,
                 notifyCallback:undefined,
-                codec:max3010xcodec
+                codec:max3010xcodec,
+                sps:100
             },
             '0004cafe-b0ba-8bad-f00d-deadbeef0000':{ //mpu6050
                 notify:true,
                 notifyCallback:undefined,
-                codec:mpu6050codec
+                codec:mpu6050codec,
+                sps:100
             },
             '0005cafe-b0ba-8bad-f00d-deadbeef0000':{ //ads131m08-2
                 notify:true,
                 notifyCallback:undefined,
-                codec:ads131m08codec
+                codec:ads131m08codec,
+                sps:250
             },
             '0006cafe-b0ba-8bad-f00d-deadbeef0000':{ //bme280
                 notify:true,
                 notifyCallback:undefined,
-                codec:bme280codec
+                codec:bme280codec,
+                sps:3.33
             }
         }// each notification is for a different sensor
     }
 }
 
+const defaultChartSetting = {nSec:10, sps:250, units:'mV'}
 export const nrf5x_usbChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
-        '0':{nSec:10, sps:250},
-        '1':{nSec:10, sps:250},
-        '2':{nSec:10, sps:250},
-        '3':{nSec:10, sps:250},
-        '4':{nSec:10, sps:250},
-        '5':{nSec:10, sps:250},
-        '6':{nSec:10, sps:250},
-        '7':{nSec:10, sps:250}
+        '0':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '1':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '2':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '3':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '4':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '5':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '6':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '7':JSON.parse(JSON.stringify(defaultChartSetting))
     },
     generateNewLines:true,
     cleanGeneration:false
@@ -101,7 +109,7 @@ let defaultsetting = {
     useBandpass:false, 
     bandpassLower:3, bandpassUpper:45, 
     useScaling:true, 
-    scalar:1.2/(32*(Math.pow(2,24)-1))
+    scalar:1000*1.2/(32*(Math.pow(2,24)-1)) //mV
 };
 
 export const nrf5x_usbFilterSettings:{[key:string]:FilterSettings} = {

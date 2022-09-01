@@ -39,6 +39,8 @@ export const accel_gyro = {
         timestamp?:number|number[]
     })=>{
 
+        if(!('ax' in data) && !('gx' in data)) return undefined; //invalid data
+
         if(!data.timestamp) {
             if((data.ax && Array.isArray(data.ax)) || (data.gx && Array.isArray(data.gx))) { //assume timestamp
                 let len = data.ax ? data.ax.length : data.gx.length;

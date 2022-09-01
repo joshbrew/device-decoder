@@ -41,6 +41,6 @@ export const max3010xChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
         'red':{nSec:10, sps:100},
         'ir':{nSec:10, sps:100},
-        'max_dietemp':{nSec:10, sps:3.33}
+        'max_dietemp':{nSec:10, sps:3.33, units:'C'} //1 read per
     }
 }

@@ -12,6 +12,7 @@ export declare const hegduinoSerialSettings: {
     baudRate: number;
     write: string;
     codec: typeof hegduinocodec;
+    sps: number;
 };
 export declare const hegduinoBLESettings: BLEDeviceOptions;
 export declare const hegduinoChartSettings: Partial<WebglLinePlotProps>;

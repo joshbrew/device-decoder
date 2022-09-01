@@ -1,12 +1,12 @@
 
-import {WorkerService, ServiceMessage, WorkerInfo} from '../../GraphServiceRouter/index' //'graphscript'////
+import {WorkerService, ServiceMessage, WorkerInfo} from 'graphscript'////
 import {WebSerial} from './serial/serialstream'
 import {BiquadChannelFilterer, FilterSettings} from './util/BiquadFilters'
 import gsworker from './debugger.worker'
 
 export const workers = new WorkerService(); 
 
-import { WebglLinePlotUtil, WebglLinePlotProps, WebglLinePlotInfo, WebglLineProps } from 'webgl-plot-utils'//'webgl-plot-utils';
+import { WebglLinePlotUtil, WebglLinePlotProps, WebglLinePlotInfo, WebglLineProps } from 'webgl-plot-utils'
 
 
 
@@ -460,38 +460,67 @@ export function setSignalControls(
     if(!controls) return false;
 
     if(chartSettings?.lines) {
-        let html = `
-        <tr>
-            <th>Name</th>
-            <th>SPS</th>
-            <th>Plot nSec</th>
-            <th>Scalar <input type='checkbox' id='${plotId}useScaling'></th>
-            <th>50Hz Notch <input type='checkbox' id='${plotId}useNotch50'></th>
-            <th>60Hz Notch <input type='checkbox' id='${plotId}useNotch60'></th>
-            <th>DC Block <input type='checkbox' id='${plotId}useDCBlock'></th>
-            <th>Lowpass <input type='checkbox' id='${plotId}useLowpass'></th>
-            <th>Bandpass <input type='checkbox' id='${plotId}useBandpass'></th>
-        </tr>
-        `;
-
         //console.log(chartSettings);
+        let body = ``;
+
+        let viewingall = true;
+        let scalingall = true;
+        let n50all = true;
+        let n60all = true;
+        let dcall = true;
+        let lpall = true;
+        let bpall = true;
+
         for(const prop in chartSettings.lines) {
             let line = chartSettings.lines[prop] as WebglLineProps
-            html += `
+            body += `
             <tr>
                 <td id='${plotId}${prop}name'><input id='${plotId}${prop}viewing' type='checkbox' ${(line.viewing) ? 'checked' : ''}>${prop}</td>
                 <td><input id='${plotId}${prop}sps' type='number' step='1' value='${line.sps ? line.sps : 100}'></td>
                 <td><input id='${plotId}${prop}nSec' type='number' step='1' value='${line.nSec ? line.nSec : (line.nPoints ? Math.floor(line.nPoints/(line.sps ? line.sps : 100)) : 10)}'></td>
                 <td><input id='${plotId}${prop}scalar'  type='number' value='${filterSettings[prop]?.scalar ? filterSettings[prop].scalar : 1}'><input id='${plotId}${prop}useScaling' type='checkbox' ${filterSettings[prop]?.useScaling ? 'checked' : ''}></td>
+                <td><input id='${plotId}${prop}units' type='text' value='${line.units ? line.units : ''}'></td>
+                <td><input id='${plotId}${prop}ymin' type='number' value='${line.ymin ? line.ymin : '0'}'></td>
+                <td><input id='${plotId}${prop}ymax' type='number' value='${line.ymax ? line.ymax : '1'}'></td>
                 <td><input id='${plotId}${prop}useNotch50' type='checkbox' ${filterSettings[prop]?.useNotch50 ? 'checked' : ''}></td>
                 <td><input id='${plotId}${prop}useNotch60' type='checkbox' ${filterSettings[prop]?.useNotch60 ? 'checked' : ''}></td>
                 <td><input id='${plotId}${prop}useDCBlock' type='checkbox' ${filterSettings[prop]?.useDCBlock ? 'checked' : ''}></td>
                 <td><input id='${plotId}${prop}lowpassHz'  type='number' value='${filterSettings[prop]?.lowpassHz ? filterSettings[prop].lowpassHz : 100}'>Hz<input id='${plotId}${prop}useLowpass' type='checkbox' ${filterSettings[prop]?.useLowpass ? 'checked' : ''}></td>
                 <td><input id='${plotId}${prop}bandpassLower'  type='number' value='${filterSettings[prop]?.bandpassLower ? filterSettings[prop].bandpassLower : 3}'>Hz to <input id='${plotId}${prop}bandpassUpper'  type='number' value='${filterSettings[prop]?.bandpassUpper ? filterSettings[prop].bandpassUpper : 45}'>Hz<input id='${plotId}${prop}useBandpass' type='checkbox' ${filterSettings[prop]?.useBandpass ? 'checked' : ''}></td>
             </tr>`
-        }
-        controls.innerHTML = html;
 
+            if(!line.viewing) viewingall = false;
+            if(!filterSettings[prop].useScaling) scalingall = false;
+            if(!filterSettings[prop].useNotch50) n50all = false;
+            if(!filterSettings[prop].useNotch60) n60all = false;
+            if(!filterSettings[prop].useDCBlock) dcall = false;
+            if(!filterSettings[prop].useLowpass) lpall = false;
+            if(!filterSettings[prop].useBandpass) bpall = false;
+
+        }
+        
+        let head = `
+        <tr>
+            <th>Name <input type='checkbox' id='${plotId}viewing' ${viewingall ? 'checked' : ''}></th>
+            <th>SPS</th>
+            <th>Plot nSec</th>
+            <th>Scalar <input type='checkbox' id='${plotId}useScaling' ${scalingall ? 'checked' : ''}></th>
+            <th>Units</th>
+            <th>Lower Bound</th>
+            <th>Upper Bound</th>
+            <th>50Hz Notch <input type='checkbox' id='${plotId}useNotch50' ${n50all ? 'checked' : ''}></th>
+            <th>60Hz Notch <input type='checkbox' id='${plotId}useNotch60' ${n60all ? 'checked' : ''}></th>
+            <th>DC Block <input type='checkbox' id='${plotId}useDCBlock' ${dcall ? 'checked' : ''}></th>
+            <th>Lowpass <input type='checkbox' id='${plotId}useLowpass' ${lpall ? 'checked' : ''}></th>
+            <th>Bandpass <input type='checkbox' id='${plotId}useBandpass' ${bpall ? 'checked' : ''}></th>
+        </tr>
+        `;
+
+
+        controls.innerHTML = head + body;
+
+        //apply to all
+        let viewall = document.getElementById(plotId+'viewing') as HTMLInputElement;
         let usescalar = document.getElementById(plotId+'useScaling') as HTMLInputElement;
         let usen50 = document.getElementById(plotId+'useNotch50') as HTMLInputElement;
         let usen60 = document.getElementById(plotId+'useNotch60') as HTMLInputElement;
@@ -506,6 +535,9 @@ export function setSignalControls(
             }
         }
 
+        viewall.onchange = (ev) => {
+            headeronchange((ev.target as HTMLInputElement).checked,'viewing')
+        }
         usescalar.onchange = (ev) => {
             headeronchange((ev.target as HTMLInputElement).checked,'useScaling')
         }
@@ -531,6 +563,9 @@ export function setSignalControls(
             let nSec = document.getElementById(plotId+prop+'nSec') as HTMLInputElement;
             let useScaling = document.getElementById(plotId+prop+'useScaling') as HTMLInputElement;
             let scalar = document.getElementById(plotId+prop+'scalar') as HTMLInputElement;
+            let units = document.getElementById(plotId+prop+'units') as HTMLInputElement;
+            let ymin = document.getElementById(plotId+prop+'ymin') as HTMLInputElement;
+            let ymax = document.getElementById(plotId+prop+'ymax') as HTMLInputElement;
             let useNotch50 = document.getElementById(plotId+prop+'useNotch50') as HTMLInputElement;
             let useNotch60 = document.getElementById(plotId+prop+'useNotch60') as HTMLInputElement;
             let useDCBlock = document.getElementById(plotId+prop+'useDCBlock') as HTMLInputElement;
@@ -539,6 +574,8 @@ export function setSignalControls(
             let useBandpass = document.getElementById(plotId+prop+'useBandpass') as HTMLInputElement;
             let bandpassLower = document.getElementById(plotId+prop+'bandpassLower') as HTMLInputElement;
             let bandpassUpper = document.getElementById(plotId+prop+'bandpassUpper') as HTMLInputElement;
+
+
 
             viewing.onchange = () => {
 
@@ -575,6 +612,27 @@ export function setSignalControls(
 
             sps.onchange = () => {
                 filteronchange();
+            }
+
+            units.onchange = () => {
+                if((!Array.isArray(chartSettings.lines?.[prop] as WebglLineProps))) {
+                    (chartSettings.lines?.[prop] as WebglLineProps).units = units.value;
+                    chartworker.run('resetChart', [plotId,chartSettings]);
+                }
+            }
+            ymax.onchange = () => {
+                if((!Array.isArray(chartSettings.lines?.[prop] as WebglLineProps))) {
+                    (chartSettings.lines?.[prop] as WebglLineProps).ymax = ymax.value ? parseFloat(ymax.value) : 1;
+                    (chartSettings.lines?.[prop] as WebglLineProps).ymin = ymin.value ? parseFloat(ymin.value) : 0;
+                    chartworker.run('resetChart', [plotId,chartSettings]);
+                }
+            }
+            ymin.onchange = () => {
+                if((!Array.isArray(chartSettings.lines?.[prop] as WebglLineProps))) {
+                    (chartSettings.lines?.[prop] as WebglLineProps).ymax = ymax.value ? parseFloat(ymax.value) : 1;
+                    (chartSettings.lines?.[prop] as WebglLineProps).ymin = ymin.value ? parseFloat(ymin.value) : 0;
+                    chartworker.run('resetChart', [plotId,chartSettings]);
+                }
             }
 
             useScaling.onchange = filteronchange;

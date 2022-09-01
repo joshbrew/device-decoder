@@ -15,6 +15,7 @@ import { hrcodec } from './genericBLE';
 export declare const Devices: {
     BLE: {
         nrf5x: {
+            sps: number;
             services: {
                 '0000cafe-b0ba-8bad-f00d-deadbeef0000': {
                     '0001cafe-b0ba-8bad-f00d-deadbeef0000': {
@@ -24,26 +25,31 @@ export declare const Devices: {
                         notify: boolean;
                         notifyCallback: any;
                         codec: typeof ads131m08codec;
+                        sps: number;
                     };
                     '0003cafe-b0ba-8bad-f00d-deadbeef0000': {
                         notify: boolean;
                         notifyCallback: any;
                         codec: typeof max3010xcodec;
+                        sps: number;
                     };
                     '0004cafe-b0ba-8bad-f00d-deadbeef0000': {
                         notify: boolean;
                         notifyCallback: any;
                         codec: typeof mpu6050codec;
+                        sps: number;
                     };
                     '0005cafe-b0ba-8bad-f00d-deadbeef0000': {
                         notify: boolean;
                         notifyCallback: any;
                         codec: typeof ads131m08codec;
+                        sps: number;
                     };
                     '0006cafe-b0ba-8bad-f00d-deadbeef0000': {
                         notify: boolean;
                         notifyCallback: any;
                         codec: (data: any) => any;
+                        sps: number;
                     };
                 };
             };
@@ -56,6 +62,7 @@ export declare const Devices: {
                         notify: boolean;
                         notifyCallback: any;
                         codec: typeof cognixionONE_EEG_codec;
+                        sps: number;
                     };
                 } | {
                     [x: string]: {
@@ -67,6 +74,7 @@ export declare const Devices: {
                     };
                 };
             };
+            sps: number;
         };
         statechanger: import("../ble/ble_client").BLEDeviceOptions;
         blueberry: import("../ble/ble_client").BLEDeviceOptions;
@@ -90,37 +98,44 @@ export declare const Devices: {
                 searchBytes: Uint8Array;
             };
             codec: typeof nrf5x_usbcodec;
+            sps: number;
         };
         freeEEG32: {
             baudRate: number;
             bufferSize: number;
             frequency: number;
             codec: typeof freeeeg32codec;
+            sps: number;
         };
         freeEEG32_optical: {
             baudRate: number;
             bufferSize: number;
             frequency: number;
             codec: typeof freeeeg32codec;
+            sps: number;
         };
         freeEEG128: {
             baudRate: number;
             bufferSize: number;
             frequency: number;
             codec: typeof freeeeg128codec;
+            sps: number;
         };
         hegduino: {
             baudRate: number;
             write: string;
             codec: typeof hegduinocodec;
+            sps: number;
         };
         cyton: {
             baudRate: number;
             codec: typeof cytoncodec;
+            sps: number;
         };
         cyton_daisy: {
             baudRate: number;
             codec: typeof cytoncodec;
+            sps: number;
         };
         peanut: {
             baudRate: number;
@@ -130,6 +145,7 @@ export declare const Devices: {
                 searchBytes: Uint8Array;
             };
             codec: typeof peanutcodec;
+            sps: number;
         };
         statechanger: {
             baudRate: number;
@@ -138,10 +154,12 @@ export declare const Devices: {
         cognixionONE: {
             baudRate: number;
             codec: typeof cytoncodec;
+            sps: number;
         };
     };
     BLE_OTHER: {
         muse: {
+            sps: number;
             connect: (settings?: any) => Promise<unknown>;
             codec: (reading: any) => any;
             disconnect: (info: any) => void;
@@ -150,6 +168,7 @@ export declare const Devices: {
             ondata: (parsed: any) => void;
         };
         ganglion: {
+            sps: number;
             connect: (settings?: any) => Promise<unknown>;
             codec: (reading: any) => {
                 0: any;

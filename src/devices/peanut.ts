@@ -66,7 +66,8 @@ export const peanutSerialSettings = {
     buffering:{
         searchBytes:new Uint8Array([170,170]),
     },
-    codec:peanutcodec
+    codec:peanutcodec,
+    sps:10.101
 };
 
 export const peanutChartSettings: Partial<WebglLinePlotProps> = {

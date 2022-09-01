@@ -28,35 +28,37 @@ export function freeeeg128codec(data:any) {
     return output;
 }
 
+const sps = 250;
 
 export const freeeeg128SerialSettings = {
     baudRate:921600,
     bufferSize:2000,
     frequency:1.9,
-    codec:freeeeg128codec
+    codec:freeeeg128codec,
+    sps
 }
 
 export const freeeeg128ChartSettings:Partial<WebglLinePlotProps> = {  //adding the rest below
     lines:{
-        'ax':{nSec:10, sps:500},
-        'ay':{nSec:10, sps:500},
-        'az':{nSec:10, sps:500},
-        'gx':{nSec:10, sps:500},
-        'gy':{nSec:10, sps:500},
-        'gz':{nSec:10, sps:500}
+        'ax':{nSec:10, sps},
+        'ay':{nSec:10, sps},
+        'az':{nSec:10, sps},
+        'gx':{nSec:10, sps},
+        'gy':{nSec:10, sps},
+        'gz':{nSec:10, sps}
     }
 }
 
 export const freeeeg128FilterSettings:{[key:string]:FilterSettings} = { }
 
 for(let i = 0; i < 128; i++) {
-    freeeeg128ChartSettings.lines[i] = {sps:250,nSec:10};
+    freeeeg128ChartSettings.lines[i] = {sps,nSec:10, units:'mV' };
     freeeeg128FilterSettings[i] = {
         sps:250, 
         useDCBlock:true, 
         useBandpass:true, 
         bandpassLower:3, 
         bandpassUpper:45, 
-        scalar:2.5/(32*(Math.pow(2,24)-1))
+        scalar:1000*2.5/(32*(Math.pow(2,24)-1))
     };
 }

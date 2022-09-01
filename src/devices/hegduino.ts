@@ -37,13 +37,17 @@ export function hegduinocodec(value:any) {
     } else return txt; //e.g. echoed commands or startup/crash messages
 }
 
+const sps = 40;
+
 export const hegduinoSerialSettings = {
     baudRate:115200,
     write:'t\n', //old firmware needs this
-    codec:hegduinocodec
+    codec:hegduinocodec,
+    sps
 }
 
 export const hegduinoBLESettings = {
+    sps, //only one output, so we can put an easier to find reference here 
     services:{
         ["6E400001-B5A3-F393-E0A9-E50E24DCCA9E".toLowerCase()]:{ //SERVICE_UUID -- for data
             '6e400002-b5a3-f393-e0a9-e50e24dcca9e':{ //write //CHARACTERISTIC_UUID_RX
@@ -52,7 +56,8 @@ export const hegduinoBLESettings = {
             '6e400003-b5a3-f393-e0a9-e50e24dcca9e':{ //CHARACTERISTIC_UUID_TX
                 notify:true,
                 notifyCallback:undefined, //define this before initializing
-                codec:hegduinocodec
+                codec:hegduinocodec,
+                sps
             } //notify
         },
         ['6E400004-B5A3-F393-E0A9-E50E24DCCA9E'.toLowerCase()]:{ //SERVICE_UUID_OTA -- for updating
@@ -74,11 +79,11 @@ export const hegduinoBLESettings = {
 
 export const hegduinoChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
-        red:{nSec:60, sps:40},
-        ir:{nSec:60, sps:40},
-        heg:{nSec:60, sps:40},
-        ambient:{nSec:60, sps:40},
-        temperature:{nSec:60, sps:40},
+        red:{nSec:60, sps},
+        ir:{nSec:60, sps},
+        heg:{nSec:60, sps},
+        ambient:{nSec:60, sps},
+        temperature:{nSec:60, sps, units:'C'},
     }
 }
 

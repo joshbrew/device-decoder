@@ -75,5 +75,6 @@ export declare const peanutSerialSettings: {
         searchBytes: Uint8Array;
     };
     codec: typeof peanutcodec;
+    sps: number;
 };
 export declare const peanutChartSettings: Partial<WebglLinePlotProps>;

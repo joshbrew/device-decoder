@@ -13,7 +13,10 @@ import { WebglLinePlotProps } from "webgl-plot-utils";
 import { FilterSettings } from "../util/BiquadFilters";
 import { bitflippin } from "../util/bitflippin";
 
+const sps = 250;
+
 export const museSettings = { //include muse-js and import {MuseClient} from 'muse-js' for this to work
+    sps, //base eeg sps, accelerometer is something else I think, I dunno
     connect:(settings:any={}) => {
         return new Promise(async (res,rej) => {
             let _id = `muse${Math.floor(Math.random()*1000000000000000)}`;
@@ -154,7 +157,7 @@ export const museSettings = { //include muse-js and import {MuseClient} from 'mu
 
 
 let defaultsetting = {
-    sps:250, 
+    sps, 
     useDCBlock:true, 
     useBandpass:true, 
     bandpassLower:3, 
@@ -172,11 +175,11 @@ export const museFilterSettings:{[key:string]:FilterSettings} = {
 
 export const museChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
-        '0':{nSec:10, sps:250},
-        '1':{nSec:10, sps:250},
-        '2':{nSec:10, sps:250},
-        '3':{nSec:10, sps:250},
-        '4':{nSec:10, sps:250},
+        '0':{nSec:10, sps, units:'mV'},
+        '1':{nSec:10, sps, units:'mV'},
+        '2':{nSec:10, sps, units:'mV'},
+        '3':{nSec:10, sps, units:'mV'},
+        '4':{nSec:10, sps, units:'mV'},
         'ax':{nSec:10, sps:100},
         'ay':{nSec:10, sps:100},
         'az':{nSec:10, sps:100},

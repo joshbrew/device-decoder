@@ -25,12 +25,14 @@ console.log(Devices); //see supported devices and customize callbacks before ins
 
 let info = initDevice(
     'BLE', 
-    'hegduino', //e.g. selected from lists, or we can only support specific devices as needed
-    (data)=>{ //data received back from codec thread
-        console.log(data)
-    },
-    function onconnect(deviceInfo) {}, //optionally specify an onconnect handler
-    function ondisconnect(deviceInfo) {}, //optionally specify an ondisconnect handler
+    'hegduino', 
+    {
+        ondecoded:(data)=>{ //data received back from codec thread
+            console.log(data)
+        },
+        onconnect: (deviceInfo) => {}, //optionally specify an onconnect handler
+        ondisconnect:(deviceInfo) => {}, //optionally specify an ondisconnect handler
+    }
     //renderSettings //e.g. specify a thread with rendering functions that receives data directly from the decoder thread (no round trip to main thread)
 ) as DeviceInfo;
 //devices are subscribed to automatically when passing an ondecoded callback or object e.g. with specifics for different BLE notifications
@@ -38,6 +40,7 @@ let info = initDevice(
 
 type DeviceInfo = {
     device:any, //the info object, api-specific data object
+    workers:any, //workes associated with this device stream
     disconnect:()=>void //device disconnect macro
     read:(command:any)=>Promise<any> //device read macro (e.g. for BLE read characteristics),
     write:(command:any)=>Promise<any> //device write macro (e.g. for Serial commands or BLE write characteristics)

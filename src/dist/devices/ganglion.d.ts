@@ -1,6 +1,7 @@
 import { WebglLinePlotProps } from "webgl-plot-utils";
 import { FilterSettings } from "../util/BiquadFilters";
 export declare const ganglionSettings: {
+    sps: number;
     connect: (settings?: any) => Promise<unknown>;
     codec: (reading: any) => {
         0: any;

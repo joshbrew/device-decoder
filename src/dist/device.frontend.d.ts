@@ -8,21 +8,41 @@ export declare const workers: WorkerService;
 export { Devices, gsworker };
 export declare function initDevice(deviceType: 'BLE' | 'USB' | 'OTHER' | 'BLE_OTHER' | 'USB_OTHER', //other includes prewritten drivers that don't fit our format very well, e.g. cloud streaming drivers or the musejs driver as they are self contained
 deviceName: string, //one of the supported settings in Devices
-ondecoded: ((data: any) => void) | {
-    [key: string]: (data: any) => void;
-}, //a single ondata function or an object with keys corresponding to BLE characteristics
-onconnect?: ((device: any) => void), ondisconnect?: ((device: any) => void), renderSettings?: {
-    canvas: HTMLCanvasElement;
-    context: string;
-    _id?: string;
-    width?: number;
-    height?: number;
-    draw?: string | ((self: any, canvas: any, context: any) => void);
-    update?: string | ((self: any, canvas: any, context: any, input: any) => void);
-    init?: string | ((self: any, canvas: any, context: any) => void);
-    clear?: string | ((self: any, canvas: any, context: any) => void);
-    animating?: boolean;
-    renderworker?: WorkerInfo;
+options: {
+    ondecoded: ((data: any) => void) | {
+        [key: string]: (data: any) => void;
+    };
+    onconnect?: ((device: any) => void);
+    ondisconnect?: ((device: any) => void);
+    subprocesses?: {
+        [key: string]: {
+            route: string;
+            otherArgs?: any[];
+            init?: string;
+            initArgs?: any[];
+            url?: any;
+            callback?: string | ((data: any) => any);
+            pipeTo?: {
+                portId: string;
+                route: string;
+                otherArgs: any[];
+            };
+            worker?: WorkerInfo;
+        };
+    };
+    renderer?: {
+        canvas: HTMLCanvasElement;
+        context: string;
+        _id?: string;
+        width?: number;
+        height?: number;
+        draw?: string | ((self: any, canvas: any, context: any) => void);
+        update?: string | ((self: any, canvas: any, context: any, input: any) => void);
+        init?: string | ((self: any, canvas: any, context: any) => void);
+        clear?: string | ((self: any, canvas: any, context: any) => void);
+        animating?: boolean;
+        renderworker?: WorkerInfo;
+    };
 }): Promise<{
     workers: {
         streamworker: WorkerInfo;
@@ -33,7 +53,7 @@ onconnect?: ((device: any) => void), ondisconnect?: ((device: any) => void), ren
     read: (command?: any) => any;
     write: (command?: any) => any;
 }>;
-export declare function createStreamPipeline(dedicatedSerialWorker?: boolean, dedicatedRenderWorker?: boolean, renderSettings?: {
+export declare function createStreamPipeline(dedicatedSerialWorker?: boolean, dedicatedRenderWorker?: boolean, renderer?: {
     canvas: HTMLCanvasElement;
     context: string;
     _id?: string;

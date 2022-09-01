@@ -50,9 +50,9 @@ function altitude(pressure,temperature) {
 
 export const bme280ChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
-        'temp':{nSec:10, sps:100},
-        'pressure':{nSec:10, sps:100},
-        'humidity':{nSec:10, sps:3.33},
-        'altitude':{nSec:10, sps:3.33}
+        'temp':   {nSec:120,  sps:3.33, units:'C'},
+        'pressure':{nSec:120, sps:3.33, units:'hPa'},
+        'humidity':{nSec:120, sps:3.33, units:'%'},
+        'altitude':{nSec:120, sps:3.33, units:'m'}
     }
 }

@@ -29,42 +29,48 @@ export function freeeeg32codec(data:any) {
     return output;
 }
 
+const sps = 512;
+
 export const freeeeg32SerialSettings = {
     baudRate:921600, //921600 baud
     bufferSize:2000,
     frequency:1.9, //512sps
-    codec:freeeeg32codec
+    codec:freeeeg32codec,
+    sps
+
 }
 
 export const freeeeg32_optical_SerialSettings = {
     baudRate:1000000, //1M baud, I forget why
     bufferSize:2000,
     frequency:1.9,
-    codec:freeeeg32codec
+    codec:freeeeg32codec,
+    sps
 }
 
+const defaultChartSetting = {nSec:10, sps}
 export const freeeeg32ChartSettings:Partial<WebglLinePlotProps> = {  //adding the rest below
     lines:{
-        'ax':{nSec:10, sps:500},
-        'ay':{nSec:10, sps:500},
-        'az':{nSec:10, sps:500},
-        'gx':{nSec:10, sps:500},
-        'gy':{nSec:10, sps:500},
-        'gz':{nSec:10, sps:500}
+        'ax':JSON.parse(JSON.stringify(defaultChartSetting)),
+        'ay':JSON.parse(JSON.stringify(defaultChartSetting)),
+        'az':JSON.parse(JSON.stringify(defaultChartSetting)),
+        'gx':JSON.parse(JSON.stringify(defaultChartSetting)),
+        'gy':JSON.parse(JSON.stringify(defaultChartSetting)),
+        'gz':JSON.parse(JSON.stringify(defaultChartSetting))
     }
 }
 
 export const freeeeg32FilterSettings:{[key:string]:FilterSettings} = { }
 
 for(let i = 0; i < 32; i++) {
-    freeeeg32ChartSettings.lines[i] = {sps:500,nSec:10};
+    freeeeg32ChartSettings.lines[i] = {sps,nSec:10, units:'mV'};
     freeeeg32FilterSettings[i] = {
-        sps:500, 
+        sps, 
         useDCBlock:true, 
         useBandpass:true, 
         bandpassLower:3, 
         bandpassUpper:45, 
         useScaling:true, 
-        scalar:2.5/(8*(Math.pow(2,24)-1))
+        scalar:1000*2.5/(8*(Math.pow(2,24)-1))
     }; //alternative is 250sps and 32x gain
 }

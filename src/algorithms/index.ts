@@ -22,16 +22,14 @@ export type AlgorithmContext = {
 
 
 //data in, interpretation out (with unique key:value pairs)
-export const algorithms = {
+export const algorithms: { [key:string]:AlgorithmContextProps } = {
     beat_detect, //beat detection, set sps and maxFreq detection (for low passing)
-    accel_gyro //get absolute angle and position change from starting point (need magnetometer for global position, the gyro is relative)
-} as {
-    [key:string]:AlgorithmContextProps
-}
-
-
-
-
+    accel_gyro, //get absolute angle and position change from starting point (need magnetometer for global position, the gyro is relative)
+    heartrate:beat_detect, //alias
+    breath:beat_detect
+};
+algorithms['breath'].structs = Object.assign({},algorithms['breath'].structs); 
+algorithms['breath'].structs.maqFreq = 1/3; //another quick preset
 
 
 
@@ -48,8 +46,8 @@ export function createAlgorithmContext(
             return ctx.ondata(ctx, data);
         }
     } as AlgorithmContext;
-    if(options.structs) recursivelyAssign(ctx,JSON.parse(JSON.stringify(options.structs))); //hard copy
-    if(inputs) recursivelyAssign(ctx,JSON.parse(JSON.stringify(options.structs)));
+    if(options.structs) recursivelyAssign(ctx, JSON.parse( JSON.stringify( options.structs ))); //hard copy
+    if(inputs) recursivelyAssign(ctx, JSON.parse( JSON.stringify( options.structs )));
 
     return ctx;
 

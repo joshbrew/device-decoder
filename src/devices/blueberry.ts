@@ -15,6 +15,7 @@ export function blueberrycodec(value:DataView) {
     return output;
 }
 
+const sps = 40; //default sample rate.
 
 export const blueberryBLESettings = {
     namePrefix:'blueberry',
@@ -26,18 +27,20 @@ export const blueberryBLESettings = {
             '3f3e3d3c-3b3a-3938-3736-353433323130':{
                 notify:true,
                 notifyCallback:undefined,
-                codec:blueberrycodec
+                codec:blueberrycodec,
+                sps
             }
         }
-    }
+    },
+    sps
 } as BLEDeviceOptions
 
 
 export const blueberryChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
-        red:{nSec:60, sps:40},
-        ir:{nSec:60, sps:40},
-        ir2:{nSec:60, sps:40},
-        heg:{nSec:60, sps:40}
+        red:{nSec:60, sps},
+        ir:{nSec:60,  sps},
+        ir2:{nSec:60, sps},
+        heg:{nSec:60, sps}
     }
 }

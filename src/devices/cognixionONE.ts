@@ -25,7 +25,7 @@ export function cognixionONE_EEG_codec(data:any) {
         timestamp:Date.now()
     };
 
-    for(let i = 0; i < 7; i++) { //hard coded packet iteration, 9 sample sets x 8 channels per packet 
+    for(let i = 0; i < 7; i++) { //hard coded packet iteration, 8 sample sets x 8 channels per packet 
         let j = i * 26 + 1; //every 0th byte is a counter and every 26th byte is 0x00 so skip those
         if(!arr[j+23]) break;
         output[0][i] = bitflippin.bytesToUInt24(arr[j],arr[j+1],arr[j+2]); //signed or unsigned? assuming unsigned
@@ -41,6 +41,8 @@ export function cognixionONE_EEG_codec(data:any) {
     return output;
 }
 
+const sps = 250;
+
 //For the USB raw stream, use the cyton codec
 export const cognixionONEBLESettings = {
     services:{
@@ -48,7 +50,8 @@ export const cognixionONEBLESettings = {
             ['8204669A-6313-4BB1-9645-6BA28BF86DF5'.toLowerCase()]:{  //raw data stream
                 notify:true,
                 notifyCallback:undefined,
-                codec:cognixionONE_EEG_codec
+                codec:cognixionONE_EEG_codec,
+                sps
             },
             //bunch more stuff
         },
@@ -61,30 +64,32 @@ export const cognixionONEBLESettings = {
             }
         }  //controls
         //more services for haptics etc.
-    }
+    },
+    sps //base eeg sps (we don't know about the other sensors yet)
 }
 
+const defaultChartSetting = {nSec:10, sps, units:'mV'};
 export const cognixionONEChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
-        '0':{nSec:10, sps:250},
-        '1':{nSec:10, sps:250},
-        '2':{nSec:10, sps:250},
-        '3':{nSec:10, sps:250},
-        '4':{nSec:10, sps:250},
-        '5':{nSec:10, sps:250},
-        '6':{nSec:10, sps:250},
-        '7':{nSec:10, sps:250}
+        '0':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '1':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '2':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '3':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '4':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '5':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '6':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '7':JSON.parse(JSON.stringify(defaultChartSetting))
     }
 }
 
 
 export const cognixionONEFilterSettings:{[key:string]:FilterSettings} = {
-    '0':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45}, //scalar?
-    '1':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '2':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '3':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '4':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '5':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '6':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
-    '7':{sps:250, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45}
+    '0':{sps, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45}, //scalar?
+    '1':{sps, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
+    '2':{sps, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
+    '3':{sps, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
+    '4':{sps, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
+    '5':{sps, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
+    '6':{sps, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45},
+    '7':{sps, useDCBlock:true, useBandpass:true, bandpassLower:3, bandpassUpper:45}
 }

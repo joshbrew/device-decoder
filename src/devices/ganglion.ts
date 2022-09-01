@@ -12,7 +12,10 @@
 import { WebglLinePlotProps } from "webgl-plot-utils";
 import { FilterSettings } from "../util/BiquadFilters";
 
+const sps = 250;
+
 export const ganglionSettings = { //include muse-js and import {MuseClient} from 'muse-js' for this to work
+    sps,
     connect:(settings:any={}) => {
         return new Promise(async (res,rej) => {
             let _id = `ganglion${Math.floor(Math.random()*1000000000000000)}`;
@@ -94,7 +97,7 @@ export const ganglionSettings = { //include muse-js and import {MuseClient} from
 
 
 let defaultsetting = {
-    sps:250, 
+    sps, 
     useDCBlock:true, 
     useBandpass:true, 
     bandpassLower:3, 
@@ -108,16 +111,16 @@ export const ganglionFilterSettings:{[key:string]:FilterSettings} = {
     '3':JSON.parse(JSON.stringify(defaultsetting))
 }
 
-
+const defaultChartSetting = {nSec:10, sps, units:'mV'};
 export const ganglionChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
-        '0':{nSec:10, sps:250},
-        '1':{nSec:10, sps:250},
-        '2':{nSec:10, sps:250},
-        '3':{nSec:10, sps:250},
-        'ax':{nSec:10, sps:100},
-        'ay':{nSec:10, sps:100},
-        'az':{nSec:10, sps:100}
+        '0':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '1':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '2':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '3':JSON.parse(JSON.stringify(defaultChartSetting)),
+        'ax':JSON.parse(JSON.stringify(defaultChartSetting)),
+        'ay':JSON.parse(JSON.stringify(defaultChartSetting)),
+        'az':JSON.parse(JSON.stringify(defaultChartSetting))
     },
     generateNewLines:true //to add the additional 16 channels
 };

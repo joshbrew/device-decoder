@@ -29,6 +29,8 @@ export function blueberrylongcodec(value:DataView) {
     return output;
 }
 
+const sps = 40;
+
 export const blueberry2BLESettings = {
     namePrefix:'blueberry',
     services:{
@@ -39,28 +41,31 @@ export const blueberry2BLESettings = {
             '4f4e4d4c-4b6a-6968-6766-656463426160':{
                 notify:true,
                 notifyCallback:undefined,
-                codec:blueberrylongcodec
+                codec:blueberrylongcodec,
+                sps
             }, //long channel
             '4f4e4d4c-4b5a-5958-5756-555453425150':{
                 notify:true,
                 notifyCallback:undefined,
-                codec:blueberryshortcodec
+                codec:blueberryshortcodec,
+                sps
             } //short channel
             
         }
-    }
+    },
+    sps
 } as BLEDeviceOptions
 
 
 export const blueberry2ChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
-        red:{nSec:60, sps:40},
-        ir:{nSec:60, sps:40},
-        ir2:{nSec:60, sps:40},
-        heg:{nSec:60, sps:40},
-        sred:{nSec:60, sps:40},
-        sir:{nSec:60, sps:40},
-        sir2:{nSec:60, sps:40},
-        sheg:{nSec:60, sps:40}
+        red:{nSec:60, sps},
+        ir:{nSec:60, sps},
+        ir2:{nSec:60, sps},
+        heg:{nSec:60, sps},
+        sred:{nSec:60, sps},
+        sir:{nSec:60, sps},
+        sir2:{nSec:60, sps},
+        sheg:{nSec:60, sps}
     }
 }

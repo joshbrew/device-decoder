@@ -22,6 +22,8 @@ export const beat_detect = {
         data:{red:number|number[], ir:number|number[], timestamp?:number|number[]}
     )=>{
 
+        if(!('red' in data) || !('ir' in data)) return undefined;  //invalid data
+
         let smoothFactor = context.sps/context.maxFreq;
         let smawindow = Math.floor(smoothFactor)
         let peakFinderWindow = smawindow; if(peakFinderWindow%2 === 0) peakFinderWindow+=1;

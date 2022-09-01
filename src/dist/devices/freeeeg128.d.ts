@@ -6,6 +6,7 @@ export declare const freeeeg128SerialSettings: {
     bufferSize: number;
     frequency: number;
     codec: typeof freeeeg128codec;
+    sps: number;
 };
 export declare const freeeeg128ChartSettings: Partial<WebglLinePlotProps>;
 export declare const freeeeg128FilterSettings: {

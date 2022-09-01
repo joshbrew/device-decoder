@@ -43,20 +43,36 @@ export function ads131m08codec(data:any) {
     return output;
 }
 
+const sps = 250;
+
+const defaultChartSetting = {nSec:10, sps, units:'mV'};
+
 export const ads131m08ChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
-        '0':{nSec:10, sps:250},
-        '1':{nSec:10, sps:250},
-        '2':{nSec:10, sps:250},
-        '3':{nSec:10, sps:250},
-        '4':{nSec:10, sps:250},
-        '5':{nSec:10, sps:250},
-        '6':{nSec:10, sps:250},
-        '7':{nSec:10, sps:250}
+        '0':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '1':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '2':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '3':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '4':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '5':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '6':JSON.parse(JSON.stringify(defaultChartSetting)),
+        '7':JSON.parse(JSON.stringify(defaultChartSetting))
     }
 }
 
-let defaultsetting = {sps:250, useDCBlock:false, useBandpass:false, bandpassLower:3, bandpassUpper:45, useScaling:true, scalar:1.2/(32*(Math.pow(2,24)-1))};
+const gain = 32;
+const nbits = 24;
+const vref = 1.2;
+
+let defaultsetting = {
+    sps, 
+    useDCBlock:false, 
+    useBandpass:false, 
+    bandpassLower:3, 
+    bandpassUpper:45, 
+    useScaling:true, 
+    scalar:0.96 * 1000*vref/(gain*(Math.pow(2,nbits)-1))
+};
 
 export const ads131m08FilterSettings:{[key:string]:FilterSettings} = {
     '0':JSON.parse(JSON.stringify(defaultsetting)),

@@ -70,11 +70,13 @@ You can also import initDevice and Devices directly into browser from the cdnjs 
 let info = initDevice(
     'BLE', 
     'hegduino', 
-    (data)=>{ //data received back from codec thread
-        console.log(data)
-    },
-    function onconnect(deviceInfo) {}, //optionally specify an onconnect handler
-    function ondisconnect(deviceInfo) {}, //optionally specify an ondisconnect handler
+    {
+        ondecoded:(data)=>{ //data received back from codec thread
+            console.log(data)
+        },
+        onconnect: (deviceInfo) => {}, //optionally specify an onconnect handler
+        ondisconnect:(deviceInfo) => {}, //optionally specify an ondisconnect handler
+    }
     //renderSettings //e.g. specify a thread with rendering functions that receives data directly from the decoder thread (no round trip to main thread)
 );
 
