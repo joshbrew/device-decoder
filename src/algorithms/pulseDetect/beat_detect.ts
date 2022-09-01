@@ -19,10 +19,15 @@ export const beat_detect = {
     },
     ondata:(
         context:AlgorithmContext,
-        data:{red:number|number[], ir:number|number[], timestamp?:number|number[]}
+        data:{
+            red?:number|number[], //could be any LED really but we are using red and IR predominantly
+            ir?:number|number[], 
+            heg?:number|number[], //e.g. the Peanut only gives us the HEG in a usable way
+            timestamp?:number|number[]
+        }
     )=>{
 
-        if(!('red' in data) || !('ir' in data)) return undefined;  //invalid data
+        if(!('red' in data) && !('heg' in data)) return undefined;  //invalid data
 
         let smoothFactor = context.sps/context.maxFreq;
         let smawindow = Math.floor(smoothFactor)
@@ -30,17 +35,26 @@ export const beat_detect = {
         let midpoint = Math.round(peakFinderWindow*.5);
 
         if(!('timestamp' in data)) { //generate timestamps if none, assuming latest data is at time of the ondata callback
-            if(Array.isArray(data.red)) { //assume timestamp
+            if(Array.isArray(data.red) || Array.isArray(data.heg)) { //assume timestamp
                 let now = Date.now();
-                let toInterp = [now - data.red.length*context.sps*1000, now];
-                data.timestamp = Math2.upsample(toInterp,data.red.length);
+                let len;
+                if(data.red) len = (data.red as number[]).length;
+                else if (data.heg) len = (data.heg as number[]).length;
+                let toInterp = [now - (data.red as number[]).length*context.sps*1000, now];
+                data.timestamp = Math2.upsample(toInterp,(data.red as number[]).length);
             } else {
                 data.timestamp = Date.now();
             }
         }
 
-        let pass = (red, ir, timestamp) => {
-            context.summed.push(red+ir);
+        let pass = (led1, led2, led_deriv, timestamp) => {
+            if(led1 && led2) {
+                context.summed.push(led1+led2);
+            } else if (led1) { //maybe only one LED value?
+                context.summed.push(led1);
+            } else if(led_deriv) {
+                context.summed.push(led_deriv);
+            }
             context.timestamp.push(timestamp);
 
             let beat;
@@ -162,9 +176,13 @@ export const beat_detect = {
         }
 
         if(Array.isArray(data.red)) {
-            let result = data.red.map((v,i) => { return pass(v,data.ir[i],(data.timestamp as number[])[i]); });
+            let result = data.red.map((v,i) => { return pass(v,data.ir?.[i],undefined,(data.timestamp as number[])[i]); });
             return result;
-        } else return pass(data.red, data.ir, data.timestamp);
+        } else if (Array.isArray(data.heg)) {
+            let result = data.heg.map((v,i) => { return pass(undefined,undefined,v,(data.timestamp as number[])[i]); });
+            return result;
+        }
+        else return pass(data.red, data.ir, data.heg, data.timestamp);
         //returns a beat when one is detected with the latest data passed in, else returns undefined
     }
 } as AlgorithmContextProps;

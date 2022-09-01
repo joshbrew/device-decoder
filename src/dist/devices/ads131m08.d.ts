@@ -18,6 +18,17 @@ export declare function ads131m08codec(data: any): {
     7: any[];
     timestamp: number;
 };
+export declare function ads131m08_arduinocodec(data: any): {
+    '0': number;
+    '1': number;
+    '2': number;
+    '3': number;
+    '4': number;
+    '5': number;
+    '6': number;
+    '7': number;
+    timestamp: number;
+};
 export declare const ads131m08ChartSettings: Partial<WebglLinePlotProps>;
 export declare const ads131m08FilterSettings: {
     [key: string]: FilterSettings;
