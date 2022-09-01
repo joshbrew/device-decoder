@@ -72,7 +72,8 @@ export const filterPresets:{[key:string]:{[key:string]:FilterSettings}} = {
     'hegduino':undefined, //https://github.com/joshbrew/hegduino.js -- incl check for android (3 outputs only) output
     //'peanut':{} //https://github.com/joshbrew/peanutjs/blob/main/peanut.js
     'nrf5x':nrf5x_usbFilterSettings,
-    'ganglion':ganglionFilterSettings
+    'ganglion':ganglionFilterSettings,
+    'arduino_ads131m08':ads131m08FilterSettings
     //...custom?
 }
 

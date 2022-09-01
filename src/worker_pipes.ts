@@ -680,6 +680,7 @@ export function createStreamRenderPipeline(dedicatedSerialWorker=false) {
             let decoded = this.graph.run('decode',data);
             if(decoded) {
                 let parsed = globalThis.WebglLinePlotUtil.formatDataForCharts(decoded);
+                if(!parsed) return decoded;
                 if(Object.keys(parsed).length === 0) return decoded;
             
                 if(parsed) {
