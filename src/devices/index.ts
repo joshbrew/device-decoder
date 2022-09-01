@@ -1,6 +1,6 @@
 import { WebglLinePlotProps } from 'webgl-plot-utils';
 import { FilterSettings } from '../util/BiquadFilters';
-import {ads131m08codec, ads131m08ChartSettings, ads131m08FilterSettings} from './ads131m08';
+import {ads131m08codec, ads131m08ChartSettings, ads131m08FilterSettings, ads131m08_arduinocodec} from './ads131m08';
 import {cytoncodec, cytonChartSettings, cytonFilterSettings, cytonSerialSettings} from './cyton';
 import {freeeeg128codec, freeeeg128ChartSettings, freeeeg128FilterSettings, freeeeg128SerialSettings} from './freeeeg128';
 import {freeeeg32codec, freeeeg32ChartSettings, freeeeg32FilterSettings, freeeeg32SerialSettings, freeeeg32_optical_SerialSettings} from './freeeeg32';
@@ -96,7 +96,8 @@ export const chartSettings:{[key:string]:Partial<WebglLinePlotProps>} = {
     'peanut':peanutChartSettings,
     'blueberry':blueberryChartSettings,
     'blueberry2':blueberry2ChartSettings,
-    'ganglion':ganglionChartSettings
+    'ganglion':ganglionChartSettings,
+    'arduino_ads131m08':ads131m08ChartSettings
     //...custom?
 }
 
@@ -110,6 +111,7 @@ export const decoders:any = {
     'console-f12':(data:any) => { if(data?.buffer) data = Array.from(new Uint8Array(data)); console.log(data); return data; },
     'debug':(data:any,debugmessage:string) => { if(data?.buffer) data = Array.from(new Uint8Array(data)); console.log(debugmessage,data); return data; },
     'ads131m08':ads131m08codec,
+    'arduino_ads131m08':ads131m08_arduinocodec,
     'max3010x':max3010xcodec,
     'mpu6050':mpu6050codec,
     'bme280':bme280codec,

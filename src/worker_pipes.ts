@@ -490,12 +490,12 @@ export function setSignalControls(
             </tr>`
 
             if(!line.viewing) viewingall = false;
-            if(!filterSettings[prop].useScaling) scalingall = false;
-            if(!filterSettings[prop].useNotch50) n50all = false;
-            if(!filterSettings[prop].useNotch60) n60all = false;
-            if(!filterSettings[prop].useDCBlock) dcall = false;
-            if(!filterSettings[prop].useLowpass) lpall = false;
-            if(!filterSettings[prop].useBandpass) bpall = false;
+            if(!filterSettings[prop]?.useScaling) scalingall = false;
+            if(!filterSettings[prop]?.useNotch50) n50all = false;
+            if(!filterSettings[prop]?.useNotch60) n60all = false;
+            if(!filterSettings[prop]?.useDCBlock) dcall = false;
+            if(!filterSettings[prop]?.useLowpass) lpall = false;
+            if(!filterSettings[prop]?.useBandpass) bpall = false;
 
         }
         
@@ -680,6 +680,7 @@ export function createStreamRenderPipeline(dedicatedSerialWorker=false) {
             let decoded = this.graph.run('decode',data);
             if(decoded) {
                 let parsed = globalThis.WebglLinePlotUtil.formatDataForCharts(decoded);
+                if(Object.keys(parsed).length === 0) return decoded;
             
                 if(parsed) {
                     if(globalThis.filtering) {

@@ -43,6 +43,27 @@ export function ads131m08codec(data:any) {
     return output;
 }
 
+//get the arduino text output
+const decoder = new TextDecoder()
+export function ads131m08_arduinocodec(data:any) {
+    const parsed = decoder.decode(data);
+
+    let split = parsed.split(',');
+
+    return {
+        '0':parseInt(split[0]),
+        '1':parseInt(split[1]),
+        '2':parseInt(split[2]),
+        '3':parseInt(split[3]),
+        '4':parseInt(split[4]),
+        '5':parseInt(split[5]),
+        '6':parseInt(split[6]),
+        '7':parseInt(split[7]),
+        timestamp: Date.now()
+    }
+
+}
+
 const sps = 250;
 
 const defaultChartSetting = {nSec:10, sps, units:'mV'};
