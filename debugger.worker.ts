@@ -26,7 +26,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
     globalThis.WebSerial = WebSerial;
     globalThis.decoders = decoders;
     globalThis.decoder = 'raw';
-    globalThis.bitflippin = ByteParser;
+    globalThis.ByteParser = ByteParser;
     globalThis.WebglLinePlotUtil = WebglLinePlotUtil;
     globalThis.runningAnim = true;
     globalThis.filtering = true;

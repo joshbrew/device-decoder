@@ -17,6 +17,7 @@ export type SerialPortOptions = {
 export type SerialStreamProps = {
     _id?:string,
     port:SerialPort,
+    settings:SerialPortOptions,
     frequency:number,
     ondata:(value:any)=>void, 
     transforms?:{
@@ -40,6 +41,7 @@ export type SerialStreamProps = {
 export type SerialStreamInfo = {
     _id:string,
     port:SerialPort,
+    settings:SerialPortOptions,
     info:Partial<SerialPortInfo>,
     reader:ReadableStreamDefaultReader<any>,
     //writer:WritableStreamDefaultWriter<any>,
@@ -219,10 +221,19 @@ export class WebSerial extends ByteParser {
                                 readLoop();
                             },stream.frequency);
                         }
+                    }).catch((er:Error) => {
+                        console.error(stream._id, ' Read error:', er)
+                        if(er.message.includes('overrun') || er.message.includes('framing')) {
+                            delete stream.reader;
+                            this.reconnect(stream);
+                        }
                     })
                 } else if (!stream.running && stream.port.readable) {
-                    try{ reader.releaseLock();
-                    } catch(er){ console.error(er); }
+                    try{ 
+                        reader.releaseLock();
+                    } catch(er){ 
+                        console.error(er); 
+                    }
                 }
             }
 
@@ -258,10 +269,10 @@ export class WebSerial extends ByteParser {
                 if((stream as SerialStreamInfo).port.readable && (stream as SerialStreamInfo).reader) {
                     try {
                         (stream as SerialStreamInfo).reader.releaseLock()
-                        try {
-                            await (stream as SerialStreamInfo).reader.cancel() 
-                        } catch(err) {}
                     } catch(er) {console.error(er)}
+                    if((stream as SerialStreamInfo).transforms) try {
+                        await (stream as SerialStreamInfo).reader.cancel() 
+                    } catch(err) {console.error(err)}
                 }
                 // if((stream as StreamInfo).port.writable && (stream as StreamInfo).writer) {
                 //     try { 
@@ -271,14 +282,58 @@ export class WebSerial extends ByteParser {
                 // }
                 try {
                     await (stream as SerialStreamInfo).port.close().then(()=>{if(onclose) onclose(this.streams[(stream as SerialStreamInfo)._id])});
-                } catch(er) { rej(er); }
-                delete this.streams[(stream as SerialStreamInfo)._id];
-                res(true);
+                    delete this.streams[(stream as SerialStreamInfo)._id];
+                    res(true);
+                } catch(er) { 
+                    rej(er); 
+                }
                 },
                 300
             );
     
         })
+    }
+
+    //reconnect to a stream using existing options
+    reconnect(
+        stream:SerialStreamInfo|string,
+        options?:SerialStreamProps
+    ):Promise<SerialStreamInfo> {
+
+        if(typeof stream === 'string') stream = this.streams[stream];
+
+        return new Promise((res,rej) => {
+            if(typeof stream !== 'object') {
+                rej(undefined);
+                return;
+            }
+
+            let info = stream.port.getInfo();
+
+            this.closeStream(stream._id).then((closed) => {
+                this.getPorts().then((ports) => {
+                    for(let i = 0; i < ports.length; i++) {
+                        if(ports[i].getInfo().usbVendorId === info.usbVendorId && ports[i].getInfo().usbProductId === info.usbProductId) {
+                            if(!options) options = stream as any;
+                            else options._id = (stream as SerialStreamInfo)._id;
+                            delete options.port;
+                            this.openPort(ports[i], options.settings).then(() => {
+                                const stream = this.createStream(
+                                    {
+                                        ...options,
+                                        port:ports[i]
+                                    }
+                                );
+
+                                this.readStream(stream);
+
+                                res(stream);
+                            }).catch(rej)
+                        }   
+                    }
+                }).catch(rej);
+            })
+        });
     }
 
     static setStreamTransforms(

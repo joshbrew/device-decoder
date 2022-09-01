@@ -25,7 +25,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
     globalThis.WebSerial = WebSerial;
     globalThis.decoders = decoders;
     globalThis.decoder = 'raw';
-    globalThis.bitflippin = ByteParser;
+    globalThis.ByteParser = ByteParser;
     globalThis.devices = Devices;
     globalThis.filtering = true;
     globalThis.filters = {};
@@ -245,19 +245,20 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                                 Serial.openPort(port, settings).then(() => {
                                     const stream = Serial.createStream({
                                         port, 
+                                        settings,
                                         frequency:settings.frequency ? settings.frequency : 10,
                                         buffering:settings.buffering,
                                         ondata: (value:Uint8Array) => { 
                                             //if(globalThis.decoder) value = WorkerService.run(globalThis.decoder, value); //run the decoder if set on this thread, else return the array buffer result raw or pipe to another thread
                                             //console.log(value);
-                                            if(stream.settings.pipeTo) {
-                                                if(typeof stream.settings.pipeTo === 'string')
-                                                    WorkerService.transmit(value, stream.settings.pipeTo, [value.buffer] as any);
+                                            if((stream.settings as any).pipeTo) {
+                                                if(typeof (stream.settings as any).pipeTo === 'string')
+                                                    WorkerService.transmit(value, (stream.settings as any).pipeTo, [value.buffer] as any);
                                                 //we can subscribe on the other end to this worker output by id
-                                                else if (stream.settings.pipeTo?.route) {
+                                                else if ((stream.settings as any).pipeTo?.route) {
                                                     let args:any = value;
-                                                    if(stream.settings.pipeTo.extraArgs) args = [value, ...stream.settings.pipeTo.extraArgs];
-                                                    WorkerService.transmit({route:stream.settings.pipeTo.route, args }, stream.settings.pipeTo._id,  [value.buffer] as any);
+                                                    if((stream.settings as any).pipeTo.extraArgs) args = [value, ...(stream.settings as any).pipeTo.extraArgs];
+                                                    WorkerService.transmit({route:(stream.settings as any).pipeTo.route, args }, (stream.settings as any).pipeTo._id,  [value.buffer] as any);
                                                 }
                                             } else {
                                                 WorkerService.transmit(value, undefined, [value.buffer] as any);
@@ -265,7 +266,6 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                                             }
                                         }
                                     });
-                                    stream.settings = settings; //save the settings 
                 
                                     Serial.readStream(stream);
                 

@@ -12,6 +12,7 @@ export declare type SerialPortOptions = {
 export declare type SerialStreamProps = {
     _id?: string;
     port: SerialPort;
+    settings: SerialPortOptions;
     frequency: number;
     ondata: (value: any) => void;
     transforms?: {
@@ -34,6 +35,7 @@ export declare type SerialStreamProps = {
 export declare type SerialStreamInfo = {
     _id: string;
     port: SerialPort;
+    settings: SerialPortOptions;
     info: Partial<SerialPortInfo>;
     reader: ReadableStreamDefaultReader<any>;
     transforms?: {
@@ -72,6 +74,7 @@ export declare class WebSerial extends ByteParser {
     readStream(stream: SerialStreamInfo): SerialStreamInfo;
     writeStream(stream: SerialStreamInfo | string, message: any): boolean;
     closeStream(stream: SerialStreamInfo | string, onclose?: (info: SerialStreamInfo) => void): Promise<boolean>;
+    reconnect(stream: SerialStreamInfo | string, options?: SerialStreamProps): Promise<SerialStreamInfo>;
     static setStreamTransforms(stream: ReadableStream, transforms: {
         [key: string]: {
             transform: TransformerTransformCallback<DataView, any>;
