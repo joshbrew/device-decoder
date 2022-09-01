@@ -68,7 +68,7 @@ export const daisycytonSerialSettings = {
     sps
 }
 
-const defaultChartSetting = {nSec:10, sps, units:'mV'}
+const defaultChartSetting = {nSec:10, sps, units:'mV'};
 export const cytonChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
         '0':JSON.parse(JSON.stringify(defaultChartSetting)),
