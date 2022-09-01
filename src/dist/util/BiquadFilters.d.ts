@@ -55,7 +55,7 @@ export declare class Biquad {
     x2: number;
     y1: number;
     y2: number;
-    constructor(type: any, freq: any, sps: any, Q?: number, dbGain?: number);
+    constructor(type: 'lowpass' | 'highpass' | 'bandpass' | 'notch' | 'peak' | 'lowshelf' | 'highshelf', freq: number, sps: number, Q?: number, dbGain?: number);
     lowpass(A: any, sn: any, cs: any, alpha: any, beta: any): void;
     highpass(A: any, sn: any, cs: any, alpha: any, beta: any): void;
     bandpass(A: any, sn: any, cs: any, alpha: any, beta: any): void;

@@ -29,7 +29,7 @@ export const algorithms: { [key:string]:AlgorithmContextProps } = {
     breath:beat_detect
 };
 algorithms['breath'].structs = Object.assign({},algorithms['breath'].structs); 
-algorithms['breath'].structs.maqFreq = 1/3; //another quick preset
+algorithms['breath'].structs.maqFreq = 0.5; //another quick preset
 
 
 

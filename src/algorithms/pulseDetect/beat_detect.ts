@@ -1,5 +1,6 @@
 //AlgorithmContext implementation for a basic low-pass peak finding algorithm with some basic error correction
 import { Math2 } from 'brainsatplay-math';
+import { Biquad } from '../../util/BiquadFilters';
 import { AlgorithmContext, AlgorithmContextProps } from '../index';
 
 export const beat_detect = {
@@ -15,7 +16,8 @@ export const beat_detect = {
         beats:[] as any,
         sps:100, //set the sample rate, e.g. 100
         maxFreq:4, //the max frequency of peaks we want to detect, we will create a moving average and peak finding interval based on this and the sample rate. //e.g. 4hz for heart rate, or 1/3rd hz for breathing
-        limit:10 //limit number of last-values stored on the peak/valley/beat arrays to save memory, can just collect externally when a beat is returned
+        limit:10, //limit number of last-values stored on the peak/valley/beat arrays to save memory, can just collect externally when a beat is returned
+        lowpass:undefined //biquad filter
     },
     ondata:(
         context:AlgorithmContext,
@@ -28,6 +30,12 @@ export const beat_detect = {
     )=>{
 
         if(!('red' in data) && !('heg' in data)) return undefined;  //invalid data
+
+        if(!context.lowpass) {
+            let freq = context.maxFreq;
+            if(freq > 1) freq *= 0.5; //helps smooth more on faster sine waves, for low freqs this starts to be too smooth
+            context.lowpass = new Biquad('lowpass', freq, context.sps); //lowpass to half the sample rate we are allowing for (makes a nice sine wave)
+        }
 
         let smoothFactor = context.sps/context.maxFreq;
         let smawindow = Math.floor(smoothFactor)
@@ -64,7 +72,7 @@ export const beat_detect = {
                 context.timestamp.shift();
             }
 
-            context.smoothed.push(Math2.mean(context.smoothed));
+            context.smoothed.push(context.lowpass.apply(context.summed[context.summed.length-1]));
 
             if(context.smoothed.length > peakFinderWindow) {
                 context.smoothed.shift();

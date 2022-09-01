@@ -197,9 +197,9 @@ export class Biquad {
 
 
   constructor(
-    type,
-    freq,
-    sps,
+    type:'lowpass'|'highpass'|'bandpass'|'notch'|'peak'|'lowshelf'|'highshelf',
+    freq:number,
+    sps:number,
     Q=1/Math.sqrt(2),
     dbGain=0
   ) {
