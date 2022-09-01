@@ -6,12 +6,14 @@ export type Algorithm = (context,data:{[key:string]:any}|any)=>{[key:string]:any
 
 export type AlgorithmContextProps = {
     ondata:Algorithm,
+    oncreate?:(ctx:AlgorithmContext)=>void,
     structs?:{ [key:string]:any }, //default structures
     [key:string]:any
 }
 
 export type AlgorithmContext = {
     ondata:Algorithm,
+    oncreate?:(ctx:AlgorithmContext)=>void,
     run?:(data:{[key:string]:any}|any)=>any, //quicker macro
     [key:string]:any
 };
@@ -48,6 +50,13 @@ export function createAlgorithmContext(
     } as AlgorithmContext;
     if(options.structs) recursivelyAssign(ctx, JSON.parse( JSON.stringify( options.structs ))); //hard copy
     if(inputs) recursivelyAssign(ctx, JSON.parse( JSON.stringify( options.structs )));
+
+    if(options.oncreate) {
+        ctx.oncreate = options.oncreate;
+    }
+    if(ctx.oncreate) {
+        ctx.oncreate(ctx);
+    }
 
     return ctx;
 

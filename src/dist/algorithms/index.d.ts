@@ -5,6 +5,7 @@ export declare type Algorithm = (context: any, data: {
 } | undefined;
 export declare type AlgorithmContextProps = {
     ondata: Algorithm;
+    oncreate?: (ctx: AlgorithmContext) => void;
     structs?: {
         [key: string]: any;
     };
@@ -12,6 +13,7 @@ export declare type AlgorithmContextProps = {
 };
 export declare type AlgorithmContext = {
     ondata: Algorithm;
+    oncreate?: (ctx: AlgorithmContext) => void;
     run?: (data: {
         [key: string]: any;
     } | any) => any;

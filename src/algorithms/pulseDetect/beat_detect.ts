@@ -5,7 +5,7 @@ import { AlgorithmContext, AlgorithmContextProps } from '../index';
 
 export const beat_detect = {
     structs:{ //assign key data structures to the context for reference on each pass
-        summed:[] as any,
+        refdata:[] as any,
         smoothed:[] as any,
         //dsmoothed:[] as any, //slope
         timestamp:[] as any,
@@ -19,23 +19,33 @@ export const beat_detect = {
         limit:10, //limit number of last-values stored on the peak/valley/beat arrays to save memory, can just collect externally when a beat is returned
         lowpass:undefined //biquad filter
     },
-    ondata:(
-        context:AlgorithmContext,
-        data:{
-            red?:number|number[], //could be any LED really but we are using red and IR predominantly
-            ir?:number|number[], 
-            heg?:number|number[], //e.g. the Peanut only gives us the HEG in a usable way
-            timestamp?:number|number[]
-        }
-    )=>{
-
-        if(!('red' in data) && !('heg' in data)) return undefined;  //invalid data
-
-        if(!context.lowpass) {
+    oncreate:(context) => {
+        if(!context.lowpass) { //init lowpass filter with up to date sample rate
             let freq = context.maxFreq;
             if(freq > 1) freq *= 0.5; //helps smooth more on faster sine waves, for low freqs this starts to be too smooth
             context.lowpass = new Biquad('lowpass', freq, context.sps); //lowpass to half the sample rate we are allowing for (makes a nice sine wave)
         }
+    },
+    ondata:(
+        context:AlgorithmContext,
+        data:{
+            //general use data key
+            raw?:number|number[],  
+            
+            //pulse ox or fnirs data
+            red?:number|number[], //could be any LED really but we are using red and IR predominantly
+            ir?:number|number[], 
+            heg?:number|number[], //e.g. the Peanut only gives us the HEG in a usable way
+
+            //used for frequency finding
+            timestamp?:number|number[]
+        }
+    )=>{
+
+        if(!('red' in data) && !('heg' in data) && !('raw' in data)) return undefined;  //invalid data
+
+        let refdata = data.red ? data.red : data.heg? data.heg : data.raw;
+
 
         let smoothFactor = context.sps/context.maxFreq;
         let smawindow = Math.floor(smoothFactor)
@@ -43,56 +53,51 @@ export const beat_detect = {
         let midpoint = Math.round(peakFinderWindow*.5);
 
         if(!('timestamp' in data)) { //generate timestamps if none, assuming latest data is at time of the ondata callback
-            if(Array.isArray(data.red) || Array.isArray(data.heg)) { //assume timestamp
+            if(Array.isArray(refdata)) { //assume timestamp
                 let now = Date.now();
                 let len;
-                if(data.red) len = (data.red as number[]).length;
-                else if (data.heg) len = (data.heg as number[]).length;
-                let toInterp = [now - (data.red as number[]).length*context.sps*1000, now];
-                data.timestamp = Math2.upsample(toInterp,(data.red as number[]).length);
+                if(refdata) len = (data.heg as number[]).length;
+                let toInterp = [now - (refdata as number[]).length*context.sps*1000, now];
+                data.timestamp = Math2.upsample(toInterp,(refdata as number[]).length);
             } else {
                 data.timestamp = Date.now();
             }
         }
 
-        let pass = (led1, led2, led_deriv, timestamp) => {
-            if(led1 && led2) {
-                context.summed.push(led1+led2);
-            } else if (led1) { //maybe only one LED value?
-                context.summed.push(led1);
-            } else if(led_deriv) {
-                context.summed.push(led_deriv);
+        let pass = (amplitude, timestamp) => {
+            if(amplitude) {
+                context.refdata.push(amplitude);
             }
             context.timestamp.push(timestamp);
 
             let beat;
             
-            if(context.summed.length > peakFinderWindow) { //we only need to store enough data in a buffer to run the algorithm (to limit buffer overflow)
-                context.summed.shift();
+            if(context.refdata.length > peakFinderWindow) { //we only need to store enough data in a buffer to run the algorithm (to limit buffer overflow)
+                context.refdata.shift();
                 context.timestamp.shift();
             }
 
-            context.smoothed.push(context.lowpass.apply(context.summed[context.summed.length-1]));
+            context.smoothed.push(context.lowpass.apply(context.refdata[context.refdata.length-1]));
 
             if(context.smoothed.length > peakFinderWindow) {
                 context.smoothed.shift();
             }
 
-            if(context.summed.length > 1) { //skip first pass
+            if(context.refdata.length > 1) { //skip first pass
                 // context.dsmoothed.push(
-                //     (   context.summed[context.summed.length-1] - 
-                //         context.summed[context.summed.length-2]   
+                //     (   context.refdata[context.refdata.length-1] - 
+                //         context.refdata[context.refdata.length-2]   
                 //     ) / context.timestamp[context.timestamp[context.timestamp.length-1]]
                 // );
 
-                if(Math2.isExtrema(context.summed,'valley')) {
+                if(Math2.isExtrema(context.refdata,'valley')) {
                     context.valleys.push({
-                        value:context.summed[context.summed.length - midpoint], 
+                        value:context.refdata[context.refdata.length - midpoint], 
                         timestamp:context.timestamp[context.timestamp.length - midpoint]
                     });
-                } else if (Math2.isExtrema(context.summed,'peak')) {
+                } else if (Math2.isExtrema(context.refdata,'peak')) {
                     context.peaks.push({
-                        value:context.summed[context.summed.length - midpoint], 
+                        value:context.refdata[context.refdata.length - midpoint], 
                         timestamp:context.timestamp[context.timestamp.length - midpoint]
                     });
                 }
@@ -183,14 +188,25 @@ export const beat_detect = {
             return beat;
         }
 
-        if(Array.isArray(data.red)) {
-            let result = data.red.map((v,i) => { return pass(v,data.ir?.[i],undefined,(data.timestamp as number[])[i]); });
+
+        if(data.red) {
+            if(('ir' in data) && !Array.isArray(data.red)) return pass((data.red  as number)+(data.ir as number),data.timestamp);
+
+            let result;
+            if(data.ir) (data.red as number[]).map((v,i) => { return pass(v+data.ir[i],(data.timestamp as number[])[i]); });
+            else (data.red as number[]).map((v,i) => { return pass(v,(data.timestamp as number[])[i]); });
+            return result;
+
+        } else if (data.raw) {
+            if(!Array.isArray(data.raw)) return pass(data.raw,data.timestamp);
+            let result = data.raw.map((v,i) => { return pass(v,(data.timestamp as number[])[i]); });
             return result;
         } else if (Array.isArray(data.heg)) {
-            let result = data.heg.map((v,i) => { return pass(undefined,undefined,v,(data.timestamp as number[])[i]); });
+            if(!Array.isArray(data.heg)) return pass(data.heg,data.timestamp);
+            let result = data.heg.map((v,i) => { return pass(v,(data.timestamp as number[])[i]); });
             return result;
+
         }
-        else return pass(data.red, data.ir, data.heg, data.timestamp);
         //returns a beat when one is detected with the latest data passed in, else returns undefined
     }
 } as AlgorithmContextProps;
