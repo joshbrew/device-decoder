@@ -9,8 +9,8 @@ import {bitflippin} from '../util/bitflippin'
 
 export const PeanutCodes = { //bytecode struct formats
     0x02: {type: 'POOR_SIGNAL',   format:'<B',                byteLength:1},
-    0x90: {type: 'unfilteredHEG', format:'<i',                byteLength:4},
-    0x91: {type: 'heg',     format:'<i',                byteLength:4}, //filteredHEG
+    0x90: {type: 'heg', format:'<i',                byteLength:4}, //unfilteredHEG <-- we'll use this as it contains useful heartrate data
+    0x91: {type: 'filteredHEG',     format:'<i',                byteLength:4}, //filteredHEG
     0x93: {type: 'rawdata4',      format:'<iiii',             byteLength:4*4},
     0x94: {type: 'rawdata6',      format:'<iiiiii',           byteLength:4*6},
     0xA0: {type: 'sampleNumber',  format:'<i',                byteLength:4},
@@ -72,8 +72,8 @@ export const peanutSerialSettings = {
 
 export const peanutChartSettings: Partial<WebglLinePlotProps> = {
     lines: {
+        filteredHEG:{sps:10.101, nSec:60}, //filteredHEG
         heg:{sps:10.101, nSec:60}, //filteredHEG
-        unfilteredHEG:{sps:10.101, nSec:60}, //filteredHEG
         debug0:{sps:10.101, nSec:60}, //filteredHEG
         debug1:{sps:10.101, nSec:60}, //filteredHEG
         debug2:{sps:10.101, nSec:60}, //filteredHEG
