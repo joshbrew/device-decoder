@@ -470,12 +470,12 @@ initDevice(
             hr: {
                 init:'createAlgorithmContext',
                 initArgs:[
-                    'heartrate' //preprogrammed algorithm
+                    'heartrate', //preprogrammed algorithm
                     {
                         sps:Devices['BLE']['hegduino'].sps
                     }
                 ],
-                route:'runAlgorithm' //the init function will set the _id as an additional argument for runAlgorithm which selects existing contexts by _id 
+                route:'runAlgorithm', //the init function will set the _id as an additional argument for runAlgorithm which selects existing contexts by _id 
                 callback:(heartbeat)=>{
                     console.log('heartrate result', heartbeat); //this algorithm only returns when it detects a beat
                 }

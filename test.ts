@@ -80,9 +80,11 @@ let DOM = new DOMService({
                                             let info = initDevice(
                                                 mode as 'BLE'|'USB', 
                                                 selected, 
-                                                (data)=>{
-                                                    outputelm.innerText = JSON.stringify(data);
-                                                    console.log(data)
+                                                {
+                                                    ondecoded:(data)=>{
+                                                        outputelm.innerText = JSON.stringify(data);
+                                                        console.log(data)
+                                                    }
                                                 }
                                             );
 

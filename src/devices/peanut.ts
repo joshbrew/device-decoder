@@ -3,14 +3,14 @@ import { WebglLinePlotProps } from 'webgl-plot-utils';
 import {bitflippin} from '../util/bitflippin'
 
 // baud: 38400
-// write 'protocol 3\n'
-// use the search bytes 170,170 to find the newline after turning this mode on, in that order
+// search bytes: 170,170
+// write 'protocol 3\n' on connecting to get the known data format (it defaults to something undocumented)
 
 
 export const PeanutCodes = { //bytecode struct formats
     0x02: {type: 'POOR_SIGNAL',   format:'<B',                byteLength:1},
     0x90: {type: 'unfilteredHEG', format:'<i',                byteLength:4},
-    0x91: {type: 'heg',   format:'<i',                byteLength:4}, //filteredHEG
+    0x91: {type: 'heg',     format:'<i',                byteLength:4}, //filteredHEG
     0x93: {type: 'rawdata4',      format:'<iiii',             byteLength:4*4},
     0x94: {type: 'rawdata6',      format:'<iiiiii',           byteLength:4*6},
     0xA0: {type: 'sampleNumber',  format:'<i',                byteLength:4},
@@ -72,7 +72,13 @@ export const peanutSerialSettings = {
 
 export const peanutChartSettings: Partial<WebglLinePlotProps> = {
     lines: {
-        heg:{sps:10.101, nSec:60} //filteredHEG
+        heg:{sps:10.101, nSec:60}, //filteredHEG
+        unfilteredHEG:{sps:10.101, nSec:60}, //filteredHEG
+        debug0:{sps:10.101, nSec:60}, //filteredHEG
+        debug1:{sps:10.101, nSec:60}, //filteredHEG
+        debug2:{sps:10.101, nSec:60}, //filteredHEG
+        debug3:{sps:10.101, nSec:60}, //filteredHEG
+        debug4:{sps:60.101, nSec:60}, //filteredHEG
     },
     generateNewLines:false,
     cleanGeneration:false

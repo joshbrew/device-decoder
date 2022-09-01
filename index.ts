@@ -4,7 +4,7 @@ import {Router, DOMService, workerCanvasRoutes, DOMElement } from 'graphscript'/
 import { ElementInfo, ElementProps } from 'graphscript/dist/services/dom/types/element';
 import { ComponentProps } from 'graphscript/dist/services/dom/types/component';
 import { decoders, chartSettings, filterPresets } from './src/devices/index'
-import { workers, cleanupWorkerStreamPipeline, createStreamRenderPipeline, initWorkerChart } from './src/worker_pipes'
+import { workers, cleanupWorkerStreamPipeline, createStreamRenderPipeline, initWorkerChart } from './worker_pipes'
 
 import './index.css'
 

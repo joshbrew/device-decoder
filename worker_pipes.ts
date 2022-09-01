@@ -1,12 +1,12 @@
 
 import {WorkerService, ServiceMessage, WorkerInfo} from 'graphscript'////
-import {WebSerial} from './serial/serialstream'
-import {BiquadChannelFilterer, FilterSettings} from './util/BiquadFilters'
+import {WebSerial} from './src/serial/serialstream'
+import {BiquadChannelFilterer, FilterSettings} from './src/util/BiquadFilters'
 import gsworker from './debugger.worker'
 
 export const workers = new WorkerService(); 
 
-import { WebglLinePlotUtil, WebglLinePlotProps, WebglLinePlotInfo, WebglLineProps } from 'webgl-plot-utils'
+import { WebglLinePlotUtil, WebglLinePlotProps, WebglLinePlotInfo, WebglLineProps } from 'webgl-plot-utils'//'../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils'//
 
 
 
