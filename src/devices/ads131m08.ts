@@ -48,7 +48,10 @@ const decoder = new TextDecoder()
 export function ads131m08_arduinocodec(data:any) {
     const parsed = decoder.decode(data);
 
-    let split = parsed.split(',');
+    let split;
+    if(parsed.includes('|')) split = parsed.split('|');
+    else if(split.includes(',')) split = parsed.split(',');
+    else split = parsed.split('\t');
 
     return {
         '0':parseInt(split[0]),
