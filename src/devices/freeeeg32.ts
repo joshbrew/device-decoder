@@ -14,7 +14,7 @@ export function freeeeg32codec(data:any) {
 
     for(let i = 0; i < 32; i++) {
         let idx = i*3+1;
-        output[i] = ByteParser.bytesToUInt24(arr[idx],arr[idx+1],arr[idx+2]);
+        output[i] = ByteParser.bytesToInt24(arr[idx],arr[idx+1],arr[idx+2]);
     }
 
     let accIdx = 97; //32*3 + 1
