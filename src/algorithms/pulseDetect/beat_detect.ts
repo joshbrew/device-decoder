@@ -51,7 +51,7 @@ export const beat_detect = {
 
         let smoothFactor = context.sps/context.maxFreq;
         let smawindow = Math.floor(smoothFactor)
-        let peakFinderWindow = smawindow; if(peakFinderWindow%2 === 0) peakFinderWindow+=1; 
+        let peakFinderWindow = smawindow; if(peakFinderWindow%2 === 0) peakFinderWindow+=1; if(peakFinderWindow < 5) peakFinderWindow = 5;
         let midpoint = Math.round(peakFinderWindow*.5);
 
         if(!('timestamp' in data)) { //generate timestamps if none, assuming latest data is at time of the ondata callback
@@ -74,7 +74,7 @@ export const beat_detect = {
 
             let beat;
             
-            if(context.refdata.length > peakFinderWindow && context.refdata.length > 5) { //we only need to store enough data in a buffer to run the algorithm (to limit buffer overflow)
+            if(context.refdata.length > peakFinderWindow) { //we only need to store enough data in a buffer to run the algorithm (to limit buffer overflow)
                 context.refdata.shift();
                 context.timestamp.shift();
             }
@@ -85,21 +85,22 @@ export const beat_detect = {
                 context.smoothed.shift();
             }
 
-            if(context.refdata.length > context.sps) { //skip first second
+        
+            if(context.smoothed.length === peakFinderWindow) {
                 // context.dsmoothed.push(
                 //     (   context.refdata[context.refdata.length-1] - 
                 //         context.refdata[context.refdata.length-2]   
                 //     ) / context.timestamp[context.timestamp[context.timestamp.length-1]]
                 // );
 
-                if(Math2.isExtrema(context.refdata,'valley')) {
+                if(Math2.isExtrema(context.smoothed,'valley')) {
                     context.valleys.push({
-                        value:context.refdata[context.refdata.length - midpoint ? midpoint : 1], 
+                        value:context.smoothed[context.smoothed.length - midpoint ? midpoint : 1], 
                         timestamp:context.timestamp[context.timestamp.length - midpoint ? midpoint : 1]
                     });
-                } else if (Math2.isExtrema(context.refdata,'peak')) {
+                } else if (Math2.isExtrema(context.smoothed,'peak')) {
                     context.peaks.push({
-                        value:context.refdata[context.refdata.length - midpoint ? midpoint : 1], 
+                        value:context.smoothed[context.smoothed.length - midpoint ? midpoint : 1], 
                         timestamp:context.timestamp[context.timestamp.length - midpoint ? midpoint : 1]
                     });
                 }

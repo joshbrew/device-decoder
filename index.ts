@@ -321,14 +321,15 @@ const domtree = {
                                                                         }
                                                                     }
 
-                                                                    (self.querySelector('[id="'+this.stream.deviceId+'"]') as HTMLElement).style.display = '';
+                                                                    (self.querySelector('[id="'+this.stream.device.deviceId+'"]') as HTMLElement).style.display = '';
 
+                                                                    let deviceId = this.stream.device.deviceId
                                                                     const xconnectEvent = (ev) => {
                                                                         BLE.disconnect(this.stream.device).then(() => {
                                                                             this.output = 'Disconnected from ' + this.stream.deviceId;
                                                                             (self.querySelector('[id="'+this.stream.deviceId+'xconnect"]') as HTMLButtonElement).innerHTML = 'Reconnect';
                                                                             (self.querySelector('[id="'+this.stream.deviceId+'xconnect"]') as HTMLButtonElement).onclick = (ev) => {  
-                                                                                BLE.reconnect(this.stream.deviceId).then((device) => {
+                                                                                BLE.reconnect(this.stream.device.deviceId).then((device) => {
                                                                                     this.output = 'Reconnected to ' + device.deviceId;
                                                                                     (self.querySelector('[id="'+this.stream.deviceId+'xconnect"]') as HTMLButtonElement).innerHTML = 'Disconnect';
                                                                                     //self.render(); //re-render, will trigger oncreate again to reset this button and update the template 

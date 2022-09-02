@@ -167,10 +167,10 @@ export class BLEClient extends ByteParser {
         return new Promise((res,rej) => {
             let android = this.isAndroid();
             let mobile = this.isMobile();
-
+            console.log(deviceId);
             let opts = options;
             if(this.devices[deviceId]) opts = Object.assign(Object.assign({},this.devices[deviceId]),opts);
-            if(opts.deviceId) delete opts.deviceId; 
+            if(opts?.deviceId) delete opts.deviceId; 
             if(!mobile && !navigator.bluetooth?.getDevices) {
                 this.setup(opts).then((device) => {
                     res(device);

@@ -31,7 +31,7 @@ export const algorithms: { [key:string]:AlgorithmContextProps } = {
     breath:Object.assign({},beat_detect)
 };
 algorithms['breath'].structs = JSON.parse( JSON.stringify( algorithms['breath'].structs ));
-algorithms['breath'].structs.maxFreq = 0.33333; //another quick preset
+algorithms['breath'].structs.maxFreq = 0.2; //another quick preset
 
 
 
@@ -58,7 +58,7 @@ export function createAlgorithmContext(
         ctx.oncreate(ctx);
     }
 
-    console.log('context created', ctx, inputs, options);
+    //console.log('context created', ctx, inputs, options);
 
     return ctx;
 
