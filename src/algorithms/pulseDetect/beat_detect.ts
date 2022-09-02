@@ -14,10 +14,12 @@ export const beat_detect = {
         peak_distances:[] as any,
         valley_distances:[] as any,
         beats:[] as any,
+        lastPeak:0,
+        lastValley:0,
         sps:100, //set the sample rate, e.g. 100
         maxFreq:4, //the max frequency of peaks we want to detect, we will create a moving average and peak finding interval based on this and the sample rate. //e.g. 4hz for heart rate, or 1/3rd hz for breathing
         limit:10, //limit number of last-values stored on the peak/valley/beat arrays to save memory, can just collect externally when a beat is returned
-        lowpass:undefined //biquad filter
+        lowpass:undefined as Biquad //biquad filter
     },
     oncreate:(context) => {
         if(!context.lowpass) { //init lowpass filter with up to date sample rate
@@ -49,14 +51,14 @@ export const beat_detect = {
 
         let smoothFactor = context.sps/context.maxFreq;
         let smawindow = Math.floor(smoothFactor)
-        let peakFinderWindow = smawindow; if(peakFinderWindow%2 === 0) peakFinderWindow+=1;
+        let peakFinderWindow = smawindow; if(peakFinderWindow%2 === 0) peakFinderWindow+=1; 
         let midpoint = Math.round(peakFinderWindow*.5);
 
         if(!('timestamp' in data)) { //generate timestamps if none, assuming latest data is at time of the ondata callback
             if(Array.isArray(refdata)) { //assume timestamp
                 let now = Date.now();
                 let len;
-                if(refdata) len = (data.heg as number[]).length;
+                if(refdata) len = (refdata as number[]).length;
                 let toInterp = [now - (refdata as number[]).length*context.sps*1000, now];
                 data.timestamp = Math2.upsample(toInterp,(refdata as number[]).length);
             } else {
@@ -72,18 +74,18 @@ export const beat_detect = {
 
             let beat;
             
-            if(context.refdata.length > peakFinderWindow) { //we only need to store enough data in a buffer to run the algorithm (to limit buffer overflow)
+            if(context.refdata.length > peakFinderWindow && context.refdata.length > 5) { //we only need to store enough data in a buffer to run the algorithm (to limit buffer overflow)
                 context.refdata.shift();
                 context.timestamp.shift();
             }
 
-            context.smoothed.push(context.lowpass.apply(context.refdata[context.refdata.length-1]));
+            context.smoothed.push(context.lowpass.applyFilter(context.refdata[context.refdata.length-1]));
 
             if(context.smoothed.length > peakFinderWindow) {
                 context.smoothed.shift();
             }
 
-            if(context.refdata.length > 1) { //skip first pass
+            if(context.refdata.length > context.sps) { //skip first second
                 // context.dsmoothed.push(
                 //     (   context.refdata[context.refdata.length-1] - 
                 //         context.refdata[context.refdata.length-2]   
@@ -92,86 +94,88 @@ export const beat_detect = {
 
                 if(Math2.isExtrema(context.refdata,'valley')) {
                     context.valleys.push({
-                        value:context.refdata[context.refdata.length - midpoint], 
-                        timestamp:context.timestamp[context.timestamp.length - midpoint]
+                        value:context.refdata[context.refdata.length - midpoint ? midpoint : 1], 
+                        timestamp:context.timestamp[context.timestamp.length - midpoint ? midpoint : 1]
                     });
                 } else if (Math2.isExtrema(context.refdata,'peak')) {
                     context.peaks.push({
-                        value:context.refdata[context.refdata.length - midpoint], 
-                        timestamp:context.timestamp[context.timestamp.length - midpoint]
+                        value:context.refdata[context.refdata.length - midpoint ? midpoint : 1], 
+                        timestamp:context.timestamp[context.timestamp.length - midpoint ? midpoint : 1]
                     });
                 }
 
 
-                if(context.valleys.length > 1 && context.peaks.length > 1) {
-
-                    let l1 = context.valleys.length; 
-                    let l2 = context.peaks.length; 
+                if(context.valleys.length > 2 && context.peaks.length > 2) {
 
                     //if we have 3+ peaks or 3+ valleys in front of the previous peak or valley, we need to shave them off as we are looking for a sine wave (1 peak 1 valley).
-                    if(context.valleys > context.peaks.length + 2) {
-                        while(context.valleys.length > context.peaks.length + 2) context.valleys.splice(context.valleys.length-2,1);
-                    } else if (context.peaks.length > context.valleys.length+2) { while(context.peaks.length > context.valleys.length+2) { context.peaks.splice(context.valleys.length-2,1); } }
+                    if(context.valleys[context.valleys.length-1].timestamp < context.peaks[context.peaks.length - 2].timestamp) 
+                        context.peaks.splice(context.peaks.length-1);
+                    if(context.peaks[context.peaks.length-1].timestamp < context.valleys[context.valleys.length - 2].timestamp) 
+                        context.valleys.splice(context.valleys.length-1);
 
-                    
-                    if(l1 < context.valleys.length) { 
-                        context.valley_distances.push({
-                            distance:context.valleys[context.valleys.length - 1].timestamp - context.valleys[context.valleys.length - 2].timestamp,
-                            timestamp:context.valleys[context.valleys.length - 1].timestamp,
-                            peak0:context.valleys[context.valleys.length - 1].value,
-                            peak1:context.valleys[context.valleys.length - 2].value
-                        });
-                    }
-                    if(l2 < context.peaks.length) { 
-                        context.peak_distances.push({
-                            distance:context.peaks[context.peaks.length - 1].timestamp - context.peaks[context.peaks.length - 2].timestamp,
-                            timestamp:context.peaks[context.peaks.length - 1].timestamp,
-                            peak0:context.peaks[context.peaks.length - 1].value,
-                            peak1:context.peaks[context.peaks.length - 2].value
-                        });
-                    }
+                    context.valley_distances.push({
+                        distance:context.valleys[context.valleys.length - 1].timestamp - context.valleys[context.valleys.length - 2].timestamp,
+                        timestamp:context.valleys[context.valleys.length - 1].timestamp,
+                        peak0:context.valleys[context.valleys.length - 1].value,
+                        peak1:context.valleys[context.valleys.length - 2].value
+                    });
+                
+                    context.peak_distances.push({
+                        distance:context.peaks[context.peaks.length - 1].timestamp - context.peaks[context.peaks.length - 2].timestamp,
+                        timestamp:context.peaks[context.peaks.length - 1].timestamp,
+                        peak0:context.peaks[context.peaks.length - 1].value,
+                        peak1:context.peaks[context.peaks.length - 2].value
+                    });
 
                     if(context.peak_distances.length > 1 && context.valley_distances.length > 1) {
-                        if(context.valley_distances[context.valley_distances.length -1].timestamp > context.peak_distances[context.peak_distances.length-1].timestamp) {
-                            let bpm, hrv = 0;
-                            if(context.beats.length < 1) {
-                                bpm = 60/(0.0005 * (context.peak_distances[context.peak_distances.length-1].distance + 
-                                    context.valley_distances[context.valley_distances.length-1].distance));
-                                
-                            } else if (context.beats[context.beats.length-1].timestamp !== context.peak_distances[context.peak_distances.length-1].timestamp) {
-                                bpm = 60/(0.0005*(context.peak_distances[context.peak_distances.length-1].dt + context.valley_distances[context.valley_distances.length-1].dt));
-                                hrv = Math.abs(bpm - context.beats[context.beats.length - 1].bpm);
-                            }
+                        if(context.lastPeak < context.peaks[context.peaks.length-1].timestamp && context.lastValley < context.peaks[context.peaks.length-1].timestamp) {
+                            if(context.valley_distances[context.valley_distances.length -1].timestamp > context.peak_distances[context.peak_distances.length-1].timestamp) {
+                                let bpm, change = 0;
+                                if(context.beats.length < 1) {
+                                    bpm = 60/(0.0005 * (context.peak_distances[context.peak_distances.length-1].distance + 
+                                        context.valley_distances[context.valley_distances.length-1].distance));
+                                    
+                                } else if (context.beats[context.beats.length-1].timestamp !== context.peak_distances[context.peak_distances.length-1].timestamp) {
+                                    bpm = 60/(0.0005*(context.peak_distances[context.peak_distances.length-1].dt + context.valley_distances[context.valley_distances.length-1].dt));
+                                    change = Math.abs(bpm - context.beats[context.beats.length - 1].bpm);
+                                }
 
-                            beat = {
-                                timestamp:context.peak_distances[context.peak_distances.length - 1].timestamp, 
-                                hrv, 
-                                bpm,
-                                height0:context.peak_distances[context.peak_distances.length-1].peak0 - 
-                                            context.valley_distances[context.valley_distances.length-1].peak0, 
-                                height1:context.peak_distances[context.peak_distances.length-1].peak1 - 
-                                            context.valley_distances[context.valley_distances.length-1].peak1
-                            }
+                                beat = {
+                                    timestamp:context.peak_distances[context.peak_distances.length - 1].timestamp, 
+                                    change, 
+                                    bpm,
+                                    height0:context.peak_distances[context.peak_distances.length-1].peak0 - 
+                                                context.valley_distances[context.valley_distances.length-1].peak0, 
+                                    height1:context.peak_distances[context.peak_distances.length-1].peak1 - 
+                                                context.valley_distances[context.valley_distances.length-1].peak1
+                                }
 
-                            context.beats.push(beat)
-                        } else {
-                            let bpm, hrv = 0;
-                            if(context.beats.length < 2) {
-                                bpm = 60/(0.0005*(context.peak_distances[context.peak_distances.length-2].distance + context.valley_distances[context.valley_distances.length-2].distance)); //(averaged peak + valley distance (msec)) * msec/sec * 60sec/min
-                            } else if(context.beats[context.beats.length-1].timestamp !== context.peak_distances[context.peak_distances.length-2].timestamp) {
-                                bpm = 60/(0.0005*(context.peak_distances[context.peak_distances.length-2].distance + context.valley_distances[context.valley_distances.length-2].distance));
-                                hrv = Math.abs(bpm-context.beats[context.beats.length-2].bpm);
-                            }
+                                context.beats.push(beat);
 
-                            beat = {
-                                timestamp:context.peak_distances[context.peak_distances.length-2].timestamp, 
-                                hrv, 
-                                bpm, 
-                                height0:context.peak_distances[context.peak_distances.length-2].peak0-context.valley_distances[context.valley_distances.length-2].peak0,
-                                height1:context.peak_distances[context.peak_distances.length-2].peak1-context.valley_distances[context.valley_distances.length-2].peak1
-                            }
+                                context.lastPeak = context.peaks[context.peaks.length-1].timestamp;
+                                context.lastValley = context.peaks[context.peaks.length-1].timestamp;
+                            } else {
+                                let bpm, change = 0;
+                                if(context.beats.length < 2) {
+                                    bpm = 60/(0.0005*(context.peak_distances[context.peak_distances.length-2].distance + context.valley_distances[context.valley_distances.length-2].distance)); //(averaged peak + valley distance (msec)) * msec/sec * 60sec/min
+                                } else if(context.beats[context.beats.length-1].timestamp !== context.peak_distances[context.peak_distances.length-2].timestamp) {
+                                    bpm = 60/(0.0005*(context.peak_distances[context.peak_distances.length-2].distance + context.valley_distances[context.valley_distances.length-2].distance));
+                                    change = Math.abs(bpm-context.beats[context.beats.length-2].bpm);
+                                }
 
-                            context.beats.push(beat);
+                                beat = {
+                                    timestamp:context.peak_distances[context.peak_distances.length-2].timestamp, 
+                                    change, 
+                                    bpm, 
+                                    height0:context.peak_distances[context.peak_distances.length-2].peak0-context.valley_distances[context.valley_distances.length-2].peak0,
+                                    height1:context.peak_distances[context.peak_distances.length-2].peak1-context.valley_distances[context.valley_distances.length-2].peak1
+                                }
+
+                                context.beats.push(beat);
+
+                                context.lastPeak = context.peaks[context.peaks.length-1].timestamp;
+                                context.lastValley = context.peaks[context.peaks.length-1].timestamp;
+                            }
                         }
                     }
 
@@ -188,6 +192,7 @@ export const beat_detect = {
             return beat;
         }
 
+        //console.log(context); console.log(data);
 
         if(data.red) {
             if(('ir' in data) && !Array.isArray(data.red)) return pass((data.red  as number)+(data.ir as number),data.timestamp);

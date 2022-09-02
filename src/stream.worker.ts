@@ -336,13 +336,29 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
 
                     let res = this.graph.ALGORITHMS[_id].run(data); 
 
-                    if(res !== undefined) this.graph.setState({[_id]:res}); 
+                    if(res !== undefined) {
+                        if(Array.isArray(res)) {
+                            let pass = [];
+                            res.forEach((r) => {
+                                if(r !== undefined) {
+                                    pass.push(r);
+                                    this.graph.setState({[_id]:r});
+                                }
+                            });
+                            if(pass.length > 0) {
+                                return pass;
+                            }
+                        }
+                        else {
+                            this.graph.setState({[_id]:res}); 
+                            return res;
+                        }
+                    }
                     //results subscribable by algorithm ID for easier organizing, 
                     //  algorithms returning undefined will not set state so you can have them only trigger 
                     //      behaviors conditionally e.g. on forward pass algorithms that run each sample but only 
                     //          report e.g. every 100 samples or when an anomaly is identified
 
-                    return res;
                 }
             }
         ],

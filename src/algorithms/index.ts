@@ -28,10 +28,10 @@ export const algorithms: { [key:string]:AlgorithmContextProps } = {
     beat_detect, //beat detection, set sps and maxFreq detection (for low passing)
     accel_gyro, //get absolute angle and position change from starting point (need magnetometer for global position, the gyro is relative)
     heartrate:beat_detect, //alias
-    breath:beat_detect
+    breath:Object.assign({},beat_detect)
 };
-algorithms['breath'].structs = Object.assign({},algorithms['breath'].structs); 
-algorithms['breath'].structs.maqFreq = 0.5; //another quick preset
+algorithms['breath'].structs = JSON.parse( JSON.stringify( algorithms['breath'].structs ));
+algorithms['breath'].structs.maxFreq = 0.33333; //another quick preset
 
 
 
@@ -49,7 +49,7 @@ export function createAlgorithmContext(
         }
     } as AlgorithmContext;
     if(options.structs) recursivelyAssign(ctx, JSON.parse( JSON.stringify( options.structs ))); //hard copy
-    if(inputs) recursivelyAssign(ctx, JSON.parse( JSON.stringify( options.structs )));
+    if(inputs) recursivelyAssign(ctx, JSON.parse( JSON.stringify( inputs )));
 
     if(options.oncreate) {
         ctx.oncreate = options.oncreate;
@@ -58,6 +58,8 @@ export function createAlgorithmContext(
         ctx.oncreate(ctx);
     }
 
+    console.log('context created', ctx, inputs, options);
+
     return ctx;
 
 }
@@ -65,8 +67,8 @@ export function createAlgorithmContext(
 
 let recursivelyAssign = (target,obj) => {
     for(const key in obj) {
-        if(typeof obj[key] === 'object') {
-            if(typeof target[key] === 'object') recursivelyAssign(target[key], obj[key]);
+        if(typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
+            if(typeof target[key] === 'object' && !Array.isArray(target[key])) recursivelyAssign(target[key], obj[key]);
             else target[key] = recursivelyAssign({},obj[key]); 
         } else target[key] = obj[key];
     }

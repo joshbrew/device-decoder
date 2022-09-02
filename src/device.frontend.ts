@@ -101,10 +101,12 @@ export function initDevice(
 
                         if(r instanceof Promise) {
                             r.then((rr) => {
-                                let args = rr; if(this.graph.otherPipeArgs) args = [rr, ...this.graph.otherPipeArgs];
-                                this.transmit({route:this.graph.pipeRoute, args}, this.graph.pipePort); //will report to main thread if pipePort undefined (if not set in this init)
+                                if(rr !== undefined) {
+                                    let args = rr; if(this.graph.otherPipeArgs) args = [rr, ...this.graph.otherPipeArgs];
+                                    this.transmit({route:this.graph.pipeRoute, args}, this.graph.pipePort); //will report to main thread if pipePort undefined (if not set in this init)
+                                }
                             });
-                        } else {
+                        } else if(r !== undefined) {
                             let args = r; if(this.graph.otherPipeArgs) args = [r, ...this.graph.otherPipeArgs];
                             this.transmit({route:this.graph.pipeRoute, args}, this.graph.pipePort);   
                         }
