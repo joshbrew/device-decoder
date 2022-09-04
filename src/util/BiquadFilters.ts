@@ -14,7 +14,9 @@ export type FilterSettings = {
   useDCBlock?: boolean,
   DCBresonance?: number,
   useScaling?: boolean,
-  scalar?:number
+  scalar?:number,
+  trimOutliers?:boolean,
+  outlierTolerance?:number
 }
 
 //Macro for running multiple filter passes over a signal. 
@@ -25,6 +27,9 @@ export class BiquadChannelFilterer {
   bandpassLower:number; bandpassUpper:number; 
   useSMA4:boolean; 
   last4:number[]; 
+  filtered:number; //last sample
+  trimOutliers:boolean;
+  outlierTolerance:number;
   useNotch50:boolean; 
   useNotch60:boolean;
   useLowpass:boolean; 
@@ -48,6 +53,8 @@ export class BiquadChannelFilterer {
       bandpassUpper:45,
       useDCBlock: true,
       DCBresonance:0.995,
+      trimOutliers:false,
+      outlierTolerance:0.20,
       useScaling: false,
       scalar:1,
     }
@@ -67,6 +74,8 @@ export class BiquadChannelFilterer {
     this.DCBresonance = options.DCBresonance ? options.DCBresonance : 0.995;
     this.useScaling = options.useScaling;
     this.scalar = options.scalar;
+    this.trimOutliers = options.trimOutliers;
+    this.outlierTolerance = options.outlierTolerance;
 
     let sps = this.sps;
     this.notch50 = [
@@ -130,6 +139,14 @@ export class BiquadChannelFilterer {
     latestData=0
   ) {
       let out=latestData; 
+      if(this.useScaling === true){
+          out *= this.scalar;
+      }
+      if(this.filtered && this.trimOutliers && this.outlierTolerance) {
+        if(Math.abs(out - this.filtered) > this.outlierTolerance) {
+          out = this.filtered; 
+        }
+      }
       if(this.useDCBlock === true) { //Apply a DC blocking filter
           out = this.dcb.applyFilter(out);
       }
@@ -166,9 +183,7 @@ export class BiquadChannelFilterer {
           });
           out *= this.bp1.length;
       }
-      if(this.useScaling === true){
-          out *= this.scalar;
-      }
+      this.filtered = out;
       this.idx++;
       //console.log(this.channel, out)
       return out;
@@ -231,7 +246,7 @@ export class Biquad {
     this.a1 /= this.a0;
     this.a2 /= this.a0;
     
-  }
+  }ad
 
   lowpass(A,sn,cs,alpha,beta) { //Stop upper frequencies
     this.b0 = (1-cs)*.5;

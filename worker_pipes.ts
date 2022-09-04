@@ -183,8 +183,11 @@ export function transferStreamAPI(worker:WorkerInfo) {
                         lowpassHz: globalThis.filters[key].lowpassHz,
                         useBandpass: globalThis.filters[key].useBandpass,
                         bandpassLower: globalThis.filters[key].bandpassLower,
-                        bandpassUpper: globalThis.filters[key].bandpassUpper
-                    }
+                        bandpassUpper: globalThis.filters[key].bandpassUpper,
+                        trimOutliers: globalThis.filters[key].trimOutliers,
+                        outlierTolerance: globalThis.filters[key].outlierTolerance
+
+                    } as FilterSettings
                 }
                 return filters;
             }
@@ -604,9 +607,13 @@ export function setSignalControls(
                         lowpassHz:  lowpassHz.value ? parseFloat(lowpassHz.value) : 100,
                         useBandpass: useBandpass.checked,
                         bandpassLower:  bandpassLower.value ? parseFloat(bandpassLower.value) : 3,
-                        bandpassUpper:  bandpassUpper.value ? parseFloat(bandpassUpper.value) : 45
+                        bandpassUpper:  bandpassUpper.value ? parseFloat(bandpassUpper.value) : 45,
+                        trimOutliers: filterSettings[prop].trimOutliers,
+                        outlierTolerance: filterSettings[prop].outlierTolerance
                     } as FilterSettings
                 }
+
+                console.log(setting);
 
                 streamworker.post('setFilters', setting); //replace current filter for this line
             }

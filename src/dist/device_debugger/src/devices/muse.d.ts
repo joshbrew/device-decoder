@@ -1,6 +1,7 @@
 import { WebglLinePlotProps } from "webgl-plot-utils";
 import { FilterSettings } from "../util/BiquadFilters";
 export declare const museSettings: {
+    sps: number;
     connect: (settings?: any) => Promise<unknown>;
     codec: (reading: any) => any;
     disconnect: (info: any) => void;

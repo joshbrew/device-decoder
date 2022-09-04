@@ -9,6 +9,7 @@ export declare function cognixionONE_EEG_codec(data: any): {
     5: any[];
     6: any[];
     7: any[];
+    timestamp: number;
 };
 export declare const cognixionONEBLESettings: {
     services: {
@@ -17,6 +18,7 @@ export declare const cognixionONEBLESettings: {
                 notify: boolean;
                 notifyCallback: any;
                 codec: typeof cognixionONE_EEG_codec;
+                sps: number;
             };
         } | {
             [x: string]: {
@@ -28,6 +30,7 @@ export declare const cognixionONEBLESettings: {
             };
         };
     };
+    sps: number;
 };
 export declare const cognixionONEChartSettings: Partial<WebglLinePlotProps>;
 export declare const cognixionONEFilterSettings: {

@@ -5,10 +5,12 @@ export declare function daisycytoncodec(data: any): any;
 export declare const cytonSerialSettings: {
     baudRate: number;
     codec: typeof cytoncodec;
+    sps: number;
 };
 export declare const daisycytonSerialSettings: {
     baudRate: number;
     codec: typeof daisycytoncodec;
+    sps: number;
 };
 export declare const cytonChartSettings: Partial<WebglLinePlotProps>;
 export declare const cytonFilterSettings: {

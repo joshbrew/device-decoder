@@ -12,6 +12,8 @@ export declare type FilterSettings = {
     DCBresonance?: number;
     useScaling?: boolean;
     scalar?: number;
+    trimOutliers?: boolean;
+    outlierTolerance?: number;
 };
 export declare class BiquadChannelFilterer {
     idx: number;
@@ -20,6 +22,9 @@ export declare class BiquadChannelFilterer {
     bandpassUpper: number;
     useSMA4: boolean;
     last4: number[];
+    filtered: number;
+    trimOutliers: boolean;
+    outlierTolerance: number;
     useNotch50: boolean;
     useNotch60: boolean;
     useLowpass: boolean;
@@ -56,6 +61,7 @@ export declare class Biquad {
     y1: number;
     y2: number;
     constructor(type: 'lowpass' | 'highpass' | 'bandpass' | 'notch' | 'peak' | 'lowshelf' | 'highshelf', freq: number, sps: number, Q?: number, dbGain?: number);
+    ad: any;
     lowpass(A: any, sn: any, cs: any, alpha: any, beta: any): void;
     highpass(A: any, sn: any, cs: any, alpha: any, beta: any): void;
     bandpass(A: any, sn: any, cs: any, alpha: any, beta: any): void;

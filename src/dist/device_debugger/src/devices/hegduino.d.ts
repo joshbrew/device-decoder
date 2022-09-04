@@ -1,5 +1,6 @@
 import { WebglLinePlotProps } from "webgl-plot-utils";
 import { BLEDeviceOptions } from "../ble/ble_client";
+import { FilterSettings } from "../util/BiquadFilters";
 export declare function hegduinocodec(value: any): string | {
     timestamp: number;
     red: number;
@@ -12,9 +13,28 @@ export declare const hegduinoSerialSettings: {
     baudRate: number;
     write: string;
     codec: typeof hegduinocodec;
+    sps: number;
+};
+export declare const hegduinoV1SerialSettings: {
+    baudRate: number;
+    write: string;
+    codec: typeof hegduinocodec;
+    sps: number;
 };
 export declare const hegduinoBLESettings: BLEDeviceOptions;
+export declare const hegduinoV1BLESettings: {
+    baudRate: number;
+    write: string;
+    codec: typeof hegduinocodec;
+    sps: number;
+};
 export declare const hegduinoChartSettings: Partial<WebglLinePlotProps>;
+export declare const hegduinoV1FilterSettings: {
+    [key: string]: FilterSettings;
+};
+export declare const hegduinoV2FilterSettings: {
+    [key: string]: FilterSettings;
+};
 /** Old BLE OTA code: Can also upload compiled .bin via wifi server.
  *
  *

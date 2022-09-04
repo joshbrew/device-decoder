@@ -1,4 +1,4 @@
-import { WebglLinePlotProps } from '../../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils';
+import { WebglLinePlotProps } from 'webgl-plot-utils';
 import { FilterSettings } from '../util/BiquadFilters';
 import { ads131m08codec } from './ads131m08';
 import { cytoncodec } from './cyton';
@@ -11,9 +11,11 @@ import { cognixionONE_EEG_codec } from './cognixionONE';
 import { peanutcodec } from './peanut';
 import { nrf5x_usbcodec } from './nrf5x_usb';
 import { statechangercodec } from './statechanger';
+import { hrcodec } from './genericBLE';
 export declare const Devices: {
     BLE: {
         nrf5x: {
+            sps: number;
             services: {
                 '0000cafe-b0ba-8bad-f00d-deadbeef0000': {
                     '0001cafe-b0ba-8bad-f00d-deadbeef0000': {
@@ -23,26 +25,42 @@ export declare const Devices: {
                         notify: boolean;
                         notifyCallback: any;
                         codec: typeof ads131m08codec;
+                        sps: number;
                     };
                     '0003cafe-b0ba-8bad-f00d-deadbeef0000': {
                         notify: boolean;
                         notifyCallback: any;
                         codec: typeof max3010xcodec;
+                        sps: number;
                     };
                     '0004cafe-b0ba-8bad-f00d-deadbeef0000': {
                         notify: boolean;
                         notifyCallback: any;
                         codec: typeof mpu6050codec;
+                        sps: number;
+                    };
+                    '0005cafe-b0ba-8bad-f00d-deadbeef0000': {
+                        notify: boolean;
+                        notifyCallback: any;
+                        codec: typeof ads131m08codec;
+                        sps: number;
                     };
                     '0006cafe-b0ba-8bad-f00d-deadbeef0000': {
                         notify: boolean;
                         notifyCallback: any;
-                        codec: typeof ads131m08codec;
+                        codec: (data: any) => any;
+                        sps: number;
                     };
                 };
             };
         };
         hegduino: import("../ble/ble_client").BLEDeviceOptions;
+        hegduinoV1: {
+            baudRate: number;
+            write: string;
+            codec: typeof hegduinocodec;
+            sps: number;
+        };
         cognixionONE: {
             services: {
                 [x: string]: {
@@ -50,6 +68,7 @@ export declare const Devices: {
                         notify: boolean;
                         notifyCallback: any;
                         codec: typeof cognixionONE_EEG_codec;
+                        sps: number;
                     };
                 } | {
                     [x: string]: {
@@ -61,10 +80,22 @@ export declare const Devices: {
                     };
                 };
             };
+            sps: number;
         };
         statechanger: import("../ble/ble_client").BLEDeviceOptions;
         blueberry: import("../ble/ble_client").BLEDeviceOptions;
         blueberry2: import("../ble/ble_client").BLEDeviceOptions;
+        heart_rate: {
+            services: {
+                heart_rate: {
+                    heart_rate_measurement: {
+                        notify: boolean;
+                        notifyCallback: any;
+                        codec: typeof hrcodec;
+                    };
+                };
+            };
+        };
     };
     USB: {
         nrf5x: {
@@ -73,37 +104,50 @@ export declare const Devices: {
                 searchBytes: Uint8Array;
             };
             codec: typeof nrf5x_usbcodec;
+            sps: number;
         };
         freeEEG32: {
             baudRate: number;
             bufferSize: number;
             frequency: number;
             codec: typeof freeeeg32codec;
+            sps: number;
         };
         freeEEG32_optical: {
             baudRate: number;
             bufferSize: number;
             frequency: number;
             codec: typeof freeeeg32codec;
+            sps: number;
         };
         freeEEG128: {
             baudRate: number;
             bufferSize: number;
             frequency: number;
             codec: typeof freeeeg128codec;
+            sps: number;
         };
         hegduino: {
             baudRate: number;
             write: string;
             codec: typeof hegduinocodec;
+            sps: number;
+        };
+        hegduinoV1: {
+            baudRate: number;
+            write: string;
+            codec: typeof hegduinocodec;
+            sps: number;
         };
         cyton: {
             baudRate: number;
             codec: typeof cytoncodec;
+            sps: number;
         };
         cyton_daisy: {
             baudRate: number;
             codec: typeof cytoncodec;
+            sps: number;
         };
         peanut: {
             baudRate: number;
@@ -113,6 +157,7 @@ export declare const Devices: {
                 searchBytes: Uint8Array;
             };
             codec: typeof peanutcodec;
+            sps: number;
         };
         statechanger: {
             baudRate: number;
@@ -121,12 +166,41 @@ export declare const Devices: {
         cognixionONE: {
             baudRate: number;
             codec: typeof cytoncodec;
+            sps: number;
         };
     };
     BLE_OTHER: {
         muse: {
+            sps: number;
             connect: (settings?: any) => Promise<unknown>;
             codec: (reading: any) => any;
+            disconnect: (info: any) => void;
+            onconnect: (info: any) => void;
+            ondisconnect: (info: any) => void;
+            ondata: (parsed: any) => void;
+        };
+        ganglion: {
+            sps: number;
+            connect: (settings?: any) => Promise<unknown>;
+            codec: (reading: any) => {
+                0: any;
+                1: any;
+                2: any;
+                3: any;
+                timestamp: number;
+                ax?: undefined;
+                ay?: undefined;
+                az?: undefined;
+            } | {
+                ax: any;
+                ay: any;
+                az: any;
+                timestamp: number;
+                0?: undefined;
+                1?: undefined;
+                2?: undefined;
+                3?: undefined;
+            };
             disconnect: (info: any) => void;
             onconnect: (info: any) => void;
             ondisconnect: (info: any) => void;

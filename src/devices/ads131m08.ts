@@ -95,8 +95,10 @@ let defaultsetting = {
     bandpassLower:3, 
     bandpassUpper:45, 
     useScaling:true, 
-    scalar:0.96 * 1000*vref/(gain*(Math.pow(2,nbits)-1))
-};
+    scalar:0.96 * 1000*vref/(gain*(Math.pow(2,nbits)-1)),
+    trimOutliers:true,
+    outlierTolerance:0.3
+} as FilterSettings;
 
 export const ads131m08FilterSettings:{[key:string]:FilterSettings} = {
     '0':JSON.parse(JSON.stringify(defaultsetting)),

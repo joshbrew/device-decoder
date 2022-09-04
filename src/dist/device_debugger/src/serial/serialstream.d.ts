@@ -1,5 +1,5 @@
 /// <reference types="dom-serial" />
-import { bitflippin } from '../util/bitflippin';
+import { ByteParser } from '../util/ByteParser';
 export declare type SerialPortOptions = {
     baudRate?: number;
     stopBits?: 1 | 2 | number;
@@ -12,6 +12,7 @@ export declare type SerialPortOptions = {
 export declare type SerialStreamProps = {
     _id?: string;
     port: SerialPort;
+    settings: SerialPortOptions;
     frequency: number;
     ondata: (value: any) => void;
     transforms?: {
@@ -34,6 +35,7 @@ export declare type SerialStreamProps = {
 export declare type SerialStreamInfo = {
     _id: string;
     port: SerialPort;
+    settings: SerialPortOptions;
     info: Partial<SerialPortInfo>;
     reader: ReadableStreamDefaultReader<any>;
     transforms?: {
@@ -57,7 +59,7 @@ export declare type SerialStreamInfo = {
     running: boolean;
     [key: string]: any;
 };
-export declare class WebSerial extends bitflippin {
+export declare class WebSerial extends ByteParser {
     streams: {
         [key: string]: SerialStreamInfo;
     };
@@ -70,8 +72,9 @@ export declare class WebSerial extends bitflippin {
     setSignals(port: SerialPort, signals: any): any;
     createStream: (options: SerialStreamProps) => SerialStreamInfo;
     readStream(stream: SerialStreamInfo): SerialStreamInfo;
-    writeStream(stream: SerialStreamInfo | string, message: any): any;
+    writeStream(stream: SerialStreamInfo | string, message: any): boolean;
     closeStream(stream: SerialStreamInfo | string, onclose?: (info: SerialStreamInfo) => void): Promise<boolean>;
+    reconnect(stream: SerialStreamInfo | string, options?: SerialStreamProps): Promise<SerialStreamInfo>;
     static setStreamTransforms(stream: ReadableStream, transforms: {
         [key: string]: {
             transform: TransformerTransformCallback<DataView, any>;

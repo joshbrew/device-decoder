@@ -1,9 +1,10 @@
 import { 
     WorkerService, 
-    unsafeRoutes, 
     workerCanvasRoutes, 
     //GPUService, 
-    parseFunctionFromText } from 'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
+    parseFunctionFromText, 
+    subprocessRoutes,
+    loadAlgorithms} from 'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
 import { WebSerial } from './serial/serialstream'; //extended classes need to be imported for compilation
 import { decoders, Devices } from './devices/index';
 //import { WebglLinePlotUtil } from '../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils'//'webgl-plot-utils';
@@ -11,7 +12,10 @@ import { ByteParser } from "./util/ByteParser";
 import { BiquadChannelFilterer, FilterSettings } from './util/BiquadFilters';
 //import * as bfs from './storage/BFSUtils'
 import { ArrayManip } from './util/ArrayManip';
-import { AlgorithmContextProps, algorithms, createAlgorithmContext } from './algorithms/index';
+
+import { algorithms } from 'graphscript-services'; //"../../GraphServiceRouter/index.services"
+
+loadAlgorithms(algorithms);
 
 declare var WorkerGlobalScope;
 
@@ -40,7 +44,8 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
         routes:[
             //GPUService as any,
             workerCanvasRoutes,
-            unsafeRoutes, //allows dynamic route loading
+            //unsafeRoutes, //allows dynamic route loading
+            subprocessRoutes, //includes unsafeRoutes
             { //serial API routes
                 'receiveDecoder':function receiveDecoder(decoder:any, decoderName:string) {
                     globalThis.decoders[decoderName] = (0, eval)('('+decoder+')');
@@ -291,7 +296,10 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
         
                         const Serial = globalThis.Serial as WebSerial;
         
+                        let ondisconnect;
+                        if(Serial.streams[streamId].port?.ondisconnect) ondisconnect = Serial.streams[streamId].port.ondisconnect
                         Serial.closeStream(Serial.streams[streamId]).then((resolved) => {
+                            if(ondisconnect) ondisconnect(undefined); //for whatever reason we need to call this manually on this callback
                             res(resolved);
                         }).catch(rej);
 
@@ -313,58 +321,10 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                         }
                     }
                 },
-                'createAlgorithmContext': function creatalg( //returns id of algorithm for calling it on server
-                    options:AlgorithmContextProps|string,
-                    inputs?:{[key:string]:any} //e.g. set the sample rate for this run
-                ){
-                    if(!this.graph.ALGORITHMS) this.graph.ALGORITHMS = {};
-                    if(typeof options === 'string') {
-                        options = algorithms[options];
-                    }
-                    if(typeof options.ondata === 'string') options.ondata = parseFunctionFromText(options.ondata);
-
-                    let ctx;
-                    if(typeof options?.ondata === 'function') ctx = createAlgorithmContext(options,inputs);
-                    if(ctx) this.graph.ALGORITHMS[ctx._id] = ctx;
-
-                    return ctx?._id;
-                },
-                'runAlgorithm':function runAlgorithm(data:{[key:string]:any}, _id?:string){
-                    if(!this.graph.ALGORITHMS) this.graph.ALGORITHMS = {};
-
-                    if(!_id) _id = Object.keys(this.graph.ALGORITHMS)[0]; //run the first key if none specified
-
-                    let res = this.graph.ALGORITHMS[_id].run(data); 
-
-                    if(res !== undefined) {
-                        if(Array.isArray(res)) {
-                            let pass = [];
-                            res.forEach((r) => {
-                                if(r !== undefined) {
-                                    pass.push(r);
-                                    this.graph.setState({[_id]:r});
-                                }
-                            });
-                            if(pass.length > 0) {
-                                return pass;
-                            }
-                        }
-                        else {
-                            this.graph.setState({[_id]:res}); 
-                            return res;
-                        }
-                    }
-                    //results subscribable by algorithm ID for easier organizing, 
-                    //  algorithms returning undefined will not set state so you can have them only trigger 
-                    //      behaviors conditionally e.g. on forward pass algorithms that run each sample but only 
-                    //          report e.g. every 100 samples or when an anomaly is identified
-
-                }
             }
         ],
         includeClassName:false
     });
-
 }
 
 export default self as any;

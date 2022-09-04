@@ -1,5 +1,5 @@
 
-import { WorkerInfo, WorkerService } from 'graphscript';
+import { subprocessRoutes, WorkerInfo, WorkerService } from 'graphscript'; //"../../GraphServiceRouter/index"//
 
 import gsworker from './stream.worker'
 
@@ -18,7 +18,10 @@ export function isMobile() {
 
 export const BLE = new BLEClient();
 export const workers = new WorkerService({
-    routes:workerCanvasRoutes
+    routes:[
+        workerCanvasRoutes,
+        subprocessRoutes
+    ]
 }); 
 export { Devices, gsworker }
 
@@ -41,7 +44,9 @@ export function initDevice(
                     portId:string, 
                     route:string, otherArgs:any[], 
                 }, //can pipe the results to a specific route on main thread or other threads via message ports
-                worker?:WorkerInfo
+                worker?:WorkerInfo,
+                subscribeRoute?:string, //if undefined subscribe to decoder stream (automatic)
+                source?:WorkerInfo
             }
         },
         renderer?:{ //dedicated render thread receives parsed/decoded result directly
@@ -71,78 +76,19 @@ export function initDevice(
     let renderworker;
     let streamworker = workers.addWorker({url:gsworker});
     if(options.subprocesses) {
-        for(const key in options.subprocesses) { //ow, my head
-            let s = options.subprocesses[key];
-            if(!s.worker) s.worker = workers.addWorker({url:gsworker});
-            let w = s.worker;
-            let wpId = workers.establishMessageChannel(w.worker,streamworker.worker);
+        for(const key in options.subprocesses) {
+            if(!options.subprocesses[key].url) 
+                options.subprocesses[key].url = gsworker;
 
-            if(s.init) {
-                w.run(s.init, s.initArgs).then((r) => { //('createAlgorithmContext', [options, inputs])
-                    //e.g. returns the algorithm context id
-                    w.run('setValue',['otherArgsProxy',r]);
-                });
-            }
-
-            if(s.otherArgs) {
-                w.run('setValue',['otherArgsProxy',s.otherArgs]);
-            }
-            if(s.pipeTo) {
-                w.run('setValue',['routeProxy',s.route]); //set the route we want to run through our proxy function below
-                w.run('setValue',['pipeRoute',s.pipeTo.route]); //set the route to pipe results to
-                if(s.pipeTo.portId) w.run('setValue',['pipePort',s.pipeTo.portId]); //set the pipe port
-                if(s.pipeTo.otherArgs) w.run('setValue',['otherPipeArgs',s.pipeTo.otherArgs]); //set additional args to pipe with the results
-                workers.transferFunction(
-                    w,
-                    function pipeResults(data){
-                        let inp = data;
-                        if(this.graph.otherArgsProxy) inp = [data, ...this.graph.otherArgsProxy]
-                        let r = this.graph.run(this.graph.routeProxy, inp);
-
-                        if(r instanceof Promise) {
-                            r.then((rr) => {
-                                if(rr !== undefined) {
-                                    let args = rr; if(this.graph.otherPipeArgs) args = [rr, ...this.graph.otherPipeArgs];
-                                    this.transmit({route:this.graph.pipeRoute, args}, this.graph.pipePort); //will report to main thread if pipePort undefined (if not set in this init)
-                                }
-                            });
-                        } else if(r !== undefined) {
-                            let args = r; if(this.graph.otherPipeArgs) args = [r, ...this.graph.otherPipeArgs];
-                            this.transmit({route:this.graph.pipeRoute, args}, this.graph.pipePort);   
-                        }
-                        
-                    },
-                    'pipeResults'
-                )
-
-                w.run('subscribeToWorker',['decodeAndParseDevice',wpId,'pipeResults']); //pass decode/parse thread results to the subprocess, and then the subprocess can pipe back to main thread or another worker (e.g. the render thread)
-
-            } else {
-                if(s.otherArgs) {
-                    w.run('setValue',['routeProxy',s.route]);
-                    workers.transferFunction(
-                        w,
-                        function routeProxy(data:any) {
-                            let inp = data;
-                            if(this.graph.otherArgsProxy) inp = [data, ...this.graph.otherArgsProxy]
-                            let r = this.graph.nodes.get(this.graph.routeProxy).operator(inp);
-                            if(r instanceof Promise) {
-                                r.then((rr) => {
-                                    this.setState({[this.graph.routeProxy]:rr});
-                                })
-                            }
-                            else this.setState({[this.graph.routeProxy]:r}); //so we can subscribe to the original route if a callback is defined
-                        },
-                        'routeProxy'
-                    )
-                    w.run('subscribeToWorker',['decodeAndParseDevice',wpId,'routeProxy']); //pass decode/parse thread results to the subprocess
-                } 
-                else w.run('subscribeToWorker',['decodeAndParseDevice',wpId, s.route])
-            }
-
-            if(s.callback) w.subscribe(s.route,s.callback);
+            if(!options.subprocesses[key].source) 
+                options.subprocesses[key].source = streamworker;
         
+            if(!options.subprocesses[key].subscribeRoute)  
+                options.subprocesses[key].subscribeRoute = 'decodeAndParseDevice';   
+
         }
+        workers.run('initSubprocesses', options.subprocesses);
+        //console.log(options.subprocesses);
     }
     if(options.renderer) {
         if(!options.renderer.renderworker) {
@@ -186,7 +132,10 @@ export function initDevice(
                     streamworker,
                     renderworker
                 },
-                disconnect:() => {settings.disconnect(settings); if(options.ondisconnect) options.ondisconnect(info); },
+                disconnect:() => { 
+                    settings.disconnect(settings); 
+                    if(options.ondisconnect) options.ondisconnect(info); 
+                },
                 device:init,
                 read:(command?:any) => {
                     if(settings.read) return new Promise((res,rej) => {res(settings.read(settings,command))});    
@@ -200,6 +149,11 @@ export function initDevice(
         }).catch((er)=>{
             console.error(er);
             workers.terminate(streamworker._id);
+            if(options.subprocesses) for(const key in options.subprocesses) {
+                if(options.subprocesses[key].worker) {
+                    workers.terminate(options.subprocesses[key].worker._id);
+                }
+            }
         }) as Promise<{
             workers:{
                 streamworker:WorkerInfo,
@@ -298,6 +252,7 @@ export function initDevice(
         let serialworker = workers.addWorker({url:gsworker});
 
         serialworker.worker.addEventListener('message',(ev:any) => {
+            //console.log(ev.data);
             if(typeof ev.data === 'string') {
                 if(ev.data.includes('disconnected')) {
                     workers.terminate(serialworker._id as string);
@@ -351,7 +306,10 @@ export function initDevice(
                         },
                         device:result,
                         options,
-                        disconnect:() => {serialworker.post('closeStream',result._id); if(options.ondisconnect) options.ondisconnect(info); },
+                        disconnect:() => {
+                            serialworker.post('closeStream',result._id); 
+                            if(options.ondisconnect) options.ondisconnect(info); 
+                        },
                         read:() => { return new Promise((res,rej) => { let sub; sub = streamworker.subscribe('decodeAndParseDevice',(result)=>{ serialworker.unsubscribe('decodeAndParseDevice',sub); res(result); });}); }, //we are already reading, just return the latest result from decodeAndParseDevice
                         write:(command:any) => {return serialworker.run('writeStream', [result._id,command])}
                     };

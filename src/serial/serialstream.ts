@@ -281,7 +281,9 @@ export class WebSerial extends ByteParser {
                 //     } catch(er) {}
                 // }
                 try {
-                    await (stream as SerialStreamInfo).port.close().then(()=>{if(onclose) onclose(this.streams[(stream as SerialStreamInfo)._id])});
+                    await (stream as SerialStreamInfo).port.close().then(()=>{
+                        if(onclose) onclose(this.streams[(stream as SerialStreamInfo)._id])}
+                    ); 
                     delete this.streams[(stream as SerialStreamInfo)._id];
                     res(true);
                 } catch(er) { 

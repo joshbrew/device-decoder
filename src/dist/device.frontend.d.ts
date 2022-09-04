@@ -28,6 +28,8 @@ options: {
                 otherArgs: any[];
             };
             worker?: WorkerInfo;
+            subscribeRoute?: string;
+            source?: WorkerInfo;
         };
     };
     renderer?: {
