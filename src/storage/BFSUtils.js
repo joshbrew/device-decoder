@@ -43,30 +43,30 @@ export const initFS = async (
     }
 }
 
-export const exists = async (filename='',dir='data') => {
+export const exists = async (path='') => {
     return new Promise(resolve => {
-        fs.exists('/'+dir+'/'+filename, function(exists) {
+        fs.exists('/'+path, function(exists) {
             resolve(exists);
         });
     })
 }
 
 
-export const readFile = async (filename='sessionName',dir='data') => {
+export const readFile = async (path='data') => {
     if (!fsInited) await initFS()
     return new Promise(resolve => {
-        fs.readFile('/'+dir+'/'+filename, function(e, output) {
+        fs.readFile('/'+path, function(e, output) {
             resolve(output)
         });
     })
 }
 
 
-export async function readFileChunk (filename='sessionName', dir='data', begin = 0, end = 5120, onread=(data)=>{}) {
+export async function readFileChunk (path='data', begin = 0, end = 5120, onread=(data)=>{}) {
     
     if (filename != ''){
         return new Promise(async resolve => { 
-            fs.open('/'+dir+'/' + filename, 'r', (e, fd) => {
+            fs.open('/'+path, 'r', (e, fd) => {
                 if (e) throw e;
 
                 fs.read(fd, end, begin, 'utf-8', (er, output, bytesRead) => {
@@ -89,9 +89,9 @@ export async function readFileChunk (filename='sessionName', dir='data', begin =
 }
 
 
-export const getFilenames = (onload=(directory)=>{}, directory = '/data') => {
+export const getFilenames = (onload=(directory)=>{}, directory = 'data') => {
     return new Promise(resolve => {
-        fs.readdir(directory, (e, dir) => {
+        fs.readdir('/'+directory, (e, dir) => {
             if (e) throw e;
             if (dir) {
                 console.log("files", dir);
@@ -103,9 +103,9 @@ export const getFilenames = (onload=(directory)=>{}, directory = '/data') => {
     });
 }
 
-export const writeFile = async (filename, data, dir='data', onwrite=(data)=>{}) => {
+export const writeFile = async (path, data, onwrite=(data)=>{}) => {
     return new Promise(resolve => {
-        fs.writeFile('/'+dir+'/'+filename, data, (err) => {
+        fs.writeFile('/'+path, data, (err) => {
             if (err) throw err;
             onwrite(data);
             resolve(true);
@@ -113,9 +113,9 @@ export const writeFile = async (filename, data, dir='data', onwrite=(data)=>{}) 
     });
 }
 
-export const appendFile = async (filename, data, dir='data', onwrite=(data)=>{}) => {
+export const appendFile = async (path, data, onwrite=(data)=>{}) => {
     return new Promise(resolve => {
-        fs.appendFile('/'+dir+'/'+filename, data, (err) => {
+        fs.appendFile('/'+path, data, (err) => {
             if (err) throw err;
             onwrite(data);
             resolve(true);
@@ -123,10 +123,10 @@ export const appendFile = async (filename, data, dir='data', onwrite=(data)=>{})
     });
 }
 
-export const deleteFile = (filename='sessionName', dir='data', ondelete=listFiles) => {
+export const deleteFile = (path='data', ondelete=listFiles) => {
     return new Promise(resolve => {
         if (filename != ''){
-            fs.unlink('/'+dir+'/'+filename, (e) => {
+            fs.unlink('/'+path, (e) => {
                 if (e) console.error(e);
                 ondelete();
                 resolve(true);
@@ -140,8 +140,7 @@ export const deleteFile = (filename='sessionName', dir='data', ondelete=listFile
 
 //read a browserfs file
 export const readFileAsText = async (
-    filename='sessionName.csv', 
-    dir='data', 
+    path='data', 
     end='end',
     begin=0,
     onread=(data,filename)=>{
@@ -158,7 +157,7 @@ export const readFileAsText = async (
             if(end > size) end = size;
         }
 
-        fs.open('/'+dir+'/'+filename, 'r', (e, fd) => {
+        fs.open('/'+path, 'r', (e, fd) => {
             if (e) throw e;
             fs.read(fd, end, begin, 'utf-8', (er, output, bytesRead) => {
                 if (er) throw er;
@@ -178,9 +177,9 @@ export const readFileAsText = async (
 
 
 
-export const getFileSize = async (filename,dir='data',onread=(size)=>{console.log(size);}) => {
+export const getFileSize = async (path='data',onread=(size)=>{console.log(size);}) => {
     return new Promise(resolve => {
-        fs.stat('/'+dir + '/' +filename,(e,stats) => {
+        fs.stat('/'+path,(e,stats) => {
             if(e) throw e;
             let filesize = stats.size;
             onread(filesize);
@@ -190,10 +189,10 @@ export const getFileSize = async (filename,dir='data',onread=(size)=>{console.lo
 }
 
 
-export const getCSVHeader = async (filename='', dir='data', onopen=(header, filename)=>{console.log(header,filename);}) => {
+export const getCSVHeader = async (path='data', onopen=(header, filename)=>{console.log(header,filename);}) => {
     
     return new Promise(resolve => {
-        fs.open('/'+dir + '/' +filename,'r',(e,fd) => {
+        fs.open('/'+path,'r',(e,fd) => {
             if(e) throw e;
             fs.read(fd,65535,0,'utf-8',(er,output,bytesRead) => {  //could be a really long header for all we know
                 if (er) throw er;
@@ -248,14 +247,14 @@ export const listFiles = async (dir='data', onload=(directory)=>{},fs_html_id=un
     }
 
     //Write IndexedDB data (preprocessed) into a CSV, in chunks to not overwhelm memory. This is for pre-processed data
-    export const writeToCSVFromDB = async (filename='sessionName',dir='data',fileSizeLimitMb=10) => {
+    export const writeToCSVFromDB = async (path='data', fileSizeLimitMb=10) => {
         return new Promise(resolve => {
         if (filename != ''){
-            fs.stat('/' + dir + '/' + filename, (e, stats) => {
+            fs.stat('/' + path, (e, stats) => {
                 if (e) throw e;
                 let filesize = stats.size;
                 console.log(filesize)
-                fs.open(dir + '/' + filename, 'r', (e, fd) => {
+                fs.open(path, 'r', (e, fd) => {
                     if (e) throw e;
                     let i = 0;
                     let maxFileSize = fileSizeLimitMb * 1024 * 1024;
@@ -301,10 +300,9 @@ export const listFiles = async (dir='data', onload=(directory)=>{},fs_html_id=un
 
 
 //returns an object with the headers and correctly sized outputs (e.g. single values or arrays pushed in columns)
-export async function readCSVChunkFromDB(filename,dir='data',start=0,end='end') {
+export async function readCSVChunkFromDB(path='data', start=0, end='end') {
 
-    
-    let head = await getCSVHeader(filename);
+    let head = await getCSVHeader(path);
 
     if(head) head = head.split(',');
     else return undefined;
@@ -321,14 +319,14 @@ export async function readCSVChunkFromDB(filename,dir='data',start=0,end='end') 
         else resultLengths[resultLengths.length-1]++;
     });
     
-    let size = await getFileSize(filename,dir);
+    let size = await getFileSize(path);
     if(end === 'end') end = size;
     else if(end > size) {
         start = size-(end-start);
         end = size;
     }
 
-    let data = await readFileChunk(filename,dir,start,end);
+    let data = await readFileChunk(path,start,end);
 
     let headeridx = 0;
     let lastIdx = 0;
@@ -352,7 +350,7 @@ export async function readCSVChunkFromDB(filename,dir='data',start=0,end='end') 
 }
 
 
-export const saveToFS = async (data, filename='sessionName',dir='data') => {
+export const saveToFS = async (path='data/session.txt',dir='data') => {
     
     if (!fsInited) await initFS()
     // Assumes content is text
@@ -360,7 +358,7 @@ export const saveToFS = async (data, filename='sessionName',dir='data') => {
 
         await dirExists(fs, dir)
 
-        fs.writeFile('/'+dir+'/'+filename,data,(e)=>{
+        fs.writeFile('/'+path,data,(e)=>{
             if(e) throw e;
             resolve(data);
         });

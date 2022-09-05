@@ -181,7 +181,7 @@ export class BiquadChannelFilterer {
           this.bp1.forEach((f,i) => {
               out = f.applyFilter(out);
           });
-          out *= this.bp1.length;
+          //out *= this.bp1.length;
       }
       this.filtered = out;
       this.idx++;
