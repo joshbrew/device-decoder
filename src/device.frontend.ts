@@ -1,5 +1,5 @@
 
-import { subprocessRoutes, WorkerInfo, WorkerService } from 'graphscript'; //"../../GraphServiceRouter/index"//
+import { subprocessRoutes, WorkerInfo, WorkerService, SubprocessWorkerProps, SubprocessWorkerInfo } from 'graphscript'//"../../GraphServiceRouter/index"//'graphscript'; //
 
 import gsworker from './stream.worker'
 
@@ -35,20 +35,8 @@ export function initDevice(
         onconnect?:((device:any) => void),
         ondisconnect?:((device:any) => void),
         subprocesses?:{ //use secondary workers to run processes and report results back to the main thread or other
-            [key:string]:{
-                route:string, 
-                otherArgs?:any[], init?:string, initArgs?:any[], //do we need to call an init function before running the callbacks? The results of this init will set the otherArgs
-                url?:any,
-                callback?:string|((data:any)=>any), //do we want to do something with the subprocess output (if any) on the main thread? 
-                pipeTo?:{ //pipe outputs (if any) from the suprocesses to a specific route on main thread or a known route on another thread?
-                    portId:string, 
-                    route:string, otherArgs:any[], 
-                }, //can pipe the results to a specific route on main thread or other threads via message ports
-                worker?:WorkerInfo,
-                subscribeRoute?:string, //if undefined subscribe to decoder stream (automatic)
-                source?:WorkerInfo
-            }
-        },
+            [key:string]:SubprocessWorkerProps,
+        }, 
         renderer?:{ //dedicated render thread receives parsed/decoded result directly
             canvas:HTMLCanvasElement,
             context:string,
@@ -137,12 +125,14 @@ export function initDevice(
                     if(options.ondisconnect) options.ondisconnect(info); 
                 },
                 device:init,
+                options,
                 read:(command?:any) => {
                     if(settings.read) return new Promise((res,rej) => {res(settings.read(settings,command))});    
                 },
                 write:(command?:any) => {
                     if(settings.write) return  new Promise((res,rej) => {res(settings.write(settings,command))});
-                }
+                },
+                subprocesses:options.subprocesses
             }   
             if(options.onconnect) options.onconnect(info);
             res(info);
@@ -160,9 +150,11 @@ export function initDevice(
                 renderworker?:WorkerInfo
             },
             device:any,
+            options:any,
             disconnect:()=>void,
             read:(command?:any)=>any,
-            write:(command?:any)=>any
+            write:(command?:any)=>any,
+            subprocesses:{[key:string]:SubprocessWorkerInfo}
         }>;
 
     } else if(deviceType === 'BLE') {
@@ -218,7 +210,8 @@ export function initDevice(
                     device:result,
                     disconnect:async () => { await BLE.disconnect(result.deviceId as string);  if(options.ondisconnect) options.ondisconnect(info);  },
                     read:(command:{ service:string, characteristic:string, ondata?:(data:DataView)=>void, timeout?:TimeoutOptions }) => { return BLE.read(result.device, command.service, command.characteristic, command.ondata, command.timeout) },
-                    write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions}) => { return BLE.write(result.device, command.service, command.characteristic, command.data, command.callback, command.timeout) }
+                    write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions}) => { return BLE.write(result.device, command.service, command.characteristic, command.data, command.callback, command.timeout) },
+                    subprocesses:options.subprocesses
                 }
                 if(options.onconnect) options.onconnect(info);
                 res(info as any);
@@ -240,11 +233,12 @@ export function initDevice(
                 streamworker:WorkerInfo,
                 renderworker?:WorkerInfo
             },
-            options,
+            options:any,
             device:BLEDeviceInfo,
             disconnect:()=>void,
             read:(command:{ service:string, characteristic:string, ondata?:(data:DataView)=>void, timeout?:TimeoutOptions }) => Promise<DataView>,
-            write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions})=>Promise<void>
+            write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions})=>Promise<void>,
+            subprocesses:{[key:string]:SubprocessWorkerInfo}
         }>)
         
     } else if (deviceType === 'USB') {
@@ -311,13 +305,24 @@ export function initDevice(
                             if(options.ondisconnect) options.ondisconnect(info); 
                         },
                         read:() => { return new Promise((res,rej) => { let sub; sub = streamworker.subscribe('decodeAndParseDevice',(result)=>{ serialworker.unsubscribe('decodeAndParseDevice',sub); res(result); });}); }, //we are already reading, just return the latest result from decodeAndParseDevice
-                        write:(command:any) => {return serialworker.run('writeStream', [result._id,command])}
+                        write:(command:any) => {return serialworker.run('writeStream', [result._id,command])},
+                        subprocesses:options.subprocesses as {[key:string]:SubprocessWorkerInfo}
                     };
                     if(options.onconnect) options.onconnect(info);
                     res(info);
                 });
             }).catch((er)=>{
                 console.error(er);
+                workers.terminate(serialworker._id as string);
+                    workers.terminate(streamworker._id);
+                    if(renderworker) workers.terminate(renderworker._id);
+                    if(options.subprocesses) {
+                        for(const key in options.subprocesses) {
+                            if(options.subprocesses[key].worker) {
+                                options.subprocesses[key].worker.terminate();
+                            }
+                        }
+                    }
                 rej(er);
             });
         }) as Promise<{
@@ -326,7 +331,7 @@ export function initDevice(
                 streamworker:WorkerInfo,
                 renderworker?:WorkerInfo
             },
-            options,
+            options:any,
             device:{
                 _id:string,
                 settings:any,
@@ -334,7 +339,8 @@ export function initDevice(
             },
             disconnect:()=>void,
             read:()=>Promise<any>,
-            write:(command:any)=>Promise<boolean>
+            write:(command:any)=>Promise<boolean>,
+            subprocesses:{[key:string]:SubprocessWorkerInfo}
         }>
         
     }

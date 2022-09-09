@@ -4,7 +4,8 @@ import {
     //GPUService, 
     parseFunctionFromText, 
     subprocessRoutes,
-    loadAlgorithms} from 'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
+    loadAlgorithms
+} from 'graphscript'//"../../GraphServiceRouter/index"//'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
 import { WebSerial } from './serial/serialstream'; //extended classes need to be imported for compilation
 import { decoders, Devices } from './devices/index';
 //import { WebglLinePlotUtil } from '../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils'//'webgl-plot-utils';
@@ -13,14 +14,19 @@ import { BiquadChannelFilterer, FilterSettings } from './util/BiquadFilters';
 //import * as bfs from './storage/BFSUtils'
 import { ArrayManip } from './util/ArrayManip';
 
-import { algorithms } from 'graphscript-services'; //"../../GraphServiceRouter/index.services"
+import { 
+    algorithms,
+    csvRoutes,
+    BFSRoutes
+ } from 'graphscript-services'//"../../GraphServiceRouter/extras/index.services"
+ //'graphscript-services'; //"../../GraphServiceRouter/index.services"
+
 
 loadAlgorithms(algorithms);
 
 declare var WorkerGlobalScope;
 
 if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
-
 
     //'install' these on the worker in a way we can write functions to work with them flexibly. You can
     // set these variables as service graph props instead but this is a bit simpler.
@@ -46,6 +52,8 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
             workerCanvasRoutes,
             //unsafeRoutes, //allows dynamic route loading
             subprocessRoutes, //includes unsafeRoutes
+            BFSRoutes,
+            csvRoutes,
             { //serial API routes
                 'receiveDecoder':function receiveDecoder(decoder:any, decoderName:string) {
                     globalThis.decoders[decoderName] = (0, eval)('('+decoder+')');
@@ -270,7 +278,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                                                 //we can subscribe on the other end to this worker output by id
                                             }
                                         }
-                                    });
+                                    })
                 
                                     Serial.readStream(stream);
                 
@@ -283,7 +291,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
                                         settings,
                                         info:stream.info
                                     })
-                                });
+                                }).catch( ()=>{postMessage(`disconnected`);} );;
                             } else {
                                 rej(false);
                             }

@@ -313,27 +313,29 @@ export class WebSerial extends ByteParser {
             let info = stream.port.getInfo();
 
             this.closeStream(stream._id).then((closed) => {
-                this.getPorts().then((ports) => {
-                    for(let i = 0; i < ports.length; i++) {
-                        if(ports[i].getInfo().usbVendorId === info.usbVendorId && ports[i].getInfo().usbProductId === info.usbProductId) {
-                            if(!options) options = stream as any;
-                            else options._id = (stream as SerialStreamInfo)._id;
-                            delete options.port;
-                            this.openPort(ports[i], options.settings).then(() => {
-                                const stream = this.createStream(
-                                    {
-                                        ...options,
-                                        port:ports[i]
-                                    }
-                                );
-
-                                this.readStream(stream);
-
-                                res(stream);
-                            }).catch(rej)
-                        }   
-                    }
-                }).catch(rej);
+                setTimeout(() => {
+                    this.getPorts().then((ports) => {
+                        for(let i = 0; i < ports.length; i++) {
+                            if(ports[i].getInfo().usbVendorId === info.usbVendorId && ports[i].getInfo().usbProductId === info.usbProductId) {
+                                if(!options) options = stream as any;
+                                else options._id = (stream as SerialStreamInfo)._id;
+                                delete options.port;
+                                this.openPort(ports[i], options.settings).then(() => {
+                                    const stream = this.createStream(
+                                        {
+                                            ...options,
+                                            port:ports[i]
+                                        }
+                                    );
+    
+                                    this.readStream(stream);
+    
+                                    res(stream);
+                                }).catch(rej)
+                            }   
+                        }
+                    }).catch(rej);
+                },100);
             })
         });
     }

@@ -61,7 +61,7 @@ export function peanutcodec(data:any) {
 
 export const peanutSerialSettings = {
     baudRate:38400,
-    bufferSize:500, //less crashy
+    bufferSize:400, //less crashy
     write:'protocol 3\n', //need to send this on connect to initialize the output stream properly
     buffering:{
         searchBytes:new Uint8Array([170,170]),
