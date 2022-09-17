@@ -1,11 +1,16 @@
 
-import { subprocessRoutes, WorkerInfo, WorkerService, SubprocessWorkerProps, SubprocessWorkerInfo } from 'graphscript'//"../../GraphServiceRouter/index"//'graphscript'; //
+import { 
+    subprocessRoutes, 
+    WorkerInfo, 
+    WorkerService, 
+    WorkerRoute, 
+    workerCanvasRoutes 
+} from "../../GraphServiceRouter/index"//'graphscript'; //
 
 import gsworker from './stream.worker'
 
 //import { ArrayManip } from './arraymanip';
 import { BLEClient, BLEDeviceOptions, BLEDeviceInfo } from './ble/ble_client';
-import { workerCanvasRoutes } from 'graphscript';
 import { WebSerial } from './serial/serialstream';
 import { Devices } from './devices';
 import { TimeoutOptions } from '@capacitor-community/bluetooth-le';
@@ -34,9 +39,9 @@ export function initDevice(
         ondecoded:((data:any) => void)|{[key:string]:(data:any)=>void}, //a single ondata function or an object with keys corresponding to BLE characteristics
         onconnect?:((device:any) => void),
         ondisconnect?:((device:any) => void),
-        subprocesses?:{ //use secondary workers to run processes and report results back to the main thread or other
-            [key:string]:SubprocessWorkerProps,
-        }, 
+        routes:{ //use secondary workers to run processes and report results back to the main thread or other
+            [key:string]:WorkerRoute
+        },
         renderer?:{ //dedicated render thread receives parsed/decoded result directly
             canvas:HTMLCanvasElement,
             context:string,
@@ -63,21 +68,17 @@ export function initDevice(
 
     let renderworker;
     let streamworker = workers.addWorker({url:gsworker});
-    if(options.subprocesses) {
-        for(const key in options.subprocesses) {
-            if(!options.subprocesses[key].url) 
-                options.subprocesses[key].url = gsworker;
-
-            if(!options.subprocesses[key].source) 
-                options.subprocesses[key].source = streamworker;
-        
-            if(!options.subprocesses[key].subscribeRoute)  
-                options.subprocesses[key].subscribeRoute = 'decodeAndParseDevice';   
-
+    if(options.routes) {
+        for(const key in options.routes) {
+            (options.routes[key] as any).parent = {
+                callback:'decodeAndParseDevice',
+                worker:streamworker
+            };
         }
-        workers.run('initSubprocesses', options.subprocesses);
-        //console.log(options.subprocesses);
+        workers.load(options.routes);
+        
     }
+
     if(options.renderer) {
         if(!options.renderer.renderworker) {
             renderworker = workers.addWorker({url:gsworker});
@@ -132,16 +133,16 @@ export function initDevice(
                 write:(command?:any) => {
                     if(settings.write) return  new Promise((res,rej) => {res(settings.write(settings,command))});
                 },
-                subprocesses:options.subprocesses
+                routes:options.routes
             }   
             if(options.onconnect) options.onconnect(info);
             res(info);
         }).catch((er)=>{
             console.error(er);
             workers.terminate(streamworker._id);
-            if(options.subprocesses) for(const key in options.subprocesses) {
-                if(options.subprocesses[key].worker) {
-                    workers.terminate(options.subprocesses[key].worker._id);
+            if(options.routes) {
+                for(const key in options.routes) {
+                    workers.removeTree(options.routes[key].tag);
                 }
             }
         }) as Promise<{
@@ -154,7 +155,7 @@ export function initDevice(
             disconnect:()=>void,
             read:(command?:any)=>any,
             write:(command?:any)=>any,
-            subprocesses:{[key:string]:SubprocessWorkerInfo}
+            routes:{[key:string]:WorkerRoute}
         }>;
 
     } else if(deviceType === 'BLE') {
@@ -190,11 +191,9 @@ export function initDevice(
         settings.ondisconnect = () => {
             workers.terminate(streamworker._id as string);
             if(renderworker) workers.terminate(renderworker._id);
-            if(options.subprocesses) {
-                for(const key in options.subprocesses) {
-                    if(options.subprocesses[key].worker) {
-                        options.subprocesses[key].worker.terminate();
-                    }
+            if(options.routes) {
+                for(const key in options.routes) {
+                    workers.removeTree(options.routes[key].tag);
                 }
             }
         }
@@ -211,7 +210,7 @@ export function initDevice(
                     disconnect:async () => { await BLE.disconnect(result.deviceId as string);  if(options.ondisconnect) options.ondisconnect(info);  },
                     read:(command:{ service:string, characteristic:string, ondata?:(data:DataView)=>void, timeout?:TimeoutOptions }) => { return BLE.read(result.device, command.service, command.characteristic, command.ondata, command.timeout) },
                     write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions}) => { return BLE.write(result.device, command.service, command.characteristic, command.data, command.callback, command.timeout) },
-                    subprocesses:options.subprocesses
+                    routes:options.routes
                 }
                 if(options.onconnect) options.onconnect(info);
                 res(info as any);
@@ -219,11 +218,9 @@ export function initDevice(
                 console.error(er);
                 streamworker.terminate();
                 if(renderworker) renderworker.terminate();
-                if(options.subprocesses) {
-                    for(const key in options.subprocesses) {
-                        if(options.subprocesses[key].worker) {
-                            options.subprocesses[key].worker.terminate();
-                        }
+                if(options.routes) {
+                    for(const key in options.routes) {
+                        workers.removeTree(options.routes[key].tag);
                     }
                 }
                 rej(er);
@@ -238,7 +235,7 @@ export function initDevice(
             disconnect:()=>void,
             read:(command:{ service:string, characteristic:string, ondata?:(data:DataView)=>void, timeout?:TimeoutOptions }) => Promise<DataView>,
             write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions})=>Promise<void>,
-            subprocesses:{[key:string]:SubprocessWorkerInfo}
+            routes:{[key:string]:WorkerRoute}
         }>)
         
     } else if (deviceType === 'USB') {
@@ -252,11 +249,10 @@ export function initDevice(
                     workers.terminate(serialworker._id as string);
                     workers.terminate(streamworker._id);
                     if(renderworker) workers.terminate(renderworker._id);
-                    if(options.subprocesses) {
-                        for(const key in options.subprocesses) {
-                            if(options.subprocesses[key].worker) {
-                                options.subprocesses[key].worker.terminate();
-                            }
+                    if(options.routes) {
+                        for(const key in options.routes) {
+                            //console.log('removing route', options.routes[key])
+                            workers.removeTree(options.routes[key].tag);
                         }
                     }
                 }
@@ -306,7 +302,7 @@ export function initDevice(
                         },
                         read:() => { return new Promise((res,rej) => { let sub; sub = streamworker.subscribe('decodeAndParseDevice',(result)=>{ serialworker.unsubscribe('decodeAndParseDevice',sub); res(result); });}); }, //we are already reading, just return the latest result from decodeAndParseDevice
                         write:(command:any) => {return serialworker.run('writeStream', [result._id,command])},
-                        subprocesses:options.subprocesses as {[key:string]:SubprocessWorkerInfo}
+                        routes:options.routes
                     };
                     if(options.onconnect) options.onconnect(info);
                     res(info);
@@ -314,15 +310,14 @@ export function initDevice(
             }).catch((er)=>{
                 console.error(er);
                 workers.terminate(serialworker._id as string);
-                    workers.terminate(streamworker._id);
-                    if(renderworker) workers.terminate(renderworker._id);
-                    if(options.subprocesses) {
-                        for(const key in options.subprocesses) {
-                            if(options.subprocesses[key].worker) {
-                                options.subprocesses[key].worker.terminate();
-                            }
-                        }
+                workers.terminate(streamworker._id);
+                if(renderworker) workers.terminate(renderworker._id);
+                if(options.routes) {
+                    for(const key in options.routes) {
+                        workers.removeTree(options.routes[key].tag);
+                        console.log('removing route', options.routes[key])
                     }
+                }
                 rej(er);
             });
         }) as Promise<{
@@ -340,7 +335,7 @@ export function initDevice(
             disconnect:()=>void,
             read:()=>Promise<any>,
             write:(command:any)=>Promise<boolean>,
-            subprocesses:{[key:string]:SubprocessWorkerInfo}
+            routes:{[key:string]:WorkerRoute}
         }>
         
     }

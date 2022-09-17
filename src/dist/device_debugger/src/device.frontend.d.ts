@@ -1,4 +1,4 @@
-import { WorkerInfo, WorkerService } from "../../GraphServiceRouter/index";
+import { WorkerInfo, WorkerService, WorkerRoute } from "../../GraphServiceRouter/index";
 import gsworker from './stream.worker';
 import { BLEClient } from './ble/ble_client';
 import { Devices } from './devices';
@@ -14,23 +14,8 @@ options: {
     };
     onconnect?: ((device: any) => void);
     ondisconnect?: ((device: any) => void);
-    subprocesses?: {
-        [key: string]: {
-            route: string;
-            otherArgs?: any[];
-            init?: string;
-            initArgs?: any[];
-            url?: any;
-            callback?: string | ((data: any) => any);
-            pipeTo?: {
-                portId: string;
-                route: string;
-                otherArgs: any[];
-            };
-            worker?: WorkerInfo;
-            subscribeRoute?: string;
-            source?: WorkerInfo;
-        };
+    routes: {
+        [key: string]: WorkerRoute;
     };
     renderer?: {
         canvas: HTMLCanvasElement;
@@ -51,9 +36,13 @@ options: {
         renderworker?: WorkerInfo;
     };
     device: any;
+    options: any;
     disconnect: () => void;
     read: (command?: any) => any;
     write: (command?: any) => any;
+    routes: {
+        [key: string]: WorkerRoute;
+    };
 }>;
 export declare function createStreamPipeline(dedicatedSerialWorker?: boolean, dedicatedRenderWorker?: boolean, renderer?: {
     canvas: HTMLCanvasElement;

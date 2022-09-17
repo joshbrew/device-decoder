@@ -8,8 +8,6 @@ Supports Web Bluetooth API + Mobile Native (via `@capacitor-community/bluetooth-
 
 Easily add your own decoders to Devices by following the formats outlined at the above github link.
 
-~350kb dist. The worker is bundled into the main file as a dataURL for easier reuse, which doubles the size.
-
 You can also import initDevice and Devices directly into browser from the cdnjs link (installed to window.initDevice and window.Devices) via 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/device-decoder@latest/dist/device.frontend.js"></script>
