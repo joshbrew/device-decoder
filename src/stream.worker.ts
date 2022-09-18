@@ -5,7 +5,7 @@ import {
     parseFunctionFromText, 
     subprocessRoutes,
     loadAlgorithms
-} from "../../GraphServiceRouter/index"//'graphscript'//"../../GraphServiceRouter/index"//'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
+} from 'graphscript'//"../../GraphServiceRouter/index"//'graphscript'//"../../GraphServiceRouter/index"//'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
 import { WebSerial } from './serial/serialstream'; //extended classes need to be imported for compilation
 import { decoders, Devices } from './devices/index';
 //import { WebglLinePlotUtil } from '../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils'//'webgl-plot-utils';
@@ -18,7 +18,7 @@ import {
     algorithms,
     csvRoutes,
     BFSRoutes
- } from "../../GraphServiceRouter/extras/index.services"//'graphscript-services'//"../../GraphServiceRouter/extras/index.services"
+ } from 'graphscript-services'//"../../GraphServiceRouter/extras/index.services"//'graphscript-services'//"../../GraphServiceRouter/extras/index.services"
  //'graphscript-services'; //"../../GraphServiceRouter/index.services"
 
 
