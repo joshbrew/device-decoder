@@ -41,32 +41,12 @@ export function initDevice(
         ondisconnect?:((device:any) => void),
         routes:{ //use secondary workers to run processes and report results back to the main thread or other
             [key:string]:WorkerRoute
-        },
-        renderer?:{ //dedicated render thread receives parsed/decoded result directly
-            canvas:HTMLCanvasElement,
-            context:string,
-            _id?:string,
-            width?:number,
-            height?:number,
-            draw?:string|((
-                self, canvas, context
-            ) => void),
-            update?:string|((self, canvas, context, input)=>void),
-            init?:string|((
-                self, canvas, context
-            ) => void),
-            clear?:string|((
-                self, canvas, context
-            ) => void),
-            animating?:boolean, //can manually make draw calls if you post 'drawFrame' with the animation _id
-            renderworker?:WorkerInfo
         }
     }
 ){
     let settings = Devices[deviceType][deviceName];
     if(!settings) return undefined;
 
-    let renderworker;
     let streamworker = workers.addWorker({url:gsworker});
     if(options.routes) {
         for(const key in options.routes) {
@@ -79,33 +59,6 @@ export function initDevice(
         
     }
 
-    if(options.renderer) {
-        if(!options.renderer.renderworker) {
-            renderworker = workers.addWorker({url:gsworker});
-            
-            //workers.run('startAnim');
-    
-            workers.transferFunction(
-                renderworker,
-                function receiveParsedData(parsed) {
-                    this.run('updateCanvas',parsed);
-                    //this.run('drawFrame');
-                },
-                'receiveParsedData'
-            )
-        }
-        else {
-            renderworker = options.renderer.renderworker;
-            delete options.renderer.renderworker;
-        }
-
-        if(options.renderer.canvas || options.renderer._id) workers.run('transferCanvas',renderworker.worker,options.renderer);
-
-        let portId = workers.establishMessageChannel(streamworker.worker,renderworker.worker);
-
-        renderworker.post('subscribeToWorker',['decodeAndParseDevice',portId,'receiveParsedData']);
-    }
-
     if(deviceType.includes('OTHER')) {
 
         if(typeof options.ondecoded === 'function') {
@@ -115,11 +68,20 @@ export function initDevice(
         }
 
         return new Promise ((res,rej) => {
+
+            settings.ondisconnect = () => { //set the ondisconnect command for the OTHER device spec
+                workers.terminate(streamworker._id as string);
+                if(options.routes) {
+                    for(const key in options.routes) {
+                        workers.removeTree(options.routes[key].tag);
+                    }
+                }
+            }
+
             let init = settings.connect(settings);
             let info = {
                 workers: {
-                    streamworker,
-                    renderworker
+                    streamworker
                 },
                 disconnect:() => { 
                     settings.disconnect(settings); 
@@ -147,8 +109,7 @@ export function initDevice(
             }
         }) as Promise<{
             workers:{
-                streamworker:WorkerInfo,
-                renderworker?:WorkerInfo
+                streamworker:WorkerInfo
             },
             device:any,
             options:any,
@@ -188,26 +149,24 @@ export function initDevice(
             }
         }
 
-        settings.ondisconnect = () => {
-            workers.terminate(streamworker._id as string);
-            if(renderworker) workers.terminate(renderworker._id);
-            if(options.routes) {
-                for(const key in options.routes) {
-                    workers.removeTree(options.routes[key].tag);
-                }
-            }
-        }
-
         return (new Promise((res,rej) => {
             BLE.setup(settings as BLEDeviceOptions).then((result) => {
                 let info = {
                     workers:{
-                        streamworker,
-                        renderworker
+                        streamworker
                     },
                     options,
                     device:result,
-                    disconnect:async () => { await BLE.disconnect(result.deviceId as string);  if(options.ondisconnect) options.ondisconnect(info);  },
+                    disconnect:async () => { 
+                        await BLE.disconnect(result.deviceId as string);  
+                        if(options.ondisconnect) options.ondisconnect(info); 
+                        streamworker.terminate();
+                        if(options.routes) {
+                            for(const key in options.routes) {
+                                workers.removeTree(options.routes[key].tag);
+                            }
+                        }
+                    },
                     read:(command:{ service:string, characteristic:string, ondata?:(data:DataView)=>void, timeout?:TimeoutOptions }) => { return BLE.read(result.device, command.service, command.characteristic, command.ondata, command.timeout) },
                     write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions}) => { return BLE.write(result.device, command.service, command.characteristic, command.data, command.callback, command.timeout) },
                     routes:options.routes
@@ -217,18 +176,18 @@ export function initDevice(
             }).catch((er)=>{
                 console.error(er);
                 streamworker.terminate();
-                if(renderworker) renderworker.terminate();
                 if(options.routes) {
+                    console.log(options.routes);
                     for(const key in options.routes) {
                         workers.removeTree(options.routes[key].tag);
+                        //console.log('removing', key);
                     }
                 }
                 rej(er);
             });
         }) as Promise<{
             workers:{
-                streamworker:WorkerInfo,
-                renderworker?:WorkerInfo
+                streamworker:WorkerInfo
             },
             options:any,
             device:BLEDeviceInfo,
@@ -248,7 +207,6 @@ export function initDevice(
                 if(ev.data.includes('disconnected')) {
                     workers.terminate(serialworker._id as string);
                     workers.terminate(streamworker._id);
-                    if(renderworker) workers.terminate(renderworker._id);
                     if(options.routes) {
                         for(const key in options.routes) {
                             //console.log('removing route', options.routes[key])
@@ -291,7 +249,6 @@ export function initDevice(
                     let info = {
                         workers:{
                             streamworker,
-                            renderworker,
                             serialworker
                         },
                         device:result,
@@ -311,7 +268,6 @@ export function initDevice(
                 console.error(er);
                 workers.terminate(serialworker._id as string);
                 workers.terminate(streamworker._id);
-                if(renderworker) workers.terminate(renderworker._id);
                 if(options.routes) {
                     for(const key in options.routes) {
                         workers.removeTree(options.routes[key].tag);
@@ -323,8 +279,7 @@ export function initDevice(
         }) as Promise<{
             workers:{
                 serialworker:WorkerInfo,
-                streamworker:WorkerInfo,
-                renderworker?:WorkerInfo
+                streamworker:WorkerInfo
             },
             options:any,
             device:{

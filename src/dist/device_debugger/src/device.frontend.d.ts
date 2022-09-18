@@ -17,23 +17,9 @@ options: {
     routes: {
         [key: string]: WorkerRoute;
     };
-    renderer?: {
-        canvas: HTMLCanvasElement;
-        context: string;
-        _id?: string;
-        width?: number;
-        height?: number;
-        draw?: string | ((self: any, canvas: any, context: any) => void);
-        update?: string | ((self: any, canvas: any, context: any, input: any) => void);
-        init?: string | ((self: any, canvas: any, context: any) => void);
-        clear?: string | ((self: any, canvas: any, context: any) => void);
-        animating?: boolean;
-        renderworker?: WorkerInfo;
-    };
 }): Promise<{
     workers: {
         streamworker: WorkerInfo;
-        renderworker?: WorkerInfo;
     };
     device: any;
     options: any;
