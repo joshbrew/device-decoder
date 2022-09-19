@@ -17,6 +17,7 @@ options: {
     routes: {
         [key: string]: WorkerRoute;
     };
+    workerUrl?: any;
 }): Promise<{
     workers: {
         streamworker: WorkerInfo;
@@ -38,4 +39,4 @@ export declare function createStreamPipeline(dedicatedSerialWorker?: boolean, de
     init?: string | ((self: any, canvas: any, context: any) => {});
     clear?: string | ((self: any, canvas: any, context: any) => {});
     animating?: boolean;
-}): any;
+}, workerUrl?: any): any;

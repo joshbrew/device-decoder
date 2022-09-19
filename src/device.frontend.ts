@@ -41,13 +41,16 @@ export function initDevice(
         ondisconnect?:((device:any) => void),
         routes:{ //use secondary workers to run processes and report results back to the main thread or other
             [key:string]:WorkerRoute
-        }
+        },
+        workerUrl?:any
     }
 ){
     let settings = Devices[deviceType][deviceName];
     if(!settings) return undefined;
 
-    let streamworker = workers.addWorker({url:gsworker});
+    if(!options.workerUrl) options.workerUrl = gsworker;
+
+    let streamworker = workers.addWorker({url:options.workerUrl});
     if(options.routes) {
         for(const key in options.routes) {
             (options.routes[key] as any).parent = {
@@ -199,7 +202,7 @@ export function initDevice(
         
     } else if (deviceType === 'USB') {
         //serial
-        let serialworker = workers.addWorker({url:gsworker});
+        let serialworker = workers.addWorker({url:options.workerUrl});
 
         serialworker.worker.addEventListener('message',(ev:any) => {
             //console.log(ev.data);
@@ -317,15 +320,18 @@ export function createStreamPipeline(
             self, canvas, context
         ) => {}),
         animating?:boolean //can manually make draw calls if you post 'drawFrame' with the animation _id
-    }
+    },
+    workerUrl?:any
 ) {
-    let streamworker = workers.addWorker({url:gsworker}) as WorkerInfo;
+
+    if(!workerUrl) workerUrl = gsworker;
+    let streamworker = workers.addWorker({url:workerUrl}) as WorkerInfo;
     let renderworker,renderPort;
     let serialworker, decoderPort;
     
     
     if(dedicatedSerialWorker) {
-        serialworker = workers.addWorker({url:gsworker}) as WorkerInfo;
+        serialworker = workers.addWorker({url:workerUrl}) as WorkerInfo;
         
         decoderPort = workers.establishMessageChannel(serialworker.worker, streamworker.worker); //returns the id of the port so we can orchestrate port communication
     
@@ -335,7 +341,7 @@ export function createStreamPipeline(
     //transferChartCommands(renderworker);
 
     if(dedicatedRenderWorker) {
-        renderworker = workers.addWorker({url:gsworker}) as WorkerInfo;
+        renderworker = workers.addWorker({url:workerUrl}) as WorkerInfo;
         renderPort = workers.establishMessageChannel(streamworker.worker, renderworker.worker); //returns the id of the port so we can orchestrate port communication
     
         if(renderer) {
