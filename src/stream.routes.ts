@@ -54,23 +54,23 @@ export const streamWorkerRoutes = { //serial API routes
                 service && 
                 characteristic
             ) {
-                if(Devices[deviceType][device]) {
-                    if(Devices[deviceType][device][service]) {
-                        if(Devices[deviceType][device][characteristic]) {
-                            Devices[deviceType][device][characteristic].codec = codec;
+                if(globalThis.devices[deviceType][device]) {
+                    if(globalThis.devices[deviceType][device][service]) {
+                        if(globalThis.devices[deviceType][device][characteristic]) {
+                            globalThis.devices[deviceType][device][characteristic].codec = codec;
                         } else {
-                            Devices[deviceType][device][characteristic] = {codec};
+                            globalThis.devices[deviceType][device][characteristic] = {codec};
                         }
                     } else {
-                        Devices[deviceType][device] = {[characteristic]: {codec}};
+                        globalThis.devices[deviceType][device] = {[characteristic]: {codec}};
                     }
                 }
             }
-            else if (Devices[deviceType][device]?.codec) {
-                if(Devices[deviceType][device])
-                    Devices[deviceType][device].codec = codec;
+            else if (globalThis.devices[deviceType][device]?.codec) {
+                if(globalThis.devices[deviceType][device])
+                    globalThis.devices[deviceType][device].codec = codec;
                 else {
-                    Devices[deviceType][device] = {codec};
+                    globalThis.devices[deviceType][device] = {codec};
                 }
             }
         }
@@ -107,10 +107,10 @@ export const streamWorkerRoutes = { //serial API routes
     },
     'setActiveDecoder':function setActiveDecoder(deviceType:'BLE'|'USB'|'BLE_OTHER'|'USB_OTHER'|'OTHER',device:string,service?:string,characteristic?:string) {
         //console.log('received decoder:',decoderName)
-        if(Devices[deviceType][device]?.codec) 
-            globalThis.decoder = Devices[deviceType][device]?.codec;
-        else if (deviceType === 'BLE' && service && characteristic && Devices[deviceType][device]?.[service as string]?.[characteristic as string]?.codec)
-            globalThis.decoder = Devices[deviceType][device][service][characteristic].codec;
+        if(globalThis.devices[deviceType][device]?.codec) 
+            globalThis.decoder = globalThis.devices[deviceType][device]?.codec;
+        else if (deviceType === 'BLE' && service && characteristic && globalThis.devices[deviceType][device]?.[service as string]?.[characteristic as string]?.codec)
+            globalThis.decoder = globalThis.devices[deviceType][device][service][characteristic].codec;
 
         return true;
     },
@@ -121,10 +121,10 @@ export const streamWorkerRoutes = { //serial API routes
         service?:string,
         characteristic?:string
     ) {
-        if(Devices[deviceType][device]?.codec) 
-            return Devices[deviceType][device].codec(data);
-        else if (deviceType === 'BLE' && service && characteristic && Devices[deviceType][device]?.[service as string]?.[characteristic as string]?.codec)
-            return Devices[deviceType][device][service][characteristic].codec(data);
+        if(globalThis.devices[deviceType][device]?.codec) 
+            return globalThis.devices[deviceType][device].codec(data);
+        else if (deviceType === 'BLE' && service && characteristic && globalThis.devices[deviceType][device]?.[service as string]?.[characteristic as string]?.codec)
+            return globalThis.devices[deviceType][device][service][characteristic].codec(data);
 
     },
     'decodeAndParseDevice':function decodeAndParseDevice(
@@ -137,10 +137,10 @@ export const streamWorkerRoutes = { //serial API routes
 
         let decoded;
 
-        if (deviceType === 'BLE' && service && characteristic && Devices[deviceType][deviceName]?.services[service as string]?.[characteristic as string]?.codec)
-            decoded = Devices[deviceType][deviceName].services[service][characteristic].codec(data);
-        else if(Devices[deviceType][deviceName]?.codec) 
-            decoded = Devices[deviceType][deviceName].codec(data);
+        if (deviceType === 'BLE' && service && characteristic && globalThis.devices[deviceType][deviceName]?.services[service as string]?.[characteristic as string]?.codec)
+            decoded = globalThis.devices[deviceType][deviceName].services[service][characteristic].codec(data);
+        else if(globalThis.devices[deviceType][deviceName]?.codec) 
+            decoded = globalThis.devices[deviceType][deviceName].codec(data);
         else decoded = data;
 
         //console.log(decoded);

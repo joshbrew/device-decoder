@@ -6,6 +6,7 @@ import {
     loadAlgorithms
 } from 'graphscript'//"../../GraphServiceRouter/index"//'graphscript'//"../../GraphServiceRouter/index"//'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
 import { streamWorkerRoutes } from './stream.routes';
+import {Devices} from './devices/third_party'
 
 import { 
     csvRoutes,
@@ -28,6 +29,7 @@ loadAlgorithms(gpualgorithms);
 declare var WorkerGlobalScope;
 
 if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
+    globalThis.devices = Devices; //access all devices incl third party (bloated)
 
     const worker = new WorkerService({
         //props:{} //could set the props instead of globalThis but it really does not matter unless you want to bake in for more complex service modules
