@@ -11,10 +11,14 @@ import { cognixionONE_EEG_codec, cognixionONEChartSettings, cognixionONEFilterSe
 import { peanutcodec, peanutChartSettings, peanutSerialSettings } from './peanut';
 import { nrf5x_usbcodec, nrf5x_usbChartSettings, nrf5x_usbFilterSettings, nrf5xBLESettings, nrf5xSerialSettings } from './nrf5x_usb';
 import { statechangerBLESettings, statechangerChartSettings, statechangercodec, statechangerSerialSettings } from './statechanger';
-import { museSettings } from './muse';
+//import { museSettings } from './third_party/muse';
 import { blueberryBLESettings, blueberryChartSettings, blueberrycodec } from './blueberry';
 import { blueberry2BLESettings, blueberry2ChartSettings } from './blueberry2';
-import { ganglionSettings, ganglionFilterSettings, ganglionChartSettings } from './ganglion';
+import { 
+    //ganglionSettings, 
+    ganglionFilterSettings, 
+    ganglionChartSettings 
+} from './third_party/ganglion';
 import { heartRateBLESettings, hrcodec } from './genericBLE';
 import { bme280codec } from './bme280';
 
@@ -43,9 +47,9 @@ export const Devices = {
         'statechanger':statechangerSerialSettings,
         'cognixionONE':cytonSerialSettings
     },
-    BLE_OTHER:{ //OTHER indicates drivers not written by us that do not fit into our format readily, but we can generalize easily to get the multithreading benefits
-        'muse':museSettings,
-        'ganglion':ganglionSettings
+    BLE_OTHER : {
+        //muse:museSettings, //these are bloated so we will separate dists
+        //ganglion:ganglionSettings
     },
     USB_OTHER : {},
     OTHER : {}

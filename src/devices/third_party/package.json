@@ -1,10 +1,11 @@
 {
-  "name": "device-decoder",
-  "version": "0.1.42",
-  "description": "Customizable multithreaded BLE and USB (or other) device connecting, sensor decoding, and (threaded) output rendering",
-  "main": "dist/device.frontend.js",
-  "module": "dist/device.frontend.esm.js",
-  "types": "dist/device.frontend.d.ts",
+  "name": "device-decoder.third-party",
+  "version": "0.0.1",
+  "description": "Barebones esbuild and test node server implementation. For building",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/devices/third_party/index.d.ts",
+  "type": "module",
   "scripts": {
     "start": "tinybuild",
     "build": "tinybuild build",
@@ -20,23 +21,12 @@
   "keywords": [
     "esbuild"
   ],
-  "author": "Joshua Brewster",
+  "author": "",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
-    "@capacitor-community/bluetooth-le": "~2.0.0",
-    "brainsatplay-math": "~0.0.23",
-    "graphscript": "~0.1.40",
-    "graphscript-services": "~0.1.44",
-    "graphscript-services.gpu": "~0.1.44"
+    "webgl-plot-utils":"~0.2.3"
   },
-  "devDependencies": {
-    "@capacitor/android": "~4.1.0",
-    "@capacitor/cli": "~4.1.0",
-    "@capacitor/core": "~4.1.0",
-    "@capacitor/ios": "~4.1.0",
-    "@types/dom-serial": "~1.0.2",
-    "@types/node": "~18.0.5"
-  },
+  "devDependencies": {},
   "nodemonConfig": {
     "env": {
       "NODEMON": true

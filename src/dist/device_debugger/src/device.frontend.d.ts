@@ -1,4 +1,4 @@
-import { WorkerInfo, WorkerService, WorkerRoute } from "../../GraphServiceRouter/index";
+import { WorkerInfo, WorkerService, WorkerRoute } from 'graphscript';
 import gsworker from './stream.worker';
 import { BLEClient } from './ble/ble_client';
 import { Devices } from './devices';

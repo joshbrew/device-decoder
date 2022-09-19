@@ -12,9 +12,15 @@ import {
     csvRoutes,
     BFSRoutes
  } from 'graphscript-services'//"../../GraphServiceRouter/extras/index.services"//'graphscript-services'//"../../GraphServiceRouter/extras/index.services"
- //; //"../../GraphServiceRouter/index.services"
+
+ import {
+    gpualgorithms
+ } from 'graphscript-services.gpu'
+ //'graphscript-services'; //"../../GraphServiceRouter/index.services"
+
 
 loadAlgorithms(algorithms);
+loadAlgorithms(gpualgorithms);
 
 declare var WorkerGlobalScope;
 

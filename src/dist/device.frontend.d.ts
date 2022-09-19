@@ -1,4 +1,4 @@
-import { WorkerInfo, WorkerService, SubprocessWorkerProps, SubprocessWorkerInfo } from 'graphscript';
+import { WorkerInfo, WorkerService, WorkerRoute } from 'graphscript';
 import gsworker from './stream.worker';
 import { BLEClient } from './ble/ble_client';
 import { Devices } from './devices';
@@ -14,34 +14,20 @@ options: {
     };
     onconnect?: ((device: any) => void);
     ondisconnect?: ((device: any) => void);
-    subprocesses?: {
-        [key: string]: SubprocessWorkerProps;
-    };
-    renderer?: {
-        canvas: HTMLCanvasElement;
-        context: string;
-        _id?: string;
-        width?: number;
-        height?: number;
-        draw?: string | ((self: any, canvas: any, context: any) => void);
-        update?: string | ((self: any, canvas: any, context: any, input: any) => void);
-        init?: string | ((self: any, canvas: any, context: any) => void);
-        clear?: string | ((self: any, canvas: any, context: any) => void);
-        animating?: boolean;
-        renderworker?: WorkerInfo;
+    routes: {
+        [key: string]: WorkerRoute;
     };
 }): Promise<{
     workers: {
         streamworker: WorkerInfo;
-        renderworker?: WorkerInfo;
     };
     device: any;
     options: any;
     disconnect: () => void;
     read: (command?: any) => any;
     write: (command?: any) => any;
-    subprocesses: {
-        [key: string]: SubprocessWorkerInfo;
+    routes: {
+        [key: string]: WorkerRoute;
     };
 }>;
 export declare function createStreamPipeline(dedicatedSerialWorker?: boolean, dedicatedRenderWorker?: boolean, renderer?: {
