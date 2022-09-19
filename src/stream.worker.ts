@@ -3,18 +3,18 @@ import {
     workerCanvasRoutes, 
     //GPUService, 
     subprocessRoutes,
-    loadAlgorithms
+//    loadAlgorithms
 } from 'graphscript'//"../../GraphServiceRouter/index"//'graphscript'//"../../GraphServiceRouter/index"//'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
 import { streamWorkerRoutes } from './stream.routes';
 
-import { 
-    algorithms,
-    csvRoutes,
-    BFSRoutes
- } from 'graphscript-services'//"../../GraphServiceRouter/extras/index.services"//'graphscript-services'//"../../GraphServiceRouter/extras/index.services"
- //; //"../../GraphServiceRouter/index.services"
+// import { 
+//     algorithms,
+//     //csvRoutes,
+//     //BFSRoutes
+//  } from 'graphscript-services'//"../../GraphServiceRouter/extras/index.services"//'graphscript-services'//"../../GraphServiceRouter/extras/index.services"
+//  //; //"../../GraphServiceRouter/index.services"
 
-loadAlgorithms(algorithms);
+// loadAlgorithms(algorithms);
 
 declare var WorkerGlobalScope;
 
@@ -27,8 +27,8 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
             workerCanvasRoutes,
             //unsafeRoutes, //allows dynamic route loading
             subprocessRoutes, //includes unsafeRoutes
-            BFSRoutes,
-            csvRoutes,
+            // BFSRoutes,
+            // csvRoutes,
             streamWorkerRoutes
         ],
         includeClassName:false

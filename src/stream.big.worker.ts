@@ -8,14 +8,17 @@ import {
 import { streamWorkerRoutes } from './stream.routes';
 
 import { 
-    algorithms,
     csvRoutes,
     BFSRoutes
- } from 'graphscript-services'//"../../GraphServiceRouter/extras/index.services"//'graphscript-services'//"../../GraphServiceRouter/extras/index.services"
+ } from 'graphscript-services.storage'//"../../GraphServiceRouter/extras/index.services"//'graphscript-services'//"../../GraphServiceRouter/extras/index.services"
 
- import {
+import {
+    algorithms
+} from 'graphscript-services'
+
+import {
     gpualgorithms
- } from 'graphscript-services.gpu'
+} from 'graphscript-services.gpu'
  //'graphscript-services'; //"../../GraphServiceRouter/index.services"
 
 
