@@ -2,6 +2,9 @@
 
 `npm i device-decoder`
 
+
+The `OTHER` drivers are contained in a separate `device-decoder.third-party` package as they contain much larger third party drivers that have been formatted with simple objects you can also create yourself to pipe through our threading system. Two drivers are the same size as our whole library (not including the browserfs and gpujs additions)
+
 See https://github.com/joshbrew/device_debugger for more details and examples
 
 Supports Web Bluetooth API + Mobile Native (via `@capacitor-community/bluetooth-le`) and Web Serial API with convenient wrappers.
@@ -59,3 +62,4 @@ if(info) { //returns a promise
 ```
 
 It also exports `BLE`, `workers` which are instances of utilities used internally. It also exports `gsworker` as a usable compiled dataUrl of stream.worker, which it uses internally, so you can control more about the API as you need without additional files from the main dist/device.frontend.js 
+

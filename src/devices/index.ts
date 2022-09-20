@@ -106,6 +106,7 @@ export const chartSettings:{[key:string]:Partial<WebglLinePlotProps>} = {
     'blueberry':blueberryChartSettings,
     'blueberry2':blueberry2ChartSettings,
     'ganglion':ganglionChartSettings,
+    'muse':ganglionChartSettings,
     'arduino_ads131m08':ads131m08ChartSettings
     //...custom?
 }

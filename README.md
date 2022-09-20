@@ -10,7 +10,10 @@ Live demo: https://devicedebugger.netlify.app
 
 `tinybuild` or `npm i -g tinybuild & tinybuild`
 
+
 ### Built-in drivers:
+
+`npm i device-decoder` package for a standalone tool.
 
 See [`src/devices/README.md`](./src/devices/README.md) for adding your own drivers or customizing existing ones
 
@@ -49,6 +52,8 @@ export const Devices = {
 };
 
 ```
+
+The `OTHER` drivers are contained in a separate `device-decoder.third-party` package as they contain much larger third party drivers that have been formatted with simple objects you can also create yourself to pipe through our threading system.
 
 ##### BLE and USB API wrappers:
 

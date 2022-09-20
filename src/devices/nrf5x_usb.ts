@@ -103,13 +103,18 @@ export const nrf5x_usbChartSettings:Partial<WebglLinePlotProps> = {
 }
 
 
+const gain = 32;
+const nbits = 24;
+const vref = 1.2;
+
 let defaultsetting = {
     sps:250, 
     useDCBlock:false, 
     useBandpass:false, 
-    bandpassLower:3, bandpassUpper:45, 
+    bandpassLower:3, 
+    bandpassUpper:45, 
     useScaling:true, 
-    scalar:1000*1.2/(32*(Math.pow(2,24)-1)) //mV
+    scalar:0.96 * 1000*vref/(gain*(Math.pow(2,nbits)-1)),
 };
 
 export const nrf5x_usbFilterSettings:{[key:string]:FilterSettings} = {

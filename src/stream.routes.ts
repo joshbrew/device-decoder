@@ -21,7 +21,7 @@ export function loadStreamWorkerGlobals() {
     globalThis.decoders = decoders;
     globalThis.decoder = 'raw';
     globalThis.ByteParser = ByteParser;
-    globalThis.devices = Devices;
+    globalThis.Devices = Devices;
     globalThis.filtering = true;
     globalThis.filters = {};
     globalThis.BiquadChannelFilterer = BiquadChannelFilterer;
@@ -54,23 +54,23 @@ export const streamWorkerRoutes = { //serial API routes
                 service && 
                 characteristic
             ) {
-                if(globalThis.devices[deviceType][device]) {
-                    if(globalThis.devices[deviceType][device][service]) {
-                        if(globalThis.devices[deviceType][device][characteristic]) {
-                            globalThis.devices[deviceType][device][characteristic].codec = codec;
+                if(globalThis.Devices[deviceType][device]) {
+                    if(globalThis.Devices[deviceType][device][service]) {
+                        if(globalThis.Devices[deviceType][device][characteristic]) {
+                            globalThis.Devices[deviceType][device][characteristic].codec = codec;
                         } else {
-                            globalThis.devices[deviceType][device][characteristic] = {codec};
+                            globalThis.Devices[deviceType][device][characteristic] = {codec};
                         }
                     } else {
-                        globalThis.devices[deviceType][device] = {[characteristic]: {codec}};
+                        globalThis.Devices[deviceType][device] = {[characteristic]: {codec}};
                     }
                 }
             }
-            else if (globalThis.devices[deviceType][device]?.codec) {
-                if(globalThis.devices[deviceType][device])
-                    globalThis.devices[deviceType][device].codec = codec;
+            else if (globalThis.Devices[deviceType][device]?.codec) {
+                if(globalThis.Devices[deviceType][device])
+                    globalThis.Devices[deviceType][device].codec = codec;
                 else {
-                    globalThis.devices[deviceType][device] = {codec};
+                    globalThis.Devices[deviceType][device] = {codec};
                 }
             }
         }
@@ -107,10 +107,10 @@ export const streamWorkerRoutes = { //serial API routes
     },
     'setActiveDecoder':function setActiveDecoder(deviceType:'BLE'|'USB'|'BLE_OTHER'|'USB_OTHER'|'OTHER',device:string,service?:string,characteristic?:string) {
         //console.log('received decoder:',decoderName)
-        if(globalThis.devices[deviceType][device]?.codec) 
-            globalThis.decoder = globalThis.devices[deviceType][device]?.codec;
-        else if (deviceType === 'BLE' && service && characteristic && globalThis.devices[deviceType][device]?.[service as string]?.[characteristic as string]?.codec)
-            globalThis.decoder = globalThis.devices[deviceType][device][service][characteristic].codec;
+        if(globalThis.Devices[deviceType][device]?.codec) 
+            globalThis.decoder = globalThis.Devices[deviceType][device]?.codec;
+        else if (deviceType === 'BLE' && service && characteristic && globalThis.Devices[deviceType][device]?.[service as string]?.[characteristic as string]?.codec)
+            globalThis.decoder = globalThis.Devices[deviceType][device][service][characteristic].codec;
 
         return true;
     },
@@ -121,10 +121,10 @@ export const streamWorkerRoutes = { //serial API routes
         service?:string,
         characteristic?:string
     ) {
-        if(globalThis.devices[deviceType][device]?.codec) 
-            return globalThis.devices[deviceType][device].codec(data);
-        else if (deviceType === 'BLE' && service && characteristic && globalThis.devices[deviceType][device]?.[service as string]?.[characteristic as string]?.codec)
-            return globalThis.devices[deviceType][device][service][characteristic].codec(data);
+        if(globalThis.Devices[deviceType][device]?.codec) 
+            return globalThis.Devices[deviceType][device].codec(data);
+        else if (deviceType === 'BLE' && service && characteristic && globalThis.Devices[deviceType][device]?.[service as string]?.[characteristic as string]?.codec)
+            return globalThis.Devices[deviceType][device][service][characteristic].codec(data);
 
     },
     'decodeAndParseDevice':function decodeAndParseDevice(
@@ -137,10 +137,10 @@ export const streamWorkerRoutes = { //serial API routes
 
         let decoded;
 
-        if (deviceType === 'BLE' && service && characteristic && globalThis.devices[deviceType][deviceName]?.services[service as string]?.[characteristic as string]?.codec)
-            decoded = globalThis.devices[deviceType][deviceName].services[service][characteristic].codec(data);
-        else if(globalThis.devices[deviceType][deviceName]?.codec) 
-            decoded = globalThis.devices[deviceType][deviceName].codec(data);
+        if (deviceType === 'BLE' && service && characteristic && globalThis.Devices[deviceType][deviceName]?.services[service as string]?.[characteristic as string]?.codec)
+            decoded = globalThis.Devices[deviceType][deviceName].services[service][characteristic].codec(data);
+        else if(globalThis.Devices[deviceType][deviceName]?.codec) 
+            decoded = globalThis.Devices[deviceType][deviceName].codec(data);
         else decoded = data;
 
         //console.log(decoded);
@@ -157,6 +157,8 @@ export const streamWorkerRoutes = { //serial API routes
                                 parsed[prop] = parsed[prop].map((v:number) => filter.apply(v));
                             } else if (parsed[prop]?.values) {
                                 parsed[prop].values = parsed[prop].values.map((v:number) => filter.apply(v));
+                            } else if (typeof parsed[prop] === 'number') {
+                                parsed[prop] = filter.apply(parsed[prop]);
                             }
                         }
                     }
@@ -173,7 +175,7 @@ export const streamWorkerRoutes = { //serial API routes
 
         return globalThis.runningAnim; //pass along to the animation message port?
     },
-    'setFilter':function setFilters(
+    'setFilters':function setFilters(
         filters:{
             [key:string]:FilterSettings
         },

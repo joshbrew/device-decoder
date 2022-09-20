@@ -5,7 +5,7 @@ import {
     WorkerService, 
     WorkerRoute, 
     workerCanvasRoutes 
-} from 'graphscript';//"../../GraphServiceRouter/index"//'graphscript'; //
+} from 'graphscript'//"../../GraphServiceRouter/index"//'graphscript';//"../../GraphServiceRouter/index"//'graphscript'; //
 
 import gsworker from './stream.worker'
 
@@ -14,6 +14,8 @@ import { BLEClient, BLEDeviceOptions, BLEDeviceInfo } from './ble/ble_client';
 import { WebSerial } from './serial/serialstream';
 import { Devices } from './devices';
 import { TimeoutOptions } from '@capacitor-community/bluetooth-le';
+import { filterPresets, chartSettings, decoders } from './devices/index';
+import { FilterSettings } from './util/BiquadFilters';
 
 export function isMobile() {
     let check = false;
@@ -28,7 +30,7 @@ export const workers = new WorkerService({
         subprocessRoutes
     ]
 }); 
-export { Devices, gsworker }
+export { Devices, gsworker, filterPresets, chartSettings, decoders, FilterSettings }
 
 
 //create streaming threads
@@ -42,15 +44,17 @@ export function initDevice(
         routes:{ //use secondary workers to run processes and report results back to the main thread or other
             [key:string]:WorkerRoute
         },
-        workerUrl?:any
+        workerUrl?:any,
+        service?:WorkerService //can load up our own worker service, the library provides a default service
     }
 ){
     let settings = Devices[deviceType][deviceName];
     if(!settings) return undefined;
 
     if(!options.workerUrl) options.workerUrl = gsworker;
+    if(!options.service) options.service = workers;
 
-    let streamworker = workers.addWorker({url:options.workerUrl});
+    let streamworker = options.service.addWorker({url:options.workerUrl});
     if(options.routes) {
         for(const key in options.routes) {
             (options.routes[key] as any).parent = {
@@ -58,7 +62,7 @@ export function initDevice(
                 worker:streamworker
             };
         }
-        workers.load(options.routes);
+        options.service.load(options.routes);
         
     }
 
@@ -73,10 +77,10 @@ export function initDevice(
         return new Promise ((res,rej) => {
 
             settings.ondisconnect = () => { //set the ondisconnect command for the OTHER device spec
-                workers.terminate(streamworker._id as string);
+                options.service.terminate(streamworker._id as string);
                 if(options.routes) {
                     for(const key in options.routes) {
-                        workers.removeTree(options.routes[key].tag);
+                        options.service.removeTree(options.routes[key].tag);
                     }
                 }
             }
@@ -104,10 +108,10 @@ export function initDevice(
             res(info);
         }).catch((er)=>{
             console.error(er);
-            workers.terminate(streamworker._id);
+            options.service.terminate(streamworker._id);
             if(options.routes) {
                 for(const key in options.routes) {
-                    workers.removeTree(options.routes[key].tag);
+                    options.service.removeTree(options.routes[key].tag);
                 }
             }
         }) as Promise<{
@@ -166,7 +170,7 @@ export function initDevice(
                         streamworker.terminate();
                         if(options.routes) {
                             for(const key in options.routes) {
-                                workers.removeTree(options.routes[key].tag);
+                                options.service.removeTree(options.routes[key].tag);
                             }
                         }
                     },
@@ -182,7 +186,7 @@ export function initDevice(
                 if(options.routes) {
                     console.log(options.routes);
                     for(const key in options.routes) {
-                        workers.removeTree(options.routes[key].tag);
+                        options.service.removeTree(options.routes[key].tag);
                         //console.log('removing', key);
                     }
                 }
@@ -202,18 +206,18 @@ export function initDevice(
         
     } else if (deviceType === 'USB') {
         //serial
-        let serialworker = workers.addWorker({url:options.workerUrl});
+        let serialworker = options.service.addWorker({url:options.workerUrl});
 
         serialworker.worker.addEventListener('message',(ev:any) => {
             //console.log(ev.data);
             if(typeof ev.data === 'string') {
                 if(ev.data.includes('disconnected')) {
-                    workers.terminate(serialworker._id as string);
-                    workers.terminate(streamworker._id);
+                    options.service.terminate(serialworker._id as string);
+                    options.service.terminate(streamworker._id);
                     if(options.routes) {
                         for(const key in options.routes) {
                             //console.log('removing route', options.routes[key])
-                            workers.removeTree(options.routes[key].tag);
+                            options.service.removeTree(options.routes[key].tag);
                         }
                     }
                 }
@@ -222,7 +226,7 @@ export function initDevice(
 
         serialworker.post('setupSerial');
 
-        let portId = workers.establishMessageChannel(streamworker.worker,serialworker.worker);
+        let portId = options.service.establishMessageChannel(streamworker.worker,serialworker.worker);
 
         const WS = new WebSerial();
 
@@ -269,11 +273,11 @@ export function initDevice(
                 });
             }).catch((er)=>{
                 console.error(er);
-                workers.terminate(serialworker._id as string);
-                workers.terminate(streamworker._id);
+                options.service.terminate(serialworker._id as string);
+                options.service.terminate(streamworker._id);
                 if(options.routes) {
                     for(const key in options.routes) {
-                        workers.removeTree(options.routes[key].tag);
+                        options.service.removeTree(options.routes[key].tag);
                         console.log('removing route', options.routes[key])
                     }
                 }

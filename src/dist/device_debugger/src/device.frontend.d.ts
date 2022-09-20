@@ -1,11 +1,13 @@
-import { WorkerInfo, WorkerService, WorkerRoute } from 'graphscript';
+import { WorkerInfo, WorkerService, WorkerRoute } from "../../GraphServiceRouter/index";
 import gsworker from './stream.worker';
 import { BLEClient } from './ble/ble_client';
 import { Devices } from './devices';
+import { filterPresets, chartSettings, decoders } from './devices/index';
+import { FilterSettings } from './util/BiquadFilters';
 export declare function isMobile(): boolean;
 export declare const BLE: BLEClient;
 export declare const workers: WorkerService;
-export { Devices, gsworker };
+export { Devices, gsworker, filterPresets, chartSettings, decoders, FilterSettings };
 export declare function initDevice(deviceType: 'BLE' | 'USB' | 'OTHER' | 'BLE_OTHER' | 'USB_OTHER', //other includes prewritten drivers that don't fit our format very well, e.g. cloud streaming drivers or the musejs driver as they are self contained
 deviceName: string, //one of the supported settings in Devices
 options: {
@@ -17,6 +19,8 @@ options: {
     routes: {
         [key: string]: WorkerRoute;
     };
+    workerUrl?: any;
+    service?: WorkerService;
 }): Promise<{
     workers: {
         streamworker: WorkerInfo;
@@ -38,4 +42,4 @@ export declare function createStreamPipeline(dedicatedSerialWorker?: boolean, de
     init?: string | ((self: any, canvas: any, context: any) => {});
     clear?: string | ((self: any, canvas: any, context: any) => {});
     animating?: boolean;
-}): any;
+}, workerUrl?: any): any;

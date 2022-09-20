@@ -5,7 +5,10 @@ import {
     subprocessRoutes,
     loadAlgorithms
 } from 'graphscript'//"../../GraphServiceRouter/index"//'graphscript'//"../../GraphServiceRouter/index"//'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
+
 import { streamWorkerRoutes } from './stream.routes';
+import { webglPlotRoutes } from './webglplot.routes';
+
 import {Devices} from './devices/third_party'
 
 import { 
@@ -23,13 +26,14 @@ import {
  //'graphscript-services'; //"../../GraphServiceRouter/index.services"
 
 
-loadAlgorithms(algorithms);
-loadAlgorithms(gpualgorithms);
 
 declare var WorkerGlobalScope;
 
 if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
-    globalThis.devices = Devices; //access all devices incl third party (bloated)
+    loadAlgorithms(algorithms);
+    loadAlgorithms(gpualgorithms);
+    
+    globalThis.Devices = Devices; //access all devices incl third party (bloated)
 
     const worker = new WorkerService({
         //props:{} //could set the props instead of globalThis but it really does not matter unless you want to bake in for more complex service modules
@@ -40,13 +44,11 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
             subprocessRoutes, //includes unsafeRoutes
             BFSRoutes,
             csvRoutes,
-            streamWorkerRoutes
+            streamWorkerRoutes,
+            webglPlotRoutes
         ],
         includeClassName:false
     });
 }
 
 export default self as any;
-
-
-///Grraaaaadient.. DESCENT *explodes*

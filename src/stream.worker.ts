@@ -37,5 +37,3 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
 
 export default self as any;
 
-
-///Grraaaaadient.. DESCENT *explodes*

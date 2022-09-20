@@ -18,6 +18,7 @@ options: {
         [key: string]: WorkerRoute;
     };
     workerUrl?: any;
+    service?: WorkerService;
 }): Promise<{
     workers: {
         streamworker: WorkerInfo;

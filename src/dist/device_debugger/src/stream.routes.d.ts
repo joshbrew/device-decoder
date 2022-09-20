@@ -10,7 +10,7 @@ export declare const streamWorkerRoutes: {
     decodeDevice: (data: any, deviceType: 'BLE' | 'USB' | 'BLE_OTHER' | 'USB_OTHER' | 'OTHER', device: string, service?: string, characteristic?: string) => any;
     decodeAndParseDevice: (data: any, deviceType: 'BLE' | 'USB' | 'BLE_OTHER' | 'USB_OTHER' | 'OTHER', deviceName: string, service?: string, characteristic?: string) => any;
     toggleAnim: () => any;
-    setFilter: (filters: {
+    setFilters: (filters: {
         [key: string]: FilterSettings;
     }, clearFilters?: boolean) => boolean;
     getFilterSettings: () => {};
