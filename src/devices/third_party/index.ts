@@ -12,8 +12,11 @@ export const Devices3rdParty = {
     }
 }
 
-import { Devices } from '../index';
+import { Devices as d } from '../index';
 
-Object.assign(Devices, Devices3rdParty); //install third party driver devices to main list just by importing this file
+const Devices = {};
+Object.assign(Devices,d);
+Object.assign(Devices,Devices3rdParty);
+
 
 export { Devices } 

@@ -38,6 +38,7 @@ export function initDevice(
     deviceType:'BLE'|'USB'|'OTHER'|'BLE_OTHER'|'USB_OTHER', //other includes prewritten drivers that don't fit our format very well, e.g. cloud streaming drivers or the musejs driver as they are self contained
     deviceName:string, //one of the supported settings in Devices
     options:{ //you can update ondecoded and ondisconnect at any time
+        devices:any, //defaults to base Devices list, else apply the third-party dist
         ondecoded:((data:any) => void)|{[key:string]:(data:any)=>void}, //a single ondata function or an object with keys corresponding to BLE characteristics
         onconnect?:((device:any) => void),
         ondisconnect?:((device:any) => void),
@@ -47,8 +48,10 @@ export function initDevice(
         workerUrl?:any,
         service?:WorkerService //can load up our own worker service, the library provides a default service
     }
-){
-    let settings = Devices[deviceType][deviceName];
+) {
+    if(!options.devices) options.devices = Devices;
+    const settings = options.devices[deviceType][deviceName];
+
     if(!settings) return undefined;
 
     if(!options.workerUrl) options.workerUrl = gsworker;
@@ -86,7 +89,12 @@ export function initDevice(
                 }
             }
 
+            //console.log(settings);
+
             let init = await settings.connect(settings);
+            
+            //console.log(init);
+            
             let info = {
                 workers: {
                     streamworker

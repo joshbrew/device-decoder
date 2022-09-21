@@ -11,6 +11,7 @@ export { Devices, gsworker, filterPresets, chartSettings, decoders, FilterSettin
 export declare function initDevice(deviceType: 'BLE' | 'USB' | 'OTHER' | 'BLE_OTHER' | 'USB_OTHER', //other includes prewritten drivers that don't fit our format very well, e.g. cloud streaming drivers or the musejs driver as they are self contained
 deviceName: string, //one of the supported settings in Devices
 options: {
+    devices: any;
     ondecoded: ((data: any) => void) | {
         [key: string]: (data: any) => void;
     };

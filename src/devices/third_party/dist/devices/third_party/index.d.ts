@@ -40,5 +40,5 @@ export declare const Devices3rdParty: {
         };
     };
 };
-import { Devices } from '../index';
+declare const Devices: {};
 export { Devices };
