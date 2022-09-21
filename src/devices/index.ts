@@ -11,7 +11,7 @@ import { cognixionONE_EEG_codec, cognixionONEChartSettings, cognixionONEFilterSe
 import { peanutcodec, peanutChartSettings, peanutSerialSettings } from './peanut';
 import { nrf5x_usbcodec, nrf5x_usbChartSettings, nrf5x_usbFilterSettings, nrf5xBLESettings, nrf5xSerialSettings } from './nrf5x_usb';
 import { statechangerBLESettings, statechangerChartSettings, statechangercodec, statechangerSerialSettings } from './statechanger';
-//import { museSettings } from './third_party/muse';
+//import { museSettings, museChartSettings } from './third_party/muse';
 import { blueberryBLESettings, blueberryChartSettings, blueberrycodec } from './blueberry';
 import { blueberry2BLESettings, blueberry2ChartSettings } from './blueberry2';
 import { 
@@ -19,6 +19,12 @@ import {
     ganglionFilterSettings, 
     ganglionChartSettings 
 } from './third_party/ganglion';
+import {
+    museChartSettings,
+    museFilterSettings
+} from './third_party/muse'
+
+
 import { heartRateBLESettings, hrcodec } from './genericBLE';
 import { bme280codec } from './bme280';
 import { simulatorSettings } from './simulator';
@@ -83,6 +89,7 @@ export const filterPresets:{[key:string]:{[key:string]:FilterSettings}} = {
     //'peanut':{} //https://github.com/joshbrew/peanutjs/blob/main/peanut.js
     'nrf5x':nrf5x_usbFilterSettings,
     'ganglion':ganglionFilterSettings,
+    'muse':museFilterSettings,
     'arduino_ads131m08':ads131m08FilterSettings
     //...custom?
 }
@@ -109,7 +116,7 @@ export const chartSettings:{[key:string]:Partial<WebglLinePlotProps>} = {
     'blueberry':blueberryChartSettings,
     'blueberry2':blueberry2ChartSettings,
     'ganglion':ganglionChartSettings,
-    'muse':ganglionChartSettings,
+    'muse':museChartSettings,
     'arduino_ads131m08':ads131m08ChartSettings,
     'simulator':defaultChartSettings
     //...custom?

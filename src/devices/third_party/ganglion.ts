@@ -118,9 +118,9 @@ export const ganglionChartSettings:Partial<WebglLinePlotProps> = {
         '1':JSON.parse(JSON.stringify(defaultChartSetting)),
         '2':JSON.parse(JSON.stringify(defaultChartSetting)),
         '3':JSON.parse(JSON.stringify(defaultChartSetting)),
-        'ax':JSON.parse(JSON.stringify(defaultChartSetting)),
-        'ay':JSON.parse(JSON.stringify(defaultChartSetting)),
-        'az':JSON.parse(JSON.stringify(defaultChartSetting))
+        'ax':{nSec:10, sps, units:'mg'},
+        'ay':{nSec:10, sps, units:'mg'},
+        'az':{nSec:10, sps, units:'mg'},
     },
     generateNewLines:true //to add the additional 16 channels
 };

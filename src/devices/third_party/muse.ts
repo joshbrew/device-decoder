@@ -33,6 +33,7 @@ export const museSettings = { //include muse-js and import {MuseClient} from 'mu
                 settings:Object.assign(Object.assign({},museSettings),settings) //e.g. customize ondisconnect
             }
 
+            client.enableAux = true;
             await client.connect();
             await client.start();
 
@@ -175,17 +176,17 @@ export const museFilterSettings:{[key:string]:FilterSettings} = {
 
 export const museChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
-        '0':{nSec:10, sps, units:'mV'},
-        '1':{nSec:10, sps, units:'mV'},
-        '2':{nSec:10, sps, units:'mV'},
-        '3':{nSec:10, sps, units:'mV'},
-        '4':{nSec:10, sps, units:'mV'},
-        'ax':{nSec:10, sps:100},
-        'ay':{nSec:10, sps:100},
-        'az':{nSec:10, sps:100},
-        'gx':{nSec:10, sps:100},
-        'gy':{nSec:10, sps:100},
-        'gz':{nSec:10, sps:100},
+        '0':{nSec:10, sps, units:'uV'},
+        '1':{nSec:10, sps, units:'uV'},
+        '2':{nSec:10, sps, units:'uV'},
+        '3':{nSec:10, sps, units:'uV'},
+        '4':{nSec:10, sps, units:'uV'},
+        'ax':{nSec:10, sps:100, units:'mg'},
+        'ay':{nSec:10, sps:100, units:'mg'},
+        'az':{nSec:10, sps:100, units:'mg'},
+        'gx':{nSec:10, sps:100, units:'rps'},
+        'gy':{nSec:10, sps:100, units:'rps'},
+        'gz':{nSec:10, sps:100, units:'rps'},
     },
     generateNewLines:true //to add the additional 16 channels
 };
