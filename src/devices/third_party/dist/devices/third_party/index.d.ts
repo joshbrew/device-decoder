@@ -9,7 +9,7 @@ export declare const Devices3rdParty: {
             disconnect: (info: any) => void;
             onconnect: (info: any) => void;
             ondisconnect: (info: any) => void;
-            ondata: (parsed: any) => void;
+            ondata: (data: any) => void;
         };
         ganglion: {
             sps: number;
@@ -36,7 +36,7 @@ export declare const Devices3rdParty: {
             disconnect: (info: any) => void;
             onconnect: (info: any) => void;
             ondisconnect: (info: any) => void;
-            ondata: (parsed: any) => void;
+            ondata: (data: any) => void;
         };
     };
 };

@@ -7,7 +7,7 @@ export declare const museSettings: {
     disconnect: (info: any) => void;
     onconnect: (info: any) => void;
     ondisconnect: (info: any) => void;
-    ondata: (parsed: any) => void;
+    ondata: (data: any) => void;
 };
 export declare const museFilterSettings: {
     [key: string]: FilterSettings;

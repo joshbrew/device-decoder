@@ -21,6 +21,7 @@ import {
 } from './third_party/ganglion';
 import { heartRateBLESettings, hrcodec } from './genericBLE';
 import { bme280codec } from './bme280';
+import { simulatorSettings } from './simulator';
 
 //containe unique (non-default) BLE and Serial device connection settings + codecs to parse key:value pairs from streamed data channels
 export const Devices = {
@@ -52,7 +53,9 @@ export const Devices = {
         //ganglion:ganglionSettings
     },
     USB_OTHER : {},
-    OTHER : {}
+    OTHER : {
+        'simulator':simulatorSettings
+    }
 };
 
 export const defaultChartSettings:any = {
@@ -107,7 +110,8 @@ export const chartSettings:{[key:string]:Partial<WebglLinePlotProps>} = {
     'blueberry2':blueberry2ChartSettings,
     'ganglion':ganglionChartSettings,
     'muse':ganglionChartSettings,
-    'arduino_ads131m08':ads131m08ChartSettings
+    'arduino_ads131m08':ads131m08ChartSettings,
+    'simulator':defaultChartSettings
     //...custom?
 }
 

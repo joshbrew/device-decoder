@@ -68,13 +68,14 @@ export function initDevice(
 
     if(deviceType.includes('OTHER')) {
 
-        if(typeof options.ondecoded === 'function') {
-            settings.ondata = (data:any) => {
-                streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName]).then(options.ondecoded as any);
-            };
-        }
+        return new Promise (async (res,rej) => {
 
-        return new Promise ((res,rej) => {
+            settings.ondata = (data:any) => {
+                //console.log(data);
+                streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName]).then((result)=>{
+                    if(typeof options.ondecoded === 'function') options.ondecoded(result);
+                });
+            };
 
             settings.ondisconnect = () => { //set the ondisconnect command for the OTHER device spec
                 options.service.terminate(streamworker._id as string);
@@ -85,13 +86,13 @@ export function initDevice(
                 }
             }
 
-            let init = settings.connect(settings);
+            let init = await settings.connect(settings);
             let info = {
                 workers: {
                     streamworker
                 },
                 disconnect:() => { 
-                    settings.disconnect(settings); 
+                    settings.disconnect(init); 
                     if(options.ondisconnect) options.ondisconnect(info); 
                 },
                 device:init,

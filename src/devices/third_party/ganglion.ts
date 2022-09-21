@@ -50,7 +50,7 @@ export const ganglionSettings = { //include muse-js and import {MuseClient} from
                 info.settings.ondata(reading);
             });
 
-            info.settings.onconnect(info);
+            if(info.settings.onconnect) info.settings.onconnect(info);
 
             res(info);
         })
@@ -88,8 +88,8 @@ export const ganglionSettings = { //include muse-js and import {MuseClient} from
     ondisconnect:(info)=>{
         console.log('ganglion disconnected!', info);
     },
-    ondata:(parsed:any)=>{
-        console.log(parsed); //after transforming
+    ondata:(data:any)=>{
+        console.log(data); //direct from teh device output
     },
     //read:(info:any,command?:any)=>{},
     //write:(info:any,command?:any)=>{}

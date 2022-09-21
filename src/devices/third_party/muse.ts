@@ -92,7 +92,7 @@ export const museSettings = { //include muse-js and import {MuseClient} from 'mu
                 });
             }
 
-            info.settings.onconnect(info);
+            if(info.settings.onconnect) info.settings.onconnect(info);
 
             res(info);
         })
@@ -148,8 +148,8 @@ export const museSettings = { //include muse-js and import {MuseClient} from 'mu
     ondisconnect:(info)=>{
         console.log('muse disconnected!', info);
     },
-    ondata:(parsed:any)=>{
-        console.log(parsed); //after transforming
+    ondata:(data:any)=>{
+        console.log(data); //direct from teh device output
     },
     //read:(info:any,command?:any)=>{},
     //write:(info:any,command?:any)=>{}

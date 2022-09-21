@@ -25,7 +25,7 @@ export declare const ganglionSettings: {
     disconnect: (info: any) => void;
     onconnect: (info: any) => void;
     ondisconnect: (info: any) => void;
-    ondata: (parsed: any) => void;
+    ondata: (data: any) => void;
 };
 export declare const ganglionFilterSettings: {
     [key: string]: FilterSettings;

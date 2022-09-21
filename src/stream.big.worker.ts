@@ -7,14 +7,14 @@ import {
 } from 'graphscript'//"../../GraphServiceRouter/index"//'graphscript'//"../../GraphServiceRouter/index"//'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
 
 import { streamWorkerRoutes } from './stream.routes';
-import { webglPlotRoutes } from './webglplot.routes';
+import { webglPlotRoutes } from 'graphscript-services'//"../../GraphServiceRouter/extras/index.services"//'graphscript-services';
 
 import {Devices} from './devices/third_party'
 
 import { 
     csvRoutes,
     BFSRoutes
- } from 'graphscript-services.storage'//"../../GraphServiceRouter/extras/index.services"//'graphscript-services'//"../../GraphServiceRouter/extras/index.services"
+ } from 'graphscript-services.storage'//"../../GraphServiceRouter/extras/index.storage.services"//'graphscript-services'//"../../GraphServiceRouter/extras/index.services"
 
 import {
     algorithms
