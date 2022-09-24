@@ -14,16 +14,16 @@ import {Devices} from './devices/third_party'
 import { 
     csvRoutes,
     BFSRoutes
- } from 'graphscript-services.storage'//"../../GraphServiceRouter/extras/index.storage.services"//'graphscript-services'//"../../GraphServiceRouter/extras/index.services"
+ } from 'graphscript-services.storage'//"../../GraphServiceRouter/extras/index.storage.services"//"../../GraphServiceRouter/extras/index.storage.services"//'graphscript-services.storage'//"../../GraphServiceRouter/extras/index.storage.services"//'graphscript-services'//"../../GraphServiceRouter/extras/index.services"
 
 import {
     algorithms
-} from 'graphscript-services'
+} from 'graphscript-services'//"../../GraphServiceRouter/extras/index.services"//'graphscript-services'
 
 import {
     gpualgorithms
-} from 'graphscript-services.gpu'
- //'graphscript-services'; //"../../GraphServiceRouter/index.services"
+} from 'graphscript-services.gpu'//"../../GraphServiceRouter/extras/index.gpu.services"//'graphscript-services.gpu'
+ //'graphscript-services'; //
 
 
 

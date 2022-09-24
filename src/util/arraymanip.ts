@@ -187,6 +187,7 @@ export class ArrayManip {
         }|string|((number|number[])[])|number, 
         key?:string //if passing a single value
     ) {
+        //console.log(JSON.parse(JSON.stringify(data)));//print copy
         //take incoming data formats and return them in the format that our charting library likes so we can blindly pass stuff in
         if (Array.isArray(data)) {
             if(Array.isArray(data[0])) {
@@ -269,6 +270,8 @@ export class ArrayManip {
             else data = {0:[data]};
         }
     
+        //console.log(JSON.parse(JSON.stringify(data)));
+
         return data;// as {[key:string]:(number[]|{values:number[],[key:string]:any}|WebglLineProps)};
     }
 

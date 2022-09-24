@@ -110,3 +110,5 @@ export const ads131m08FilterSettings:{[key:string]:FilterSettings} = {
     '6':JSON.parse(JSON.stringify(defaultsetting)),
     '7':JSON.parse(JSON.stringify(defaultsetting))
 }
+
+
