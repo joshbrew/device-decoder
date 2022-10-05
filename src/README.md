@@ -2,6 +2,7 @@
 
 `npm i device-decoder`
 
+This is a streamlined package to work with streaming devices in-browser or in-app efficiently and create a uniform pattern for outputs.
 
 The `OTHER` drivers are contained in a separate `device-decoder.third-party` package as they contain much larger third party drivers that have been formatted with simple objects you can also create yourself to pipe through our threading system. Two drivers are the same size as our whole library (not including the browserfs and gpujs additions)
 
@@ -63,3 +64,4 @@ if(info) { //returns a promise
 
 It also exports `BLE`, `workers` which are instances of utilities used internally. It also exports `gsworker` as a usable compiled dataUrl of stream.worker, which it uses internally, so you can control more about the API as you need without additional files from the main dist/device.frontend.js 
 
+NOTE: that for BLE devices with multiple notification or read characteristics, you can supply an object to the `ondecoded` property in initDevice and then specify callback functions per-characteristic. The routes will subscribe to the dedicating stream parsing worker (one per initDevice call) and will receive all outputs from there so you will need to constrain the pipeline from there yourself. 
