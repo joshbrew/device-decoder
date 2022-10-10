@@ -1,6 +1,6 @@
 {
   "name": "device-decoder.third-party",
-  "version": "0.0.12",
+  "version": "0.1.1",
   "description": "Barebones esbuild and test node server implementation. For building",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -24,7 +24,7 @@
   "author": "",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
-    "webgl-plot-utils":"~0.2.7"
+    "webgl-plot-utils":"~0.3.4"
   },
   "devDependencies": {},
   "nodemonConfig": {

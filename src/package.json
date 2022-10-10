@@ -1,6 +1,6 @@
 {
   "name": "device-decoder",
-  "version": "0.2.17",
+  "version": "0.2.23",
   "description": "Customizable multithreaded BLE and USB (or other) device connecting, sensor decoding, and (threaded) output rendering",
   "main": "dist/device.frontend.js",
   "module": "dist/device.frontend.esm.js",
@@ -23,13 +23,13 @@
   "author": "Joshua Brewster",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
-    "@capacitor-community/bluetooth-le": "~2.0.0",
+    "@capacitor-community/bluetooth-le": "~2.0.1",
     "brainsatplay-math": "~0.0.25",
     "graphscript": "~0.1.41",
-    "graphscript-services": "~0.1.51",
+    "graphscript-services": "~0.1.54",
     "graphscript-services.gpu": "~0.1.54",
     "graphscript-services.storage": "~0.1.53",
-    "webgl-plot-utils": "~0.2.7"
+    "webgl-plot-utils": "~0.3.4"
   },
   "devDependencies": {
     "@capacitor/android": "~4.1.0",

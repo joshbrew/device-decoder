@@ -24,14 +24,14 @@ export function hegduinocodec(value:any) {
         output.infrared = parseInt(line[1]);
         output.heg = parseFloat(line[2]);
 
-    } else if(line.length >= 5) {
+    } else if(line.length >= 2) {
         //output.timestamp = parseInt(line[0]);
         output.timestamp = Date.now();
         output.red = parseInt(line[1]);
         output.infrared = parseInt(line[2]);
         output.heg = parseFloat(line[3]);
-        output.ambient = parseFloat(line[4]);
-        output.temperature = parseFloat(line[5]);
+        if(line[4]) output.ambient = parseFloat(line[4]);
+        if(line[5]) output.temperature = parseFloat(line[5]);
 
         return output;
 

@@ -38,11 +38,11 @@ export function initDevice(
     deviceType:'BLE'|'USB'|'OTHER'|'BLE_OTHER'|'USB_OTHER', //other includes prewritten drivers that don't fit our format very well, e.g. cloud streaming drivers or the musejs driver as they are self contained
     deviceName:string, //one of the supported settings in Devices
     options:{ //you can update ondecoded and ondisconnect at any time
-        devices:any, //defaults to base Devices list, else apply the third-party dist
+        devices?:any, //defaults to base Devices list, else apply the third-party dist
         ondecoded:((data:any) => void)|{[key:string]:(data:any)=>void}, //a single ondata function or an object with keys corresponding to BLE characteristics
         onconnect?:((device:any) => void),
         ondisconnect?:((device:any) => void),
-        routes:{ //use secondary workers to run processes and report results back to the main thread or other
+        routes?:{ //use secondary workers to run processes and report results back to the main thread or other
             [key:string]:WorkerRoute
         },
         workerUrl?:any,
