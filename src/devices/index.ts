@@ -14,20 +14,24 @@ import { statechangerBLESettings, statechangerChartSettings, statechangercodec, 
 //import { museSettings, museChartSettings } from './third_party/muse';
 import { blueberryBLESettings, blueberryChartSettings, blueberrycodec } from './blueberry';
 import { blueberry2BLESettings, blueberry2ChartSettings } from './blueberry2';
+
+
 import { 
     //ganglionSettings, 
     ganglionFilterSettings, 
-    ganglionChartSettings 
-} from './third_party/ganglion';
-import {
+    ganglionChartSettings,
     museChartSettings,
     museFilterSettings
-} from './third_party/muse'
+} from './third_party/device_settings';
 
 
 import { heartRateBLESettings, hrcodec } from './genericBLE';
 import { bme280codec } from './bme280';
 import { simulatorSettings } from './simulator';
+
+
+
+
 
 //containe unique (non-default) BLE and Serial device connection settings + codecs to parse key:value pairs from streamed data channels
 export const Devices = {
