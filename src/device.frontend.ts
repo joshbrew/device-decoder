@@ -5,7 +5,7 @@ import {
     WorkerService, 
     WorkerRoute, 
     workerCanvasRoutes 
-} from 'graphscript'//"../../GraphServiceRouter/index"//'graphscript';//"../../GraphServiceRouter/index"//'graphscript'; //
+} from "../../graphscript/index"//'graphscript'//"../../GraphServiceRouter/index"//'graphscript';//"../../GraphServiceRouter/index"//'graphscript'; //
 
 import gsworker from './stream.worker'
 

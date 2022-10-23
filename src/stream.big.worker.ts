@@ -4,7 +4,7 @@ import {
     //GPUService, 
     subprocessRoutes,
     loadAlgorithms
-} from 'graphscript'//"../../GraphServiceRouter/index"//'graphscript'//"../../GraphServiceRouter/index"//'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
+} from 'graphscript'//"../../graphscript/index"//'graphscript'//"../../GraphServiceRouter/index"//'graphscript'//"../../GraphServiceRouter/index"//'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
 
 import { streamWorkerRoutes } from './stream.routes';
 import { webglPlotRoutes } from 'graphscript-services'//"../../GraphServiceRouter/extras/index.services"//'graphscript-services';
@@ -49,6 +49,9 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
         ],
         includeClassName:false
     });
+
+    
+    
 }
 
 export default self as any;
