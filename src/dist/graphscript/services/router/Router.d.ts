@@ -1,5 +1,5 @@
 import { Graph, GraphNode } from "../../Graph";
-import { Routes, Service, ServiceOptions } from "../Service";
+import { Service, ServiceOptions } from "../Service";
 export declare type User = {
     _id: string;
     send: (...args: any[]) => any;
@@ -38,7 +38,7 @@ export declare type ConnectionInfo = {
     terminate: (...a: any[]) => boolean;
     onclose?: (connection: ConnectionInfo, ...args: any[]) => void;
 };
-export declare type RouterOptions = ServiceOptions & {
+export declare type RouterOptions = {
     services?: {
         [key: string]: Service | any | {
             service: Service | any;
@@ -56,9 +56,9 @@ export declare type RouterOptions = ServiceOptions & {
             };
         };
     };
-    syncServices?: boolean;
     order?: string[];
-};
+    [key: string]: any;
+} & ServiceOptions;
 export declare class Router extends Service {
     name: string;
     connections: {
@@ -112,7 +112,7 @@ export declare class Router extends Service {
         [key: string]: any;
         _id: string;
     }, terminate?: boolean) => boolean;
-    addService: (service: Service, connections?: any, includeClassName?: boolean, routeFormat?: string, syncServices?: boolean, source?: string, order?: string[]) => void;
+    routeService: (service: Service, connections?: any, source?: string, order?: string[]) => void;
     addServiceConnections: (service: Service | string, connectionsKey: any, source?: string) => {};
     openConnection: (service: string | Service, options: {
         [key: string]: any;
@@ -120,9 +120,7 @@ export declare class Router extends Service {
     terminate: (connection: string | ConnectionInfo) => boolean;
     subscribeThroughConnection: (route: string, relay: string | ConnectionInfo, endpoint: string, callback: string | ((res: any) => void), ...args: any[]) => Promise<unknown>;
     routeConnections: (route: string, transmitter: string | ConnectionInfo, receiver: string | ConnectionInfo, ...args: any[]) => Promise<number>;
-    syncServices: () => void;
     setUserData: (user: string | User, data: string | {
         [key: string]: any;
     }) => boolean;
-    routes: Routes;
 }

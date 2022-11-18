@@ -1,4 +1,4 @@
-import { Routes, Service, ServiceOptions } from "../Service";
+import { Service, ServiceOptions } from "../Service";
 import { User } from "../router/Router";
 export declare type PrivateSessionProps = {
     _id?: string;
@@ -178,5 +178,16 @@ export declare class SessionsService extends Service {
     };
     getStreamUpdate: (streamName: string) => {};
     getAllStreamUpdates: () => {};
-    routes: Routes;
+    streamLoop: {
+        __operator: () => {};
+        loop: number;
+    };
+    userUpdateLoop: {
+        __operator: (user: SessionUser) => {};
+        loop: number;
+    };
+    sessionLoop: {
+        __operator: (transmit?: boolean) => any;
+        loop: number;
+    };
 }

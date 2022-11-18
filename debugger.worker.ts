@@ -15,12 +15,11 @@ declare var WorkerGlobalScope;
 
 if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
     (self as any).SERVICE = new WorkerService({
-        routes:[
+        services:{
             //GPUService as any,
             workerCanvasRoutes,
             unsafeRoutes //allows dynamic route loading
-        ],
-        includeClassName:false
+        }
     });
 
     globalThis.WebSerial = WebSerial;

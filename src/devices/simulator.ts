@@ -70,6 +70,7 @@ export const simulatorSettings = {
         
     },
     codec:(reading:any) => { //remap outputs to more or less match the rest of our formatting
+        console.log(reading);
         return reading; //Nothing to see here
     },
     disconnect:(info) => {

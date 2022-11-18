@@ -4,25 +4,25 @@ import {
     //GPUService, 
     subprocessRoutes,
     loadAlgorithms
-} from 'graphscript'//"../../graphscript/index"//'graphscript'//"../../GraphServiceRouter/index"//'graphscript'//"../../GraphServiceRouter/index"//'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
+} from "../../graphscript/index"//'graphscript'//"../../GraphServiceRouter/index"//'graphscript'//"../../GraphServiceRouter/index"//'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
 
 import { streamWorkerRoutes } from './stream.routes';
-import { webglPlotRoutes } from 'graphscript-services'//"../../GraphServiceRouter/extras/index.services"//'graphscript-services';
+import { webglPlotRoutes } from "../../graphscript/extras/index.services"//'graphscript-services';
 
 import {Devices} from './devices/third_party'
 
 import { 
     csvRoutes,
     BFSRoutes
- } from 'graphscript-services.storage'//"../../GraphServiceRouter/extras/index.storage.services"//"../../GraphServiceRouter/extras/index.storage.services"//'graphscript-services.storage'//"../../GraphServiceRouter/extras/index.storage.services"//'graphscript-services'//"../../GraphServiceRouter/extras/index.services"
+ } from "../../graphscript/extras/index.storage.services"//"../../GraphServiceRouter/extras/index.storage.services"//'graphscript-services.storage'//"../../GraphServiceRouter/extras/index.storage.services"//'graphscript-services'//"../../GraphServiceRouter/extras/index.services"
 
 import {
     algorithms
-} from 'graphscript-services'//"../../GraphServiceRouter/extras/index.services"//'graphscript-services'
+} from "../../graphscript/extras/index.services"//'graphscript-services'
 
 import {
     gpualgorithms
-} from 'graphscript-services.gpu'//"../../GraphServiceRouter/extras/index.gpu.services"//'graphscript-services.gpu'
+} from "../../graphscript/extras/index.gpu.services"//'graphscript-services.gpu'
  //'graphscript-services'; //
 
 
@@ -37,7 +37,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
 
     const worker = new WorkerService({
         //props:{} //could set the props instead of globalThis but it really does not matter unless you want to bake in for more complex service modules
-        routes:[
+        services:{
             //GPUService as any,
             workerCanvasRoutes,
             //unsafeRoutes, //allows dynamic route loading
@@ -46,11 +46,10 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
             csvRoutes,
             streamWorkerRoutes,
             webglPlotRoutes
-        ],
-        includeClassName:false
+        }
     });
 
-    
+    console.log('worker', worker)
     
 }
 

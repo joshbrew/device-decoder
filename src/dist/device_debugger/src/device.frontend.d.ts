@@ -17,7 +17,7 @@ options: {
     };
     onconnect?: ((device: any) => void);
     ondisconnect?: ((device: any) => void);
-    routes?: {
+    tree?: {
         [key: string]: WorkerRoute;
     };
     workerUrl?: any;
@@ -31,7 +31,7 @@ options: {
     disconnect: () => void;
     read: (command?: any) => any;
     write: (command?: any) => any;
-    routes: {
+    tree: {
         [key: string]: WorkerRoute;
     };
 }>;

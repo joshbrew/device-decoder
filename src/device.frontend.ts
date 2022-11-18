@@ -25,10 +25,10 @@ export function isMobile() {
 
 export const BLE = new BLEClient();
 export const workers = new WorkerService({
-    routes:[
+    services:{
         workerCanvasRoutes,
         subprocessRoutes
-    ]
+    }
 }); 
 export { Devices, gsworker, filterPresets, chartSettings, decoders, FilterSettings }
 
@@ -42,7 +42,7 @@ export function initDevice(
         ondecoded:((data:any) => void)|{[key:string]:(data:any)=>void}, //a single ondata function or an object with keys corresponding to BLE characteristics
         onconnect?:((device:any) => void),
         ondisconnect?:((device:any) => void),
-        routes?:{ //use secondary workers to run processes and report results back to the main thread or other
+        tree?:{ //use secondary workers to run processes and report results back to the main thread or other
             [key:string]:WorkerRoute
         },
         workerUrl?:any,
@@ -58,15 +58,16 @@ export function initDevice(
     if(!options.service) options.service = workers;
 
     let streamworker = options.service.addWorker({url:options.workerUrl});
-    if(options.routes) {
-        for(const key in options.routes) {
-            (options.routes[key] as any).parent = {
-                callback:'decodeAndParseDevice',
-                worker:streamworker
+
+    if(options.tree) {
+        for(const key in options.tree) {
+            let __parent = {
+                    callback:'decodeAndParseDevice',
+                    worker:streamworker
             };
+            (options.tree[key] as any).__parent = (options.tree[key] as any).__parent ? Object.assign((options.tree[key] as any).__parent, __parent) : __parent;
         }
-        options.service.load(options.routes);
-        
+        options.service.setTree(options.tree);
     }
 
     if(deviceType.includes('OTHER')) {
@@ -82,9 +83,9 @@ export function initDevice(
 
             settings.ondisconnect = () => { //set the ondisconnect command for the OTHER device spec
                 options.service.terminate(streamworker._id as string);
-                if(options.routes) {
-                    for(const key in options.routes) {
-                        options.service.removeTree(options.routes[key].tag);
+                if(options.tree) {
+                    for(const key in options.tree) {
+                        options.service.remove(key);
                     }
                 }
             }
@@ -102,6 +103,11 @@ export function initDevice(
                 disconnect:() => { 
                     settings.disconnect(init); 
                     if(options.ondisconnect) options.ondisconnect(info); 
+                    if(options.tree) {
+                        for(const key in options.tree) {
+                            options.service.remove(key);
+                        }
+                    }
                 },
                 device:init,
                 options,
@@ -111,16 +117,16 @@ export function initDevice(
                 write:(command?:any) => {
                     if(settings.write) return  new Promise((res,rej) => {res(settings.write(settings,command))});
                 },
-                routes:options.routes
+                tree:options.tree
             }   
             if(options.onconnect) options.onconnect(info);
             res(info);
         }).catch((er)=>{
             console.error(er);
             options.service.terminate(streamworker._id);
-            if(options.routes) {
-                for(const key in options.routes) {
-                    options.service.removeTree(options.routes[key].tag);
+            if(options.tree) {
+                for(const key in options.tree) {
+                    options.service.remove(key);
                 }
             }
         }) as Promise<{
@@ -132,7 +138,7 @@ export function initDevice(
             disconnect:()=>void,
             read:(command?:any)=>any,
             write:(command?:any)=>any,
-            routes:{[key:string]:WorkerRoute}
+            tree:{[key:string]:WorkerRoute}
         }>;
 
     } else if(deviceType === 'BLE') {
@@ -177,25 +183,25 @@ export function initDevice(
                         await BLE.disconnect(result.deviceId as string);  
                         if(options.ondisconnect) options.ondisconnect(info); 
                         streamworker.terminate();
-                        if(options.routes) {
-                            for(const key in options.routes) {
-                                options.service.removeTree(options.routes[key].tag);
+                        if(options.tree) {
+                            for(const key in options.tree) {
+                                options.service.remove(key);
                             }
                         }
                     },
                     read:(command:{ service:string, characteristic:string, ondata?:(data:DataView)=>void, timeout?:TimeoutOptions }) => { return BLE.read(result.device, command.service, command.characteristic, command.ondata, command.timeout) },
                     write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions}) => { return BLE.write(result.device, command.service, command.characteristic, command.data, command.callback, command.timeout) },
-                    routes:options.routes
+                    tree:options.tree
                 }
                 if(options.onconnect) options.onconnect(info);
                 res(info as any);
             }).catch((er)=>{
                 console.error(er);
                 streamworker.terminate();
-                if(options.routes) {
-                    console.log(options.routes);
-                    for(const key in options.routes) {
-                        options.service.removeTree(options.routes[key].tag);
+                if(options.tree) {
+                    //console.log(options.tree);
+                    for(const key in options.tree) {
+                        options.service.remove(key);
                         //console.log('removing', key);
                     }
                 }
@@ -210,7 +216,7 @@ export function initDevice(
             disconnect:()=>void,
             read:(command:{ service:string, characteristic:string, ondata?:(data:DataView)=>void, timeout?:TimeoutOptions }) => Promise<DataView>,
             write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions})=>Promise<void>,
-            routes:{[key:string]:WorkerRoute}
+            tree:{[key:string]:WorkerRoute}
         }>)
         
     } else if (deviceType === 'USB') {
@@ -223,10 +229,10 @@ export function initDevice(
                 if(ev.data.includes('disconnected')) {
                     options.service.terminate(serialworker._id as string);
                     options.service.terminate(streamworker._id);
-                    if(options.routes) {
-                        for(const key in options.routes) {
-                            //console.log('removing route', options.routes[key])
-                            options.service.removeTree(options.routes[key].tag);
+                    if(options.tree) {
+                        for(const key in options.tree) {
+                            //console.log('removing route', options.tree[key])
+                            options.service.remove(key);
                         }
                     }
                 }
@@ -275,7 +281,7 @@ export function initDevice(
                         },
                         read:() => { return new Promise((res,rej) => { let sub; sub = streamworker.subscribe('decodeAndParseDevice',(result)=>{ serialworker.unsubscribe('decodeAndParseDevice',sub); res(result); });}); }, //we are already reading, just return the latest result from decodeAndParseDevice
                         write:(command:any) => {return serialworker.run('writeStream', [result._id,command])},
-                        routes:options.routes
+                        tree:options.tree
                     };
                     if(options.onconnect) options.onconnect(info);
                     res(info);
@@ -284,10 +290,10 @@ export function initDevice(
                 console.error(er);
                 options.service.terminate(serialworker._id as string);
                 options.service.terminate(streamworker._id);
-                if(options.routes) {
-                    for(const key in options.routes) {
-                        options.service.removeTree(options.routes[key].tag);
-                        console.log('removing route', options.routes[key])
+                if(options.tree) {
+                    for(const key in options.tree) {
+                        options.service.remove(key);
+                        //console.log('removing route', options.tree[key])
                     }
                 }
                 rej(er);
@@ -306,7 +312,7 @@ export function initDevice(
             disconnect:()=>void,
             read:()=>Promise<any>,
             write:(command:any)=>Promise<boolean>,
-            routes:{[key:string]:WorkerRoute}
+            tree:{[key:string]:WorkerRoute}
         }>
         
     }

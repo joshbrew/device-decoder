@@ -1,14 +1,14 @@
 import { 
     WorkerService
-} from 'graphscript'
+} from '../../graphscript/services/worker/Worker.service'//'graphscript'
 import { WebSerial } from './serial/serialstream'; //extended classes need to be imported for compilation
 import { decoders, Devices } from './devices/index';
 //import { WebglLinePlotUtil } from '../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils'//'webgl-plot-utils';
 import { ByteParser } from "./util/ByteParser";
 import { BiquadChannelFilterer, FilterSettings } from './util/BiquadFilters';
 //import * as bfs from './storage/BFSUtils'
-import { ArrayManip } from './util/ArrayManip';
-import { parseFunctionFromText } from 'graphscript';
+import { ArrayManip } from './util/arraymanip';
+import { parseFunctionFromText } from '../../graphscript/services/utils'//'graphscript';
 
 
 //to load in a worker 
@@ -38,7 +38,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
 export const streamWorkerRoutes = { //serial API routes
     'receiveDecoder':function receiveDecoder(decoder:any, decoderName:string) {
         globalThis.decoders[decoderName] = (0, eval)('('+decoder+')');
-    },
+},
     'receiveCodec':function receiveDeviceCodec(
         decoder:any, 
         deviceType:'BLE'|'USB'|'BLE_OTHER'|'USB_OTHER'|'OTHER',
@@ -176,16 +176,16 @@ export const streamWorkerRoutes = { //serial API routes
         return globalThis.runningAnim; //pass along to the animation message port?
     },
     'setFilters':function setFilters(
-        filters:{
-            [key:string]:FilterSettings
-        },
-        clearFilters=false //clear any other filters not being overwritten
-    ) {
-        if(!globalThis.filters || clearFilters) globalThis.filters = {};
-        for(const key in filters) {
-            globalThis.filters[key] = new BiquadChannelFilterer(filters[key]); 
-        }
-        return true;
+            filters:{
+                [key:string]:FilterSettings
+            },
+            clearFilters=false //clear any other filters not being overwritten
+        ) {
+            if(!globalThis.filters || clearFilters) globalThis.filters = {};
+            for(const key in filters) {
+                globalThis.filters[key] = new BiquadChannelFilterer(filters[key]); 
+            }
+            return true;
     },
     'getFilterSettings':function getFilterSettings() {
         if(globalThis.filters) {

@@ -1,6 +1,6 @@
 //byte manipulation math utils
 
-import { ArrayManip } from "./ArrayManip"
+import { ArrayManip } from "./arraymanip"
 
 
 //struct packing/unpacking by https://github.com/lyngklip/structjs (MIT License)

@@ -4,7 +4,7 @@ import {
     //GPUService, 
     subprocessRoutes,
 //    loadAlgorithms
-} from 'graphscript'//"../../GraphServiceRouter/index"//'graphscript'//"../../GraphServiceRouter/index"//'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
+} from "../../graphscript/index"//'graphscript'//"../../GraphServiceRouter/index"//'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
 import { streamWorkerRoutes } from './stream.routes';
 
 // import { 
@@ -22,7 +22,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
 
     const worker = new WorkerService({
         //props:{} //could set the props instead of globalThis but it really does not matter unless you want to bake in for more complex service modules
-        routes:[
+        services:{
             //GPUService as any,
             workerCanvasRoutes,
             //unsafeRoutes, //allows dynamic route loading
@@ -30,8 +30,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
             // BFSRoutes,
             // csvRoutes,
             streamWorkerRoutes
-        ],
-        includeClassName:false
+        }
     });
 }
 
