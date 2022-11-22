@@ -70,7 +70,7 @@ export const simulatorSettings = {
         
     },
     codec:(reading:any) => { //remap outputs to more or less match the rest of our formatting
-        console.log(reading);
+        //console.log(reading);
         return reading; //Nothing to see here
     },
     disconnect:(info) => {
@@ -79,13 +79,13 @@ export const simulatorSettings = {
         info.settings.ondisconnect(info);
     },
     onconnect:(info)=>{
-        console.log('muse connected!', info);
+        console.log('simulator connected!', info);
     }, 
     ondisconnect:(info)=>{
-        console.log('muse disconnected!', info);
+        console.log('simulator disconnected!', info);
     },
     ondata:(data:any)=>{
-        console.log(data); //direct from device
+        //console.log(data); //direct from device
     }
     //read:(info:any,command?:any)=>{},
     //write:(info:any,command?:any)=>{}

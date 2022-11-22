@@ -38,6 +38,7 @@ export declare class WSSfrontend extends Service {
     };
     constructor(options?: ServiceOptions);
     openWS: (options?: WebSocketProps) => WebSocketInfo;
+    open: (options?: WebSocketProps) => WebSocketInfo;
     transmit: (data: string | ArrayBufferLike | Blob | ArrayBufferView | ServiceMessage, ws: WebSocket) => boolean;
     terminate: (ws: WebSocket | string) => boolean;
     request: (message: ServiceMessage | any, ws: WebSocket, _id: string, method?: string) => Promise<unknown>;

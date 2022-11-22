@@ -4,25 +4,25 @@ import {
     //GPUService, 
     subprocessRoutes,
     loadAlgorithms
-} from "../../graphscript/index"//'graphscript'//"../../GraphServiceRouter/index"//'graphscript'//"../../GraphServiceRouter/index"//'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
+} from 'graphscript'//
 
 import { streamWorkerRoutes } from './stream.routes';
-import { webglPlotRoutes } from "../../graphscript/extras/index.services"//'graphscript-services';
+import { webglPlotRoutes } from 'graphscript-services'; //"../../graphscript/extras/index.services"//
 
 import {Devices} from './devices/third_party'
 
 import { 
     csvRoutes,
     BFSRoutes
- } from "../../graphscript/extras/index.storage.services"//"../../GraphServiceRouter/extras/index.storage.services"//'graphscript-services.storage'//"../../GraphServiceRouter/extras/index.storage.services"//'graphscript-services'//"../../GraphServiceRouter/extras/index.services"
+ } from 'graphscript-services.storage'//"../../GraphServiceRouter/extras/index.storage.services"//'graphscript-services'//"../../GraphServiceRouter/extras/index.services"
 
 import {
     algorithms
-} from "../../graphscript/extras/index.services"//'graphscript-services'
+} from 'graphscript-services'
 
 import {
     gpualgorithms
-} from "../../graphscript/extras/index.gpu.services"//'graphscript-services.gpu'
+} from 'graphscript-services.gpu'
  //'graphscript-services'; //
 
 
@@ -37,15 +37,15 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
 
     const worker = new WorkerService({
         //props:{} //could set the props instead of globalThis but it really does not matter unless you want to bake in for more complex service modules
-        services:{
+        tree:{
             //GPUService as any,
-            workerCanvasRoutes,
+            ...workerCanvasRoutes,
             //unsafeRoutes, //allows dynamic route loading
-            subprocessRoutes, //includes unsafeRoutes
-            BFSRoutes,
-            csvRoutes,
-            streamWorkerRoutes,
-            webglPlotRoutes
+            ...subprocessRoutes, //includes unsafeRoutes
+            ...BFSRoutes,
+            ...csvRoutes,
+            ...streamWorkerRoutes,
+            ...webglPlotRoutes
         }
     });
 

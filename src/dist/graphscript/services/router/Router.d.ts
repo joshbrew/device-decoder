@@ -39,9 +39,9 @@ export declare type ConnectionInfo = {
     onclose?: (connection: ConnectionInfo, ...args: any[]) => void;
 };
 export declare type RouterOptions = {
-    services?: {
-        [key: string]: Service | any | {
-            service: Service | any;
+    graph?: {
+        [key: string]: Service | Graph | any | {
+            service: Service | Graph | any;
             connections: string[] | {
                 [key: string]: any;
             };

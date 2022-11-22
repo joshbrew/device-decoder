@@ -1,6 +1,7 @@
 import { EventHandler } from "./services/EventHandler";
 export declare const state: EventHandler;
 export declare type GraphNodeProperties = {
+    __props?: Function | GraphNodeProperties;
     __operator?: ((...args: any[]) => any) | string;
     __children?: {
         [key: string]: GraphNodeProperties;
@@ -57,6 +58,7 @@ export declare class GraphNode {
     __children?: any;
     __operator?: any;
     __listeners?: any;
+    __props?: any;
     [key: string]: any;
     constructor(properties: any, parent?: {
         [key: string]: any;
@@ -67,12 +69,14 @@ export declare class GraphNode {
     __addLocalState(props?: {
         [key: string]: any;
     }): void;
+    __proxyObject: (obj: any) => void;
     __addOnconnected(callback: (node: any) => void): void;
     __addDisconnected(callback: (node: any) => void): void;
     __callConnected(node?: this): void;
     __callDisconnected(node?: this): void;
 }
 export declare class Graph {
+    [key: string]: any;
     __node: {
         tag: string;
         state: EventHandler;
@@ -90,7 +94,6 @@ export declare class Graph {
     add: (properties: any, parent?: GraphNode | string) => GraphNode;
     recursiveSet: (t: any, parent: any, listeners?: {}) => {};
     remove: (node: GraphNode | string, clearListeners?: boolean) => string | GraphNode;
-    removeTree: (tree: any) => void;
     run: (node: string | GraphNode, ...args: any[]) => any;
     setListeners: (listeners: {
         [key: string]: {
@@ -98,8 +101,9 @@ export declare class Graph {
         };
     }) => void;
     clearListeners: (node: GraphNode | string, listener?: string) => void;
-    get: (tag: any) => any;
-    set: (tag: any, node: any) => Map<string, any>;
+    get: (tag: string) => any;
+    set: (tag: string, node: GraphNode) => Map<string, any>;
+    delete: (tag: string) => boolean;
     getProps: (node: GraphNode | string, getInitial?: boolean) => void;
     subscribe: (node: GraphNode | string, callback: string | GraphNode | ((res: any) => void), key?: string | undefined, subInput?: boolean, target?: string, bound?: string) => any;
     unsubscribe: (node: GraphNode | string, sub?: number, key?: string, subInput?: boolean) => any;

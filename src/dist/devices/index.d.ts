@@ -142,11 +142,13 @@ export declare const Devices: {
         cyton: {
             baudRate: number;
             codec: typeof cytoncodec;
+            write: string;
             sps: number;
         };
         cyton_daisy: {
             baudRate: number;
             codec: typeof cytoncodec;
+            write: string;
             sps: number;
         };
         peanut: {
@@ -166,6 +168,7 @@ export declare const Devices: {
         cognixionONE: {
             baudRate: number;
             codec: typeof cytoncodec;
+            write: string;
             sps: number;
         };
     };

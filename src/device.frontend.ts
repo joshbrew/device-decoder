@@ -5,7 +5,7 @@ import {
     WorkerService, 
     WorkerRoute, 
     workerCanvasRoutes 
-} from "../../graphscript/index"//'graphscript'//"../../GraphServiceRouter/index"//'graphscript';//"../../GraphServiceRouter/index"//'graphscript'; //
+} from 'graphscript'//"../../GraphServiceRouter/index"//'graphscript';//"../../GraphServiceRouter/index"//'graphscript'; //
 
 import gsworker from './stream.worker'
 
@@ -25,9 +25,9 @@ export function isMobile() {
 
 export const BLE = new BLEClient();
 export const workers = new WorkerService({
-    services:{
-        workerCanvasRoutes,
-        subprocessRoutes
+    tree:{
+        ...workerCanvasRoutes,
+        ...subprocessRoutes
     }
 }); 
 export { Devices, gsworker, filterPresets, chartSettings, decoders, FilterSettings }

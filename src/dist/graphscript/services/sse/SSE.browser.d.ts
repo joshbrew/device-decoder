@@ -40,6 +40,7 @@ export declare class SSEfrontend extends Service {
     };
     constructor(options?: ServiceOptions);
     openSSE: (options: EventSourceProps) => EventSourceInfo;
+    open: (options: EventSourceProps) => EventSourceInfo;
     POST: (message: any | ServiceMessage, url?: string | URL, type?: XMLHttpRequestResponseType, mimeType?: string | undefined) => Promise<unknown>;
     transmit: (message: any | ServiceMessage, url: string | URL) => Promise<unknown>;
     request: (message: ServiceMessage | any, url: string, method?: string, sessionId?: string) => Promise<unknown>;
