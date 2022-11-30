@@ -59,14 +59,14 @@ const sps = 250;
 export const cytonSerialSettings = {
     baudRate:115200,
     codec:cytoncodec,
-    write:'b\n',
+    write:'b',
     sps
 };
 
 export const daisycytonSerialSettings = {
     baudRate:115200,
     codec:daisycytoncodec,
-    write:'b\n',
+    write:'b',
     sps
 }
 
