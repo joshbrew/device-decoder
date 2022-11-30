@@ -1,7 +1,7 @@
 import { 
     WorkerService
 } from 'graphscript' //'../../graphscript/services/worker/Worker.service'//
-import { WebSerial } from './serial/serialstream'; //extended classes need to be imported for compilation
+import { SerialPortOptions, WebSerial } from './serial/serialstream'; //extended classes need to be imported for compilation
 import { decoders, Devices } from './devices/index';
 //import { WebglLinePlotUtil } from '../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils'//'webgl-plot-utils';
 import { ByteParser } from "./util/ByteParser";
@@ -81,7 +81,7 @@ export const streamWorkerRoutes = { //serial API routes
         //return globalThis.decoders[globalThis.decoder](data);
     },
     'decodeAndParse':function decodeAndParse(data:any) {
-        let decoded = this.graph.run('decode',data);
+        let decoded = this.__node.graph.run('decode',data);
         if(decoded) {
             let parsed = globalThis.ArrayManip.reformatData(decoded);
         
@@ -102,7 +102,7 @@ export const streamWorkerRoutes = { //serial API routes
                 return parsed;
             }
         }
-        //console.log(decoded, this.graph)
+        //console.log(decoded, this.__node.graph)
         return decoded;
     },
     'setActiveDecoder':function setActiveDecoder(deviceType:'BLE'|'USB'|'BLE_OTHER'|'USB_OTHER'|'OTHER',device:string,service?:string,characteristic?:string) {
@@ -167,7 +167,7 @@ export const streamWorkerRoutes = { //serial API routes
                 return parsed;
             }
         }
-        //console.log(decoded, this.graph)
+        //console.log(decoded, this.__node.graph)
         return decoded;
     },
     'toggleAnim':function toggleAnim() {
@@ -227,7 +227,7 @@ export const streamWorkerRoutes = { //serial API routes
             buffering?:{searchBytes:Uint8Array} 
         }) {
 
-        const WorkerService = this.graph as WorkerService;
+        const WorkerService = this.__node.graph as WorkerService;
         if(!globalThis.Serial) WorkerService.run('setupSerial');
         return new Promise((res,rej) => {
             globalThis.Serial.getPorts().then((ports)=>{
@@ -238,6 +238,12 @@ export const streamWorkerRoutes = { //serial API routes
                     return port.getInfo().usbVendorId === settings.usbVendorId && port.getInfo().usbProductId === settings.usbProductId;
                 }) as SerialPort;
                 if(port) {
+                    let options = settings as SerialPortOptions;
+                    if(typeof settings.pipeTo === 'object' && settings.pipeTo.extraArgs && globalThis.Devices[settings.pipeTo.extraArgs[0]]) {
+                        options.onconnect = globalThis.Devices[settings.pipeTo.extraArgs[0]][settings.pipeTo.extraArgs[1]].onconnect;
+                        options.ondisconnect = globalThis.Devices[settings.pipeTo.extraArgs[0]][settings.pipeTo.extraArgs[1]].onconnect;
+                        options.beforedisconnect = globalThis.Devices[settings.pipeTo.extraArgs[0]][settings.pipeTo.extraArgs[1]].onconnect;
+                    }
                     Serial.openPort(port, settings).then(() => {
                         const stream = Serial.createStream({
                             port, 

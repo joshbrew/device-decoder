@@ -11,6 +11,7 @@ export type SerialPortOptions = {
     bufferSize?:number,
     flowControl?:'none'|'hardware'|FlowControlType,
     onconnect?:(port:SerialPort)=>void,
+    beforedisconnect?:(client:WebSerial,port:SerialPort)=>void,
     ondisconnect?:(ev)=>void
 }
 
@@ -265,6 +266,11 @@ export class WebSerial extends ByteParser {
         stream.running = false;
         
         return new Promise((res,rej) => {
+            
+            if((stream as SerialStreamInfo).settings.beforedisconnect) {
+                (stream as SerialStreamInfo).settings.beforedisconnect(this,(stream as SerialStreamInfo).port);
+            }
+
             setTimeout(async ()=>{
                 if((stream as SerialStreamInfo).port.readable && (stream as SerialStreamInfo).reader) {
                     try {

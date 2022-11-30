@@ -1,7 +1,6 @@
 import { WebglLinePlotProps } from 'webgl-plot-utils';
 import { FilterSettings } from '../util/BiquadFilters';
 import { ads131m08codec } from './ads131m08';
-import { cytoncodec } from './cyton';
 import { freeeeg128codec } from './freeeeg128';
 import { freeeeg32codec } from './freeeeg32';
 import { hegduinocodec } from './hegduino';
@@ -139,18 +138,8 @@ export declare const Devices: {
             codec: typeof hegduinocodec;
             sps: number;
         };
-        cyton: {
-            baudRate: number;
-            codec: typeof cytoncodec;
-            write: string;
-            sps: number;
-        };
-        cyton_daisy: {
-            baudRate: number;
-            codec: typeof cytoncodec;
-            write: string;
-            sps: number;
-        };
+        cyton: import("../serial/serialstream").SerialPortOptions;
+        cyton_daisy: import("../serial/serialstream").SerialPortOptions;
         peanut: {
             baudRate: number;
             bufferSize: number;
@@ -165,12 +154,7 @@ export declare const Devices: {
             baudRate: number;
             codec: typeof statechangercodec;
         };
-        cognixionONE: {
-            baudRate: number;
-            codec: typeof cytoncodec;
-            write: string;
-            sps: number;
-        };
+        cognixionONE: import("../serial/serialstream").SerialPortOptions;
     };
     BLE_OTHER: {};
     USB_OTHER: {};

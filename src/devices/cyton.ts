@@ -1,5 +1,6 @@
 
 import { WebglLinePlotProps } from "webgl-plot-utils";
+import { SerialPortOptions } from "../serial/serialstream";
 import { FilterSettings } from "../util/BiquadFilters";
 import { ByteParser } from "../util/ByteParser";
 
@@ -60,13 +61,15 @@ export const cytonSerialSettings = {
     baudRate:115200,
     codec:cytoncodec,
     write:'b',
+    beforedisconnect:(client,port)=>{ client.writePort(port, 's' ); },
     sps
-};
+} as SerialPortOptions;
 
 export const daisycytonSerialSettings = {
     baudRate:115200,
     codec:daisycytoncodec,
     write:'b',
+    beforedisconnect:(client,port)=>{ client.writePort(port, 's' ); },
     sps
 }
 

@@ -16,6 +16,7 @@ export type BLEDeviceOptions = {
     name?:string,
     deviceId?:string,
     onconnect?:()=>void,
+    beforedisconnect?:(client:BLEClient,device:BLEDeviceInfo)=>void,
     ondisconnect?:(deviceId:string)=>void,
     connectOptions?:TimeoutOptions,
     services?:{ 
@@ -187,9 +188,17 @@ export class BLEClient extends ByteParser {
     }
 
     disconnect(device:BleDevice|string) {
-        if(typeof device === 'object') device = device.deviceId;
-        delete this.devices[device];
-        return this.client.disconnect(device);
+        if(typeof device === 'object') {
+            if(device?.deviceId) {
+                device = device.deviceId;
+            };
+        }
+        if(typeof device === 'string') {
+            let info = this.devices[device];
+            if(info.beforedisconnect) info.beforedisconnect(this,info);
+            delete this.devices[device];
+            this.client.disconnect(device);
+        }
     }
 
     write(

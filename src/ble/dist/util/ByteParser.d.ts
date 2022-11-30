@@ -1,4 +1,4 @@
-import { ArrayManip } from "./ArrayManip";
+import { ArrayManip } from "./arraymanip";
 export declare class ByteParser extends ArrayManip {
     static codes: {
         '\\n': number;
