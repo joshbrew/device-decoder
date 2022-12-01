@@ -139,7 +139,13 @@ export declare const Devices: {
             sps: number;
         };
         cyton: import("../serial/serialstream").SerialPortOptions;
-        cyton_daisy: import("../serial/serialstream").SerialPortOptions;
+        cyton_daisy: {
+            baudRate: number;
+            codec: typeof import("./cyton").daisycytoncodec;
+            write: string;
+            beforedisconnect: (client: any, port: any) => void;
+            sps: number;
+        };
         peanut: {
             baudRate: number;
             bufferSize: number;

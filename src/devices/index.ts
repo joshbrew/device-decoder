@@ -1,7 +1,7 @@
 import { WebglLinePlotProps } from 'webgl-plot-utils';
 import { FilterSettings } from '../util/BiquadFilters';
 import {ads131m08codec, ads131m08ChartSettings, ads131m08FilterSettings, ads131m08_arduinocodec} from './ads131m08';
-import {cytoncodec, cytonChartSettings, cytonFilterSettings, cytonSerialSettings} from './cyton';
+import {cytoncodec, cytonChartSettings, cytonFilterSettings, cytonSerialSettings, daisycytonSerialSettings} from './cyton';
 import {freeeeg128codec, freeeeg128ChartSettings, freeeeg128FilterSettings, freeeeg128SerialSettings} from './freeeeg128';
 import {freeeeg32codec, freeeeg32ChartSettings, freeeeg32FilterSettings, freeeeg32SerialSettings, freeeeg32_optical_SerialSettings} from './freeeeg32';
 import {hegduinocodec, hegduinoChartSettings, hegduinoBLESettings, hegduinoSerialSettings, hegduinoV2FilterSettings, hegduinoV1FilterSettings, hegduinoV1SerialSettings, hegduinoV1BLESettings} from './hegduino';
@@ -53,7 +53,7 @@ export const Devices = {
         'hegduino':hegduinoSerialSettings,
         'hegduinoV1':hegduinoV1SerialSettings,
         'cyton':cytonSerialSettings,
-        'cyton_daisy':cytonSerialSettings,
+        'cyton_daisy':daisycytonSerialSettings,
         'peanut':peanutSerialSettings,
         'statechanger':statechangerSerialSettings,
         'cognixionONE':cytonSerialSettings

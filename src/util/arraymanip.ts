@@ -230,18 +230,20 @@ export class ArrayManip {
                     } else if (l.includes('|')) {
                         split = l.split('|');
                     }
-                    split.forEach((val,i) => {
-                        if(val.includes(':')) {
-                            let [key,v] = val.split(':');
-                            let fl = parseFloat(v);
-                            if(fl) data[key] = [fl];
-                            else return undefined;
-                        } else {
-                            let fl = parseFloat(val);
-                            if(fl) data[i] = [fl];
-                            else return undefined;
-                        }
-                    });
+                    if(Array.isArray(split)) {
+                        split.forEach((val,i) => {
+                            if(val.includes(':')) {
+                                let [key,v] = val.split(':');
+                                let fl = parseFloat(v);
+                                if(fl) data[key] = [fl];
+                                else return undefined;
+                            } else {
+                                let fl = parseFloat(val);
+                                if(fl) data[i] = [fl];
+                                else return undefined;
+                            }
+                        });
+                    }   
                 })
             } else if(data.includes('\t')) {
                 split = data.split('\t');
@@ -251,7 +253,7 @@ export class ArrayManip {
                 split = data.split('|');
             }
             data = {};
-            if(split) {
+            if(Array.isArray(split)) {
                 split.forEach((val,i) => {
                     if(val.includes(':')) {
                         let [key,v] = val.split(':');
