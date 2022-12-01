@@ -7,6 +7,9 @@ export declare const freeeeg128SerialSettings: {
     frequency: number;
     codec: typeof freeeeg128codec;
     sps: number;
+    buffering: {
+        searchBytes: Uint8Array;
+    };
 };
 export declare const freeeeg128ChartSettings: Partial<WebglLinePlotProps>;
 export declare const freeeeg128FilterSettings: {

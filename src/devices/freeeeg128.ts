@@ -35,7 +35,10 @@ export const freeeeg128SerialSettings = {
     bufferSize:2000,
     frequency:1.9,
     codec:freeeeg128codec,
-    sps
+    sps, 
+    buffering:{
+        searchBytes:new Uint8Array([192,160]),
+    }
 }
 
 export const freeeeg128ChartSettings:Partial<WebglLinePlotProps> = {  //adding the rest below

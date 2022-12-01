@@ -62,6 +62,9 @@ export const cytonSerialSettings = {
     codec:cytoncodec,
     write:'b',
     beforedisconnect:(client,port)=>{ client.writePort(port, 's' ); }, 
+    buffering:{
+        searchBytes:new Uint8Array([192,160]),
+    },
     sps
 } as SerialPortOptions;
 
@@ -70,10 +73,14 @@ export const daisycytonSerialSettings = {
     codec:daisycytoncodec,
     write:'b',
     beforedisconnect:(client,port)=>{ client.writePort(port, 's' ); },
+    buffering:{
+        searchBytes:new Uint8Array([192,160]),
+    },
     sps
-}
+} as SerialPortOptions;
 
 const defaultChartSetting = {nSec:10, sps, units:'mV'};
+const defaultChartSetting2 = {nSec:10, sps};
 export const cytonChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
         '0':JSON.parse(JSON.stringify(defaultChartSetting)),
@@ -84,12 +91,12 @@ export const cytonChartSettings:Partial<WebglLinePlotProps> = {
         '5':JSON.parse(JSON.stringify(defaultChartSetting)),
         '6':JSON.parse(JSON.stringify(defaultChartSetting)),
         '7':JSON.parse(JSON.stringify(defaultChartSetting)),
-        'ax':JSON.parse(JSON.stringify(defaultChartSetting)),
-        'ay':JSON.parse(JSON.stringify(defaultChartSetting)),
-        'az':JSON.parse(JSON.stringify(defaultChartSetting)),
-        'gx':JSON.parse(JSON.stringify(defaultChartSetting)),
-        'gy':JSON.parse(JSON.stringify(defaultChartSetting)),
-        'gz':JSON.parse(JSON.stringify(defaultChartSetting)),
+        'ax':JSON.parse(JSON.stringify(defaultChartSetting2)),
+        'ay':JSON.parse(JSON.stringify(defaultChartSetting2)),
+        'az':JSON.parse(JSON.stringify(defaultChartSetting2)),
+        'gx':JSON.parse(JSON.stringify(defaultChartSetting2)),
+        'gy':JSON.parse(JSON.stringify(defaultChartSetting2)),
+        'gz':JSON.parse(JSON.stringify(defaultChartSetting2)),
     },
     generateNewLines:true //to add the additional 16 channels
 };

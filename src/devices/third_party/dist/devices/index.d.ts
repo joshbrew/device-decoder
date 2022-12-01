@@ -111,6 +111,9 @@ export declare const Devices: {
             frequency: number;
             codec: typeof freeeeg32codec;
             sps: number;
+            buffering: {
+                searchBytes: Uint8Array;
+            };
         };
         freeEEG32_optical: {
             baudRate: number;
@@ -118,6 +121,9 @@ export declare const Devices: {
             frequency: number;
             codec: typeof freeeeg32codec;
             sps: number;
+            buffering: {
+                searchBytes: Uint8Array;
+            };
         };
         freeEEG128: {
             baudRate: number;
@@ -125,6 +131,9 @@ export declare const Devices: {
             frequency: number;
             codec: typeof freeeeg128codec;
             sps: number;
+            buffering: {
+                searchBytes: Uint8Array;
+            };
         };
         hegduino: {
             baudRate: number;
@@ -139,13 +148,7 @@ export declare const Devices: {
             sps: number;
         };
         cyton: import("../serial/serialstream").SerialPortOptions;
-        cyton_daisy: {
-            baudRate: number;
-            codec: typeof import("./cyton").daisycytoncodec;
-            write: string;
-            beforedisconnect: (client: any, port: any) => void;
-            sps: number;
-        };
+        cyton_daisy: import("../serial/serialstream").SerialPortOptions;
         peanut: {
             baudRate: number;
             bufferSize: number;

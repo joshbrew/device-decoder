@@ -7,6 +7,9 @@ export declare const freeeeg32SerialSettings: {
     frequency: number;
     codec: typeof freeeeg32codec;
     sps: number;
+    buffering: {
+        searchBytes: Uint8Array;
+    };
 };
 export declare const freeeeg32_optical_SerialSettings: {
     baudRate: number;
@@ -14,6 +17,9 @@ export declare const freeeeg32_optical_SerialSettings: {
     frequency: number;
     codec: typeof freeeeg32codec;
     sps: number;
+    buffering: {
+        searchBytes: Uint8Array;
+    };
 };
 export declare const freeeeg32ChartSettings: Partial<WebglLinePlotProps>;
 export declare const freeeeg32FilterSettings: {

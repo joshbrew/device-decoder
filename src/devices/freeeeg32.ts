@@ -36,7 +36,10 @@ export const freeeeg32SerialSettings = {
     bufferSize:2000,
     frequency:1.9, //512sps
     codec:freeeeg32codec,
-    sps
+    sps, 
+    buffering:{
+        searchBytes:new Uint8Array([192,160]),
+    }
 
 }
 
@@ -45,7 +48,10 @@ export const freeeeg32_optical_SerialSettings = {
     bufferSize:2000,
     frequency:1.9,
     codec:freeeeg32codec,
-    sps
+    sps, 
+    buffering:{
+        searchBytes:new Uint8Array([192,160]),
+    }
 }
 
 const defaultChartSetting = {nSec:10, sps}
