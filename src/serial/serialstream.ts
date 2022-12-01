@@ -199,22 +199,31 @@ export class WebSerial extends ByteParser {
                                 const skip = search.byteLength;
                                 let nextIndex = -1;
 
+                                let used = stream.buffering.lockIdx ?? 0
+
                                 for (var i = search(haystack); i !== -1; i = search(haystack, i + skip)) {
-                                    if(!stream.buffering.locked && !('lockIdx' in stream.buffering)) stream.buffering.lockIdx = i;
+
+                                    if(!stream.buffering.locked && !('lockIdx' in stream.buffering)) used = stream.buffering.lockIdx = i;
                                     else {
+
                                         nextIndex = i;
                                         if(nextIndex >= 0) {
+                                            const len = nextIndex - used;        
                                             if(!stream.buffering.locked) {
-                                                stream.ondata(new Uint8Array(stream.buffering.buffer.splice(stream.buffering.lockIdx+stream.buffering.searchBytes.length,nextIndex+stream.buffering.searchBytes.length))); 
-                                                stream.buffering.buffer.splice(0,stream.buffering.searchBytes.length); //splice off the front pattern buffer bytes and assume every next section defined by nextIndex is a target section
+                                                const line = stream.buffering.buffer.splice(stream.buffering.lockIdx, len)
+                                                const data = new Uint8Array(line.slice(stream.buffering.searchBytes.length))
+                                                stream.ondata(data); 
                                                 stream.buffering.locked = true;
                                             }
-                                            else if(nextIndex > 0) {
-                                                stream.ondata(new Uint8Array(stream.buffering.buffer.splice(stream.buffering.searchBytes.length,nextIndex)));
+                                            else if(len > 0) {
+                                                const line = stream.buffering.buffer.splice(stream.buffering.lockIdx, len)
+                                                const data = new Uint8Array(line.slice(stream.buffering.searchBytes.length))
+                                                stream.ondata(new Uint8Array(data));
                                             }
-                                            
+                                            used = nextIndex;
                                         }
                                     }
+
                                 }
                             } else stream.ondata(result.value);
 
