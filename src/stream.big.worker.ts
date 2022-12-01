@@ -9,7 +9,7 @@ import {
 import { streamWorkerRoutes } from './stream.routes';
 import { webglPlotRoutes } from 'graphscript-services'; //"../../graphscript/extras/index.services"//
 
-import {Devices} from './devices/third_party'
+import {Devices} from './devices/third_party/index'
 
 import { 
     csvRoutes,
