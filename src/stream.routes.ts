@@ -241,8 +241,8 @@ export const streamWorkerRoutes = { //serial API routes
                     let options = settings as SerialPortOptions;
                     if(typeof settings.pipeTo === 'object' && settings.pipeTo.extraArgs && globalThis.Devices[settings.pipeTo.extraArgs[0]]) {
                         options.onconnect = globalThis.Devices[settings.pipeTo.extraArgs[0]][settings.pipeTo.extraArgs[1]].onconnect;
-                        options.ondisconnect = globalThis.Devices[settings.pipeTo.extraArgs[0]][settings.pipeTo.extraArgs[1]].onconnect;
-                        options.beforedisconnect = globalThis.Devices[settings.pipeTo.extraArgs[0]][settings.pipeTo.extraArgs[1]].onconnect;
+                        options.ondisconnect = globalThis.Devices[settings.pipeTo.extraArgs[0]][settings.pipeTo.extraArgs[1]].ondisconnect;
+                        options.beforedisconnect = globalThis.Devices[settings.pipeTo.extraArgs[0]][settings.pipeTo.extraArgs[1]].beforedisconnect;
                     }
                     Serial.openPort(port, settings).then(() => {
                         const stream = Serial.createStream({

@@ -1,6 +1,6 @@
 {
   "name": "device-decoder.third-party",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "Barebones esbuild and test node server implementation. For building",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
