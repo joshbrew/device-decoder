@@ -238,16 +238,16 @@ export const streamWorkerRoutes = { //serial API routes
                     return port.getInfo().usbVendorId === settings.usbVendorId && port.getInfo().usbProductId === settings.usbProductId;
                 }) as SerialPort;
                 if(port) {
-                    let options = settings as SerialPortOptions;
+                    let options = Object.assign({},settings as SerialPortOptions);
                     if(typeof settings.pipeTo === 'object' && settings.pipeTo.extraArgs && globalThis.Devices[settings.pipeTo.extraArgs[0]]) {
                         options.onconnect = globalThis.Devices[settings.pipeTo.extraArgs[0]][settings.pipeTo.extraArgs[1]].onconnect;
                         options.ondisconnect = globalThis.Devices[settings.pipeTo.extraArgs[0]][settings.pipeTo.extraArgs[1]].ondisconnect;
                         options.beforedisconnect = globalThis.Devices[settings.pipeTo.extraArgs[0]][settings.pipeTo.extraArgs[1]].beforedisconnect;
                     }
-                    Serial.openPort(port, settings).then(() => {
+                    Serial.openPort(port, options).then(() => {
                         const stream = Serial.createStream({
                             port, 
-                            settings,
+                            settings:options,
                             frequency:settings.frequency ? settings.frequency : 10,
                             buffering:settings.buffering,
                             ondata: (value:Uint8Array) => { 
