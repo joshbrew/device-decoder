@@ -239,7 +239,7 @@ export const streamWorkerRoutes = { //serial API routes
                 }) as SerialPort;
                 if(port) {
                     let options = Object.assign({},settings as SerialPortOptions);
-                    if(typeof settings.pipeTo === 'object' && settings.pipeTo.extraArgs && globalThis.Devices[settings.pipeTo.extraArgs[0]]) {
+                    if(typeof settings.pipeTo === 'object' && settings.pipeTo.extraArgs && globalThis.Devices?.[settings.pipeTo.extraArgs[0]]?.[settings.pipeTo.extraArgs[1]]) {
                         options.onconnect = globalThis.Devices[settings.pipeTo.extraArgs[0]][settings.pipeTo.extraArgs[1]].onconnect;
                         options.ondisconnect = globalThis.Devices[settings.pipeTo.extraArgs[0]][settings.pipeTo.extraArgs[1]].ondisconnect;
                         options.beforedisconnect = globalThis.Devices[settings.pipeTo.extraArgs[0]][settings.pipeTo.extraArgs[1]].beforedisconnect;
