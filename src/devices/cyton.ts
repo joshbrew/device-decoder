@@ -61,7 +61,7 @@ export const cytonSerialSettings = {
     baudRate:115200,
     codec:cytoncodec,
     write:'b',
-    beforedisconnect:(client,port)=>{ client.writePort(port, 's' ); },
+    beforedisconnect:(client,port)=>{ client.writePort(port, 's' ); }, 
     sps
 } as SerialPortOptions;
 
