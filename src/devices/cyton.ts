@@ -48,9 +48,6 @@ export function daisycytoncodec(data:any) {
     output.ax = ByteParser.bytesToInt16(arr[accIdx],arr[accIdx+1]);
     output.ay = ByteParser.bytesToInt16(arr[accIdx+2],arr[accIdx+3]);
     output.az = ByteParser.bytesToInt16(arr[accIdx+4],arr[accIdx+5]);
-    output.gx = ByteParser.bytesToInt16(arr[accIdx+6],arr[accIdx+7]);
-    output.gy = ByteParser.bytesToInt16(arr[accIdx+8],arr[accIdx+9]);
-    output.gz = ByteParser.bytesToInt16(arr[accIdx+10],arr[accIdx+11]);
 
     return output;
 }
@@ -93,10 +90,7 @@ export const cytonChartSettings:Partial<WebglLinePlotProps> = {
         '7':JSON.parse(JSON.stringify(defaultChartSetting)),
         'ax':JSON.parse(JSON.stringify(defaultChartSetting2)),
         'ay':JSON.parse(JSON.stringify(defaultChartSetting2)),
-        'az':JSON.parse(JSON.stringify(defaultChartSetting2)),
-        'gx':JSON.parse(JSON.stringify(defaultChartSetting2)),
-        'gy':JSON.parse(JSON.stringify(defaultChartSetting2)),
-        'gz':JSON.parse(JSON.stringify(defaultChartSetting2)),
+        'az':JSON.parse(JSON.stringify(defaultChartSetting2))
     },
     generateNewLines:true //to add the additional 16 channels
 };
