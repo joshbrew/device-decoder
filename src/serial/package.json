@@ -21,7 +21,7 @@
   "keywords": [
     "esbuild"
   ],
-  "author": "Joshua Brewster",
+  "author": "Joshua Brewster and Garrett Flynn",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
     "@types/dom-serial": "^1.0.2"
