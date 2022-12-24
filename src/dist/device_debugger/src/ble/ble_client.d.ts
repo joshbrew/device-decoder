@@ -5,6 +5,7 @@ export declare type BLEDeviceOptions = {
     name?: string;
     deviceId?: string;
     onconnect?: () => void;
+    beforedisconnect?: (client: BLEClient, device: BLEDeviceInfo) => void;
     ondisconnect?: (deviceId: string) => void;
     connectOptions?: TimeoutOptions;
     services?: {
@@ -41,7 +42,7 @@ export declare class BLEClient extends ByteParser {
     setupDevice: (device: BleDevice, options?: BLEDeviceOptions) => Promise<BLEDeviceInfo>;
     connect(device: BleDevice, options?: BLEDeviceOptions): Promise<BleDevice>;
     reconnect(deviceId: string, options?: BLEDeviceOptions): Promise<BLEDeviceInfo>;
-    disconnect(device: BleDevice | string): Promise<void>;
+    disconnect(device: BleDevice | string): void;
     write(device: BleDevice | string, service: string, characteristic: string, value: string | number | ArrayBufferLike | DataView | number[], callback?: () => void, options?: TimeoutOptions): Promise<void>;
     read(device: BleDevice | string, service: string, characteristic: string, ondata?: (result: DataView) => void, options?: TimeoutOptions): Promise<void> | Promise<DataView>;
     subscribe(device: BleDevice | string, service: string, characteristic: string, ondata: (result: DataView) => void): Promise<void>;

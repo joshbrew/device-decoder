@@ -7,6 +7,7 @@ export declare type SerialPortOptions = {
     bufferSize?: number;
     flowControl?: 'none' | 'hardware' | FlowControlType;
     onconnect?: (port: SerialPort) => void;
+    beforedisconnect?: (client: WebSerial, port: SerialPort) => void;
     ondisconnect?: (ev: any) => void;
 };
 export declare type SerialStreamProps = {

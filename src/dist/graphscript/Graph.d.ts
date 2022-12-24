@@ -7,55 +7,50 @@ export declare type GraphNodeProperties = {
         [key: string]: GraphNodeProperties;
     };
     __listeners?: {
-        [key: string]: ((result: any) => void) | {
-            callback: (result: any) => void;
+        [key: string]: true | string | ((result: any) => void) | {
+            __callback: string | ((result: any) => void) | true;
+            subInput?: boolean;
+            [key: string]: any;
         };
+    } | {
+        [key: string]: ((result: any) => void) | true | string;
     };
     __onconnected?: ((node: any) => void | ((node: any) => void)[]);
     __ondisconnected?: ((node: any) => void | ((node: any) => void)[]);
     __node?: {
         tag?: string;
         state?: EventHandler;
-        inputState?: boolean;
         [key: string]: any;
     };
     [key: string]: any;
 };
-export declare type GraphProperties = {
-    tree?: {
+export declare type Loader = (node: GraphNode, parent: Graph | GraphNode, graph: Graph, roots: any, properties: GraphNodeProperties, key: string) => void;
+export declare type GraphOptions = {
+    roots?: {
         [key: string]: any;
     };
     loaders?: {
-        [key: string]: {
-            node: GraphNode;
-            parent: Graph | GraphNode;
-            graph: Graph;
-            tree: any;
-            properties: GraphNodeProperties;
+        [key: string]: Loader | {
+            init?: Loader;
+            connected?: (node: any) => void;
+            disconnected?: (node: any) => void;
         };
     };
     state?: EventHandler;
-    childrenKey?: string;
-    mapGraphs?: false;
-    [key: string]: any;
-};
-export declare type GraphOptions = {
-    tree?: {
-        [key: string]: any;
-    };
-    loaders?: {
-        [key: string]: (node: GraphNode, parent: Graph | GraphNode, graph: Graph, tree: any, properties: GraphNodeProperties) => void;
-    };
-    state?: EventHandler;
-    childrenKey?: string;
     mapGraphs?: false;
     [key: string]: any;
 };
 export declare class GraphNode {
     __node: {
+        tag: string;
+        unique: string;
+        state: EventHandler;
         [key: string]: any;
     };
-    __children?: any;
+    __children?: {
+        [key: string]: GraphNode;
+    };
+    __parent?: Graph | GraphNode;
     __operator?: any;
     __listeners?: any;
     __props?: any;
@@ -64,14 +59,14 @@ export declare class GraphNode {
         [key: string]: any;
     }, graph?: Graph);
     __subscribe: (callback: string | GraphNode | ((res: any) => void), key?: string, subInput?: boolean, bound?: string, target?: string) => any;
-    __unsubscribe: (sub?: number, key?: string, subInput?: boolean) => any;
+    __unsubscribe: (sub?: number, key?: string, unsubInput?: boolean) => boolean;
     __setOperator: (fn: (...args: any[]) => any) => any;
-    __addLocalState(props?: {
+    __addLocalState: (props?: {
         [key: string]: any;
-    }): void;
+    }, key?: string) => void;
     __proxyObject: (obj: any) => void;
     __addOnconnected(callback: (node: any) => void): void;
-    __addDisconnected(callback: (node: any) => void): void;
+    __addOndisconnected(callback: (node: any) => void): void;
     __callConnected(node?: this): void;
     __callDisconnected(node?: this): void;
 }
@@ -79,20 +74,28 @@ export declare class Graph {
     [key: string]: any;
     __node: {
         tag: string;
+        unique: string;
         state: EventHandler;
         nodes: Map<string, GraphNode | any>;
+        roots?: {
+            [key: string]: any;
+        };
+        mapGraphs?: boolean;
         [key: string]: any;
     };
     constructor(options?: GraphOptions);
     init: (options: GraphOptions) => void;
-    setTree: (tree: {
+    load: (roots: {
         [key: string]: any;
-    }) => void;
+    }) => {
+        [key: string]: any;
+    };
     setLoaders: (loaders: {
-        [key: string]: (node: GraphNode, parent: Graph | GraphNode, graph: Graph, tree: any, props: any) => void;
+        [key: string]: (node: GraphNode, parent: Graph | GraphNode, graph: Graph, roots: any, props: any, key: string) => void;
     }, replace?: boolean) => any;
-    add: (properties: any, parent?: GraphNode | string) => GraphNode;
-    recursiveSet: (t: any, parent: any, listeners?: {}) => {};
+    runLoaders: (node: any, parent: any, properties: any, key: any) => void;
+    add: (properties: any, parent?: GraphNode | string) => any;
+    recursiveSet: (t: any, parent: any, listeners: {}, origin: any) => {};
     remove: (node: GraphNode | string, clearListeners?: boolean) => string | GraphNode;
     run: (node: string | GraphNode, ...args: any[]) => any;
     setListeners: (listeners: {
@@ -111,3 +114,6 @@ export declare class Graph {
         [key: string]: any;
     }) => void;
 }
+export declare function getAllProperties(obj: any): any[];
+export declare function instanceObject(obj: any): {};
+export declare function isNativeClass(thing: any): boolean;

@@ -18,7 +18,7 @@ export declare class Service extends Graph {
     name: string;
     constructor(options?: ServiceOptions);
     addServices: (services: {
-        [key: string]: Function | Service | {
+        [key: string]: Function | Graph | Service | {
             [key: string]: any;
         };
     }) => void;
@@ -28,7 +28,7 @@ export declare class Service extends Graph {
     transmit: (...args: any[]) => any | void;
     receive: (...args: any[]) => any | void;
     pipe: (source: GraphNode | string, destination: string, endpoint?: string | any, method?: string, callback?: (res: any) => any | void) => any;
-    pipeOnce: (source: GraphNode | string, destination: string, endpoint?: string | any, method?: string, callback?: (res: any) => any | void) => any;
+    pipeOnce: (source: GraphNode | string, destination: string, endpoint?: string | any, method?: string, callback?: (res: any) => any | void) => void;
     terminate: (...args: any) => void;
     isTypedArray: typeof isTypedArray;
     recursivelyAssign: (target: any, obj: any) => any;
