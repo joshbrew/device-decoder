@@ -197,7 +197,7 @@ export class BLEClient extends ByteParser {
             let info = this.devices[device];
             if(info.beforedisconnect) info.beforedisconnect(this,info);
             delete this.devices[device];
-            this.client.disconnect(device);
+            return this.client.disconnect(device);
         }
     }
 
