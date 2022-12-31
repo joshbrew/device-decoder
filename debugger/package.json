@@ -1,10 +1,9 @@
 {
-  "name": "device-decoder",
-  "version": "0.3.6",
-  "description": "Customizable multithreaded BLE and USB (or other) device connecting, sensor decoding, and (threaded) output rendering",
-  "main": "dist/device.frontend.js",
-  "module": "dist/device.frontend.esm.js",
-  "types": "dist/device.frontend.d.ts",
+  "name": "tinybuildapp6636",
+  "version": "0.0.0",
+  "description": "Barebones esbuild and test node server implementation. For building",
+  "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "tinybuild",
     "build": "tinybuild build",
@@ -20,16 +19,13 @@
   "keywords": [
     "esbuild"
   ],
-  "author": "Joshua Brewster and Garrett Flynn",
+  "author": "Joshua Brewster",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
     "@capacitor-community/bluetooth-le": "~2.0.1",
     "brainsatplay-math": "~0.0.25",
-    "graphscript": "~0.2.27",
-    "graphscript-services": "~0.2.30",
-    "graphscript-services.gpu": "~0.2.30",
-    "graphscript-services.storage": "~0.2.30",
-    "webgl-plot-utils": "~0.3.15"
+    "graphscript": "~0.2.1",
+    "webgl-plot-utils": "~0.3.13"
   },
   "devDependencies": {
     "@capacitor/android": "~4.1.0",

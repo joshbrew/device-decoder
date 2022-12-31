@@ -4,7 +4,7 @@ import {
     //GPUService, 
     subprocessRoutes,
     loadAlgorithms
-} from 'graphscript'//
+} from 'graphscript'//'../../graphscript/index'//'graphscript'//
 
 import { streamWorkerRoutes } from './stream.routes';
 import { webglPlotRoutes } from 'graphscript-services'; //"../../graphscript/extras/index.services"//
@@ -14,7 +14,7 @@ import {Devices} from './devices/third_party/index'
 import { 
     csvRoutes,
     BFSRoutes
- } from 'graphscript-services.storage'//"../../GraphServiceRouter/extras/index.storage.services"//'graphscript-services'//"../../GraphServiceRouter/extras/index.services"
+ } from 'graphscript-services.storage'//'../../graphscript/src/extras/index.storage.services'//'graphscript-services.storage'//"../../GraphServiceRouter/extras/index.storage.services"//'graphscript-services'//"../../GraphServiceRouter/extras/index.services"
 
 import {
     algorithms
