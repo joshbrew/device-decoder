@@ -8,7 +8,7 @@ import { ByteParser } from "./util/ByteParser";
 import { BiquadChannelFilterer, FilterSettings } from './util/BiquadFilters';
 //import * as bfs from './storage/BFSUtils'
 import { ArrayManip } from './util/arraymanip';
-import { parseFunctionFromText } from 'graphscript/services/utils';
+import { parseFunctionFromText } from 'graphscript/src/services/utils';
 
 
 //to load in a worker 
