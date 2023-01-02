@@ -21,20 +21,22 @@ export const bme280codec = (data:any) => {
 
     for(let j = 0; j < 3; j++) {
         let i = j*24;
-        let tint = ByteParser.bytesToUInt32(arr[0+i],arr[1+i],arr[2+i],arr[3+i]);
-        let tfrac = ByteParser.bytesToUInt32(arr[4+i],arr[5+i],arr[6+i],arr[7+i]);
+        let tint = ByteParser.bytesToInt32(arr[0+i],arr[1+i],arr[2+i],arr[3+i]);
+        let tfrac = ByteParser.bytesToInt32(arr[4+i],arr[5+i],arr[6+i],arr[7+i]);
         output.temp.push(tint + tfrac/Math.pow(10,Math.ceil(Math.log10(tfrac))))
         
-        let pint = ByteParser.bytesToUInt32(arr[8+i],arr[9+i],arr[10+i],arr[11+i]);
-        let pfrac = ByteParser.bytesToUInt32(arr[12+i],arr[13+i],arr[14+i],arr[15+i]);
+        let pint = ByteParser.bytesToInt32(arr[8+i],arr[9+i],arr[10+i],arr[11+i]);
+        let pfrac = ByteParser.bytesToInt32(arr[12+i],arr[13+i],arr[14+i],arr[15+i]);
         output.pressure.push(pint + pfrac/Math.pow(10,Math.ceil(Math.log10(pfrac))))
         
-        let hint = ByteParser.bytesToUInt32(arr[16+i],arr[17+i],arr[18+i],arr[19+i]);
-        let hfrac = ByteParser.bytesToUInt32(arr[20+i],arr[21+i],arr[22+i],arr[23+i]);
+        let hint = ByteParser.bytesToInt32(arr[16+i],arr[17+i],arr[18+i],arr[19+i]);
+        let hfrac = ByteParser.bytesToInt32(arr[20+i],arr[21+i],arr[22+i],arr[23+i]);
         output.humidity.push(hint + hfrac/Math.pow(10,Math.ceil(Math.log10(hfrac))))
     
         output.altitude.push(altitude(output.pressure[j],output.temp[j]));
     }
+
+    console.log(data);
 
     return output;
 
