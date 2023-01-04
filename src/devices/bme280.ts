@@ -13,13 +13,14 @@ export const bme280codec = (data:any) => {
     else arr = data;
 
     let output:any = {
+        timestamp:[],
         temp:[],
         pressure:[],
         humidity:[],
         altitude:[] //in meters
     }
 
-    for(let j = 0; j < 3; j++) {
+    for(let j = 0; j < 2; j++) {
         let i = j*24;
         let tint = ByteParser.bytesToInt32(arr[0+i],arr[1+i],arr[2+i],arr[3+i]);
         let tfrac = ByteParser.bytesToInt32(arr[4+i],arr[5+i],arr[6+i],arr[7+i]);
@@ -36,7 +37,7 @@ export const bme280codec = (data:any) => {
         output.altitude.push(altitude(output.pressure[j],output.temp[j]));
     }
 
-    console.log(data);
+    //console.log(data);
 
     return output;
 

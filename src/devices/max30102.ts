@@ -9,15 +9,17 @@ export function max3010xcodec(data:any) {
     else if(!data.buffer) arr = new Uint8Array(data);
     else arr = data;
 
+    let pktCt = 32;
+
     const output:any = {
-        'red':new Array(32),
-        'ir':new Array(32),
+        'red':new Array(pktCt),
+        'ir':new Array(pktCt),
         'max_dietemp':ByteParser.get2sCompliment(arr[193],8) + 0.0625 * arr[194],
         'timestamp': Date.now()
     };
 
     let i=0;
-    while(i < 32) {
+    while(i < pktCt) {
         let idx = i*6;
     
         // output['red'][i] = (arr[idx+1] << 16 | arr[idx+2] << 8 | arr[idx+3]) & 0x7FFFF;
@@ -39,8 +41,8 @@ export function max3010xcodec(data:any) {
 
 export const max3010xChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
-        'red':{nSec:10, sps:100},
-        'ir':{nSec:10, sps:100},
+        'red':{nSec:10, sps:96},
+        'ir':{nSec:10, sps:96},
         'max_dietemp':{nSec:10, sps:3.33, units:'C'} //1 read per
     }
 }

@@ -18,7 +18,7 @@ import {
 
 import {
     algorithms
-} from 'graphscript-services'
+} from '../../graphscript/src/extras/algorithms/index'//'graphscript-services'
 
 import {
     gpualgorithms
