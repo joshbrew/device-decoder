@@ -55,7 +55,7 @@ export const bme280codec = (data:any) => {
     }
     
 
-    console.log(data, output);
+    //console.log(data, output);
 
     return output;
 
