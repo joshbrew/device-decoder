@@ -27,7 +27,7 @@ export const bme280codec = (data:any) => {
             let tfrac = ByteParser.bytesToInt32(arr[7+i],arr[6+i],arr[5+i],arr[4+i]);
             output.temp.push(tint + tfrac/Math.pow(10,Math.ceil(Math.log10(tfrac))))
             
-            let pint = ByteParser.bytesToInt32(arr[11+i],arr[10+i],arr[9+i],arr[8+i]);
+            let pint = 10*ByteParser.bytesToInt32(arr[11+i],arr[10+i],arr[9+i],arr[8+i]);
             let pfrac = ByteParser.bytesToInt32(arr[15+i],arr[14+i],arr[13+i],arr[12+i]);
             output.pressure.push(pint + pfrac/Math.pow(10,Math.ceil(Math.log10(pfrac))));
         
@@ -61,12 +61,9 @@ export const bme280codec = (data:any) => {
 
 }
 
-let exponent = 1/5.257;
-let denom = 1/0.0065;
-
 //works up to 9km altitude
 function altitude(pressure,temperature) {
-    return (Math.pow(sealevel_hpa/pressure,exponent) - 1)*(temperature+273.15)*denom;
+    return 44330 * (1.0 - Math.pow(pressure / sealevel_hpa, 0.1903));
 }
 
 export const bme280ChartSettings:Partial<WebglLinePlotProps> = {
