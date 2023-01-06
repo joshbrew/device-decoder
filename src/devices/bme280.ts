@@ -19,8 +19,10 @@ export const bme280codec = (data:any) => {
         altitude:[] //in meters
     }
 
-    if(arr[0] === 0x58) {
+    let mode = 0;
+    if(arr[0].length === 74) mode = 1;
 
+    if(!mode) {
         for(let j = 0; j < 3; j++) {
             let i = j*16+2;
             let tint = ByteParser.bytesToInt32(arr[3+i],arr[2+i],arr[1+i],arr[0+i]);

@@ -82,7 +82,7 @@ export class BLEClient extends ByteParser {
             } else {
                 if(options) {
                     let deviceRequest:any = {
-                        filters:[{services}]
+                        filters:[{services:services}]
                     };
                     if(!this.isMobile()) deviceRequest.optionalServices = services; //required on web
                     if(options?.namePrefix) deviceRequest.filters[0].namePrefix = options.namePrefix;// = options.namePrefix;
