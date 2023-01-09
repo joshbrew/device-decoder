@@ -1,12 +1,12 @@
 
 import {WorkerService, ServiceMessage, WorkerInfo} from 'graphscript'////
-import {WebSerial} from './src/serial/serialstream'
-import {BiquadChannelFilterer, FilterSettings} from './src/util/BiquadFilters'
+import {WebSerial} from '../src/serial/serialstream'
+import {BiquadChannelFilterer, FilterSettings} from '../src/util/BiquadFilters'
 import gsworker from './debugger.worker'
 
 export const workers = new WorkerService(); 
 
-import { WebglLinePlotUtil, WebglLinePlotProps, WebglLinePlotInfo, WebglLineProps } from 'webgl-plot-utils'//'../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils'//
+import { WebglLinePlotUtil, WebglLinePlotProps, WebglLinePlotInfo, WebglLineProps } from '../../webgl-plot-utils/webgl-plot-utils'//'webgl-plot-utils'//'../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils'//
 
 
 
@@ -213,7 +213,7 @@ export function transferStreamAPI(worker:WorkerInfo) {
         worker,
         function openPort(settings:SerialOptions & { usbVendorId:number, usbProductId:number, pipeTo?:string|{route:string, _id:string, extraArgs:any[]}, frequency?:number, buffering?:{searchBytes:Uint8Array} }) {
             
-            const WorkerService = this.graph as WorkerService;
+            const WorkerService = this.__node.graph as WorkerService;
             if(!globalThis.Serial) WorkerService.run('setupSerial');
             return new Promise((res,rej) => {
                 globalThis.Serial.getPorts().then((ports)=>{
@@ -685,7 +685,7 @@ export function createStreamRenderPipeline(dedicatedSerialWorker=false) {
     transferFunction(
         streamworker,
         function decodeAndPassToChart(data:any, chartPortId:string) {
-            let decoded = this.graph.run('decode',data);
+            let decoded = this.__node.graph.run('decode',data);
             if(decoded) {
                 let parsed = globalThis.WebglLinePlotUtil.formatDataForCharts(decoded);
                 if(!parsed) return decoded;
@@ -708,7 +708,7 @@ export function createStreamRenderPipeline(dedicatedSerialWorker=false) {
                     //console.log('parsed', parsed);
             
                     if(globalThis.runningAnim) {
-                        this.graph.workers[chartPortId].send(
+                        this.__node.graph.workers[chartPortId].send(
                             {
                                 route:'updateChartData',
                                 args:[chartPortId,parsed]
@@ -720,7 +720,7 @@ export function createStreamRenderPipeline(dedicatedSerialWorker=false) {
                     return parsed;
                 }
             }
-            //console.log(decoded, this.graph)
+            //console.log(decoded, this.__node.graph)
             return decoded;
         },
         'decodeAndPassToChart'

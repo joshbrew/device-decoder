@@ -1,11 +1,9 @@
 import {SerialStreamInfo, WebSerial} from '../src/serial/serialstream'
 import {BLEClient, BLEDeviceOptions} from '../src/ble/ble_client'
-import {Router, htmlloader, workerCanvasRoutes, DOMElement } from 'graphscript'//'../GraphServiceRouter/index'//
-import { ElementInfo, ElementProps } from 'graphscript/dist/services/dom/types/element';
-import { ComponentProps } from 'graphscript/dist/services/dom/types/component';
+import {Router, wchtmlloader, workerCanvasRoutes, DOMElement, HTMLNodeProperties } from 'graphscript'//'../GraphServiceRouter/index'//
+
 import { decoders, chartSettings, filterPresets } from '../src/devices/index'
 import { workers, cleanupWorkerStreamPipeline, createStreamRenderPipeline, initWorkerChart } from './worker_pipes'
-
 import './index.css'
 
 /**
@@ -63,9 +61,9 @@ const BLE = new BLEClient();
 //alternatively, implement this all in a single web component
 const domtree = {
     'debugger': {
-        template:()=>{return '';},//`<div>Test</div>`;}, //`<div>Test</div>`
         tagName:'device-debugger',
-        styles:`
+        __template:` `,//`<div>Test</div>`;}, //`<div>Test</div>`
+        __css:`
 
         #header {
             background-color:black;
@@ -107,7 +105,6 @@ const domtree = {
             min-width: 150px;
         }
         
-
         label > select {
             float:right;
         }
@@ -158,29 +155,29 @@ const domtree = {
         }
 
         `,
-        children:{
+        __children:{
             'debuggerbody':{
                 tagName:'div',
-                attributes:{
+                __attributes:{
                     className:'debugger'
                 },
-                children:{
+                __children:{
                     'header':{
                         tagName:'div',
-                        children:{
+                        __children:{
                             'connectionopts':{
                                 tagName:'div',
-                                children:{
+                                __children:{
                                     'bleopts':{
                                         tagName:'div',
-                                        attributes:{
+                                        __attributes:{
                                             className:'config'
                                         },
-                                        children:{                
+                                        __children:{                
                                             'bleconnect':{
                                                 tagName:'button',
                                                 innerText:'Connect BLE Device',
-                                                onrender:(self: HTMLElement, info?: ElementInfo)=>{
+                                                __onrender:(self: HTMLElement)=>{
                                                     self.onclick = () => {
 
                                                         let parent = document.querySelector('device-debugger');
@@ -504,14 +501,14 @@ const domtree = {
                                                         }); //set options in bleconfig
                                                     }
                                                 }
-                                            } as ElementProps,
+                                            } as HTMLNodeProperties,
                                             'bleconfigdropdown':{
                                                 tagName:'button',
                                                 innerText:'--',
                                                 style:{
                                                     float:'right'
                                                 },
-                                                attributes:{
+                                                __attributes:{
                                                     onclick:(ev)=>{
                                                         //to make this more modular to select the adjacent node, ev.target.parentNode.querySelector('#bleconfigcontainer')
                                                         if( ev.target.parentNode.querySelector('#bleconfigcontainer').style.display === 'none') {
@@ -524,10 +521,10 @@ const domtree = {
                                                         }
                                                         // console.log(ev)
                                                         // let node = ev.target.node;
-                                                        // for(const key in node.children) {
-                                                        //     if(node.children[key].element) {
-                                                        //         if(!node.children[key].element.style.display) node.children[key].element.style.display = 'none';
-                                                        //         else node.children[key].element.style.display = '';
+                                                        // for(const key in node.__children) {
+                                                        //     if(node.__children[key].element) {
+                                                        //         if(!node.__children[key].element.style.display) node.__children[key].element.style.display = 'none';
+                                                        //         else node.__children[key].element.style.display = '';
                                                         //     }
                                                         // }
                                                     }
@@ -535,86 +532,86 @@ const domtree = {
                                             },
                                             'bleconfig':{
                                                 tagName:'div',
-                                                children:{
+                                                __children:{
                                                     'bleconfigcontainer':{
                                                         tagName:'div',
-                                                        children:{
+                                                        __children:{
                                                             'namePrefixLabel':{
                                                                 tagName:'label',
                                                                 innerText:'BLE Device Name',
-                                                                children:{
+                                                                __children:{
                                                                     'namePrefix':{
                                                                         tagName:'input',
-                                                                        attributes:{
+                                                                        __attributes:{
                                                                             type:'text',
                                                                             placeholder:'e.g. ESP32',
                                                                         }
-                                                                    } as ElementProps,
+                                                                    } as HTMLNodeProperties,
                                                                 }
-                                                            } as ElementProps,
+                                                            } as HTMLNodeProperties,
                                                             'ln':{template:'<br/>'},
                                                             'deviceIdLabel':{
                                                                 tagName:'label',
                                                                 innerText:'BLE Device ID (direct connect)',
-                                                                children:{
+                                                                __children:{
                                                                     'deviceId':{
                                                                         tagName:'input',
-                                                                        attributes:{
+                                                                        __attributes:{
                                                                             type:'text'
                                                                         }
-                                                                    } as ElementProps,
+                                                                    } as HTMLNodeProperties,
                                                                 }
-                                                            } as ElementProps,
+                                                            } as HTMLNodeProperties,
                                                             'ln2':{template:'<br/>'},
                                                             'serviceuuidLabel':{
                                                                 tagName:'label',
                                                                 innerText:'Primary Service UUID(s), comma separated',
-                                                                children:{
+                                                                __children:{
                                                                     'serviceuuid':{
                                                                         tagName:'input',
-                                                                        attributes:{
+                                                                        __attributes:{
                                                                             type:'text',
                                                                             value:'0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase(),
                                                                             placeholder:'0000CAFE-B0BA-8BAD-F00D-DEADBEEF0000'.toLowerCase()
                                                                         }
-                                                                    } as ElementProps,
+                                                                    } as HTMLNodeProperties,
                                                                 }
-                                                            } as ElementProps,
+                                                            } as HTMLNodeProperties,
                                                             // 'ln3':{template:'<br/>'},
                                                             // 'servicesLabel':{
                                                             //     tagName:'label',
                                                             //     innerText:'Services Config ',
-                                                            //     children:{
+                                                            //     __children:{
                                                             //         'services':{ //need to configure options for multiple services and multiple characteristics per service in like a table
                                                             //             tagName:'table',
                                                             //             style:{
                                                             //                 border:'1px solid black',
                                                             //                 display:'flex'
                                                             //             },
-                                                            //             children:{
+                                                            //             __children:{
                                                             //             }
-                                                            //         } as ElementProps
+                                                            //         } as HTMLNodeProperties
                                                             //     }
                                                             // }
                                                         }
-                                                    } as ElementProps,
-                                                } as ElementProps,
-                                            } as ElementProps,
+                                                    } as HTMLNodeProperties,
+                                                } as HTMLNodeProperties,
+                                            } as HTMLNodeProperties,
                                         }
-                                    } as ElementProps,
+                                    } as HTMLNodeProperties,
                                     'serialopts':{
                                         tagName:'div',
-                                        attributes:{
+                                        __attributes:{
                                             className:'config'
                                         },
-                                        onrender:(self)=>{
+                                        __onrender:(self)=>{
                                             if(isMobile()) self.style.display = 'none';
                                         },
-                                        children:{
+                                        __children:{
                                             'serialconnect':{
                                                 tagName:'button',
                                                 innerText:'Connect USB Device',
-                                                onrender:(elm: HTMLElement, info?: ElementInfo)=>{
+                                                __onrender:(elm: HTMLElement)=>{
                 
                                                     let parent = document.querySelector('device-debugger');
                 
@@ -987,14 +984,14 @@ const domtree = {
                                                 },
                                                     
                                                 
-                                            } as ElementProps,
+                                            } as HTMLNodeProperties,
                                             'serialconfigdropdown':{
                                                 tagName:'button',
                                                 innerText:'--',
                                                 style:{
                                                     float:'right'
                                                 },
-                                                attributes:{
+                                                __attributes:{
                                                     onclick:(ev)=>{
                                                         if(ev.target.parentNode.querySelector('#serialconfigcontainer').style.display === 'none') {
                                                             ev.target.parentNode.querySelector('#serialconfigcontainer').style.display = '';
@@ -1007,57 +1004,57 @@ const domtree = {
                 
                                                     }
                                                 }
-                                            } as ElementProps,
+                                            } as HTMLNodeProperties,
                                             'serialconfig':{ //need labels
                                                 tagName:'div',
-                                                children:{
+                                                __children:{
                                                     'serialconfigcontainer':{
                                                         tagName:'div',
-                                                        children:{
+                                                        __children:{
                                                             'baudRateLabel':{
                                                                 tagName:'label',
                                                                 innerText:'Baud Rate (bps)',
-                                                                children:{
+                                                                __children:{
                                                                     'baudRate':{
                                                                         tagName:'input',
-                                                                        attributes:{
+                                                                        __attributes:{
                                                                             type:'number',
                                                                             placeholder:115200,
                                                                             value:115200,
                                                                             min:1, //anything below 9600 is unlikely
                                                                             max:10000000 //10M baud I think is highest web serial supports... might only be 921600
                                                                         }
-                                                                    } as ElementProps
+                                                                    } as HTMLNodeProperties
                                                                 }
-                                                            } as ElementProps,
+                                                            } as HTMLNodeProperties,
                                                             'ln':{template:'<br/>'},
                                                             'bufferSizeLabel':{
                                                                 tagName:'label',
                                                                 innerText:'Read/Write buffer size (bytes)',
-                                                                children:{
+                                                                __children:{
                                                                     'bufferSize':{
                                                                         tagName:'input',
-                                                                        attributes:{
+                                                                        __attributes:{
                                                                             type:'number',
                                                                             placeholder:255,
                                                                             value:255,
                                                                             min:1,
                                                                             max:10000000 
                                                                         }
-                                                                    } as ElementProps,
+                                                                    } as HTMLNodeProperties,
                                                                 }
-                                                            } as ElementProps,
+                                                            } as HTMLNodeProperties,
                                                             'ln2':{template:'<br/>'},
                                                             'parityLabel':{
                                                                 tagName:'label',
                                                                 innerText:'Parity',
-                                                                children:{
+                                                                __children:{
                                                                     'parity':{
                                                                         tagName:'select',
-                                                                        children:{
+                                                                        __children:{
                                                                             'none':{
                                                                                 tagName:'option',
-                                                                                attributes:{
+                                                                                __attributes:{
                                                                                     value:'none',
                                                                                     selected:true,
                                                                                     innerText:'none'
@@ -1065,67 +1062,67 @@ const domtree = {
                                                                             },
                                                                             'even':{
                                                                                 tagName:'option',
-                                                                                attributes:{
+                                                                                __attributes:{
                                                                                     value:'even',
                                                                                     innerText:'even'
                                                                                 }
                                                                             },
                                                                             'odd':{
                                                                                 tagName:'option',
-                                                                                attributes:{
+                                                                                __attributes:{
                                                                                     value:'odd',
                                                                                     innerText:'odd'
                                                                                 }
                                                                             }
                                                                         }
-                                                                    } as ElementProps,
+                                                                    } as HTMLNodeProperties,
                                                                 }
-                                                            } as ElementProps,
+                                                            } as HTMLNodeProperties,
                                                             'ln3':{template:'<br/>'},
                                                             'dataBitsLabel':{
                                                                 tagName:'label',
                                                                 innerText:'Data bits (7 or 8)',
-                                                                children:{
+                                                                __children:{
                                                                     'dataBits':{
                                                                         tagName:'input',
-                                                                        attributes:{
+                                                                        __attributes:{
                                                                             type:'number',
                                                                             placeholder:8,
                                                                             value:8,
                                                                             min:7, 
                                                                             max:8 
                                                                         }
-                                                                    } as ElementProps,
+                                                                    } as HTMLNodeProperties,
                                                                 }
-                                                            } as ElementProps,
+                                                            } as HTMLNodeProperties,
                                                             'ln4':{template:'<br/>'},
                                                             'stopBitsLabel':{
                                                                 tagName:'label',
                                                                 innerText:'Stop bits (1 or 2)',
-                                                                children:{
+                                                                __children:{
                                                                     'stopBits':{
                                                                         tagName:'input',
-                                                                        attributes:{
+                                                                        __attributes:{
                                                                             type:'number',
                                                                             placeholder:1,
                                                                             value:1,
                                                                             min:1, 
                                                                             max:2 
                                                                         }
-                                                                    } as ElementProps,
+                                                                    } as HTMLNodeProperties,
                                                                 }
-                                                            } as ElementProps,
+                                                            } as HTMLNodeProperties,
                                                             'ln5':{template:'<br/>'},
                                                             'flowControlLabel':{
                                                                 tagName:'label',
                                                                 innerText:'Flow control (hardware?)',
-                                                                children:{
+                                                                __children:{
                                                                     'flowControl':{
                                                                         tagName:'select',
-                                                                        children:{
+                                                                        __children:{
                                                                             'none':{
                                                                                 tagName:'option',
-                                                                                attributes:{
+                                                                                __attributes:{
                                                                                     value:'none',
                                                                                     selected:true,
                                                                                     innerText:'none'
@@ -1133,65 +1130,65 @@ const domtree = {
                                                                             },
                                                                             'hardware':{
                                                                                 tagName:'option',
-                                                                                attributes:{
+                                                                                __attributes:{
                                                                                     value:'hardware',
                                                                                     innerText:'hardware'
                                                                                 }
                                                                             },
                                                                         }
-                                                                    } as ElementProps,
+                                                                    } as HTMLNodeProperties,
                                                                 }
-                                                            } as ElementProps,
+                                                            } as HTMLNodeProperties,
                                                             'ln6':{template:'<br/>'},
                                                             'usbVendorIdLabel':{
                                                                 tagName:'label',
                                                                 innerText:'Vendor ID Filter? (hexadecimal)',
-                                                                children:{
+                                                                __children:{
                                                                     'usbVendorId':{
                                                                         tagName:'input',
-                                                                        attributes:{
+                                                                        __attributes:{
                                                                             type:'text',
                                                                             placeholder:'0xabcd',
                                                                         }
-                                                                    } as ElementProps,
+                                                                    } as HTMLNodeProperties,
                                                                 }
-                                                            } as ElementProps,
+                                                            } as HTMLNodeProperties,
                                                             'ln7':{template:'<br/>'},
                                                             'usbProductIdLabel':{
                                                                 tagName:'label',
                                                                 innerText:'Product ID Filter? (hexadecimal)',
-                                                                children:{
+                                                                __children:{
                                                                     'usbProductId':{
                                                                         tagName:'input',
-                                                                        attributes:{
+                                                                        __attributes:{
                                                                             type:'text',
                                                                             placeholder:'0xefgh',
                                                                         }
-                                                                    } as ElementProps,
+                                                                    } as HTMLNodeProperties,
                                                                 }
-                                                            } as ElementProps,
+                                                            } as HTMLNodeProperties,
                                                             'ln8':{template:'<br/>'},
                                                             'searchBytesLabel':{
                                                                 tagName:'label',
                                                                 innerText:'Search bytes? e.g. 0xD,0xA = \\r\\n',
-                                                                children:{
+                                                                __children:{
                                                                     'searchBytes':{
                                                                         tagName:'input',
-                                                                        attributes:{
+                                                                        __attributes:{
                                                                             type:'text',
                                                                             placeholder:'0xD,0xA',
                                                                         }
-                                                                    } as ElementProps,
+                                                                    } as HTMLNodeProperties,
                                                                 }
-                                                            } as ElementProps,
+                                                            } as HTMLNodeProperties,
                                                             'ln9':{template:'<br/>'},
                                                             'frequencyLabel':{
                                                                 tagName:'label',
                                                                 innerText:'Maximum read frequency? (ms)',
-                                                                children:{
+                                                                __children:{
                                                                     'frequency':{
                                                                         tagName:'input',
-                                                                        attributes:{
+                                                                        __attributes:{
                                                                             type:'number',
                                                                             placeholder:10,
                                                                             value:10,
@@ -1199,207 +1196,209 @@ const domtree = {
                                                                             max:10000000,
                                                                             step:0.001
                                                                         }
-                                                                    } as ElementProps
+                                                                    } as HTMLNodeProperties
                                                                 }
-                                                            } as ElementProps
+                                                            } as HTMLNodeProperties
                                                         }
-                                                    } as ElementProps
+                                                    } as HTMLNodeProperties
                                                 }
-                                            } as ElementProps
+                                            } as HTMLNodeProperties
                                         }
-                                    } as ElementProps
+                                    } as HTMLNodeProperties
                                 }
-                            } as ElementProps
+                            } as HTMLNodeProperties
                         }
-                    } as ElementProps,
+                    } as HTMLNodeProperties,
                     'connections':{
                         tagName:'div',
                         style:{
                             minHeight:'300px',
                             backgroundColor:'black'
                         }
-                    } as ElementProps,
-                    'customdecoder':{
-                        tagName:'div',
-                        innerHTML:'Custom Decoder',
-                        style:{
-                            display:'flex'
-                        },
-                        children:{
-                            'testinput':{
-                                tagName:'textarea',
-                                attributes:{
-                                    value:'new DataView(new Uint8Array([24,52,230,125,243,112,0,0,10,2,30]).buffer)',
-                                    onchange:(ev:Event)=>{
-                                        let elm = (ev.target as HTMLInputElement);
-                                        let value = (ev.target as HTMLInputElement).value;
-                                        if(value.includes(',') && !value.includes('[')) {
-                                            value = `[${value}]`;
-                                        }
-                                        try {
-                                            value = JSON.parse(value);   
-                                            if(Array.isArray(value)) {
-                                                let testfunction = (elm.parentNode.querySelector('#testfunction') as HTMLInputElement).value;
-                                                try {
-                                                    let fn = (0, eval)(testfunction);
-                                                    if(typeof fn === 'function') {
-                                                        (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = fn(value);
+                    } as HTMLNodeProperties,
+//                     'customdecoder':{
+//                         tagName:'div',
+//                         innerHTML:'Custom Decoder',
+//                         style:{
+//                             display:'flex'
+//                         },
+//                         __children:{
+//                             'testinput':{
+//                                 tagName:'textarea',
+//                                 __attributes:{
+//                                     value:'new DataView(new Uint8Array([24,52,230,125,243,112,0,0,10,2,30]).buffer)',
+//                                     onchange:(ev:Event)=>{
+//                                         let elm = (ev.target as HTMLInputElement);
+//                                         let value = (ev.target as HTMLInputElement).value;
+//                                         if(value.includes(',') && !value.includes('[')) {
+//                                             value = `[${value}]`;
+//                                         }
+//                                         try {
+//                                             value = JSON.parse(value);   
+//                                             if(Array.isArray(value)) {
+//                                                 let testfunction = (elm.parentNode.querySelector('#testfunction') as HTMLInputElement).value;
+//                                                 try {
+//                                                     let fn = (0, eval)(testfunction);
+//                                                     if(typeof fn === 'function') {
+//                                                         (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = fn(value);
                 
-                                                    }
-                                                } catch (er) {
-                                                    (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
-                                                }
-                                            }
-                                        } catch(er) {
-                                            (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
-                                        }
-                                    }
-                                }
-                            } as ElementProps,
-                            'testfunction':{
-                                tagName:'textarea',
-                                onrender:(self) => {
+//                                                     }
+//                                                 } catch (er) {
+//                                                     (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
+//                                                 }
+//                                             }
+//                                         } catch(er) {
+//                                             (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
+//                                         }
+//                                     }
+//                                 }
+//                             } as HTMLNodeProperties,
+//                             'testfunction':{
+//                                 tagName:'textarea',
+//                                 __onrender:(self) => {
                                     
-                                },
-                                attributes:{
-                                    value:`//value is a DataView
-(value) => {
-    return value.buffer;
-}`,
-                                    onchange:(ev:Event) => { //when you click away
-                                        let elm = (ev.target as HTMLInputElement);
-                                        let value = (ev.target as HTMLInputElement).value;
+//                                 },
+//                                 __attributes:{
+//                                     value:`//value is a DataView
+// (value) => {
+//     return value.buffer;
+// }`,
+//                                     onchange:(ev:Event) => { //when you click away
+//                                         let elm = (ev.target as HTMLInputElement);
+//                                         let value = (ev.target as HTMLInputElement).value;
                                         
-                                        try {
-                                            let fn = (0, eval)(value);
-                                            if(typeof fn === 'function') {
-                                                let testvalue = (elm.parentNode.querySelector('#testinput') as HTMLInputElement).value;
-                                                if(testvalue.includes(',') && !testvalue.includes('[')) {
-                                                    testvalue = `new DataView(new Uint8Array([${testvalue}]).buffer)`;
-                                                }
-                                                try {
-                                                    testvalue = JSON.parse(testvalue);  
-                                                    (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = fn(testvalue);
-                                                } catch(er) {
-                                                    (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
-                                                } 
-                                            }
-                                        } catch (er) {
-                                            (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
-                                        }
-                                    }
-                                }
-                            } as ElementProps,
-                            'testoutput':{
-                                tagName:'div',
-                                style:{
-                                    minHeight:'50px',
-                                    minWidth:'50px',
-                                    color:'white',
-                                    backgroundColor:'black',
-                                    overflowX:'scroll'
-                                }
-                            } as ElementProps,
-                            'testdecoder':{
-                                tagName:'button',
-                                innerText:'Test',
-                                attributes:{
-                                    onclick:(ev)=>{
-                                        let elm = (ev.target as HTMLInputElement);
-                                        let value = (elm.parentNode.querySelector('#testfunction') as HTMLInputElement).value;
-                                        try {
-                                            let fn = (0, eval)(value);
-                                            if(typeof fn === 'function') {
-                                                let testvalue = (elm.parentNode.querySelector('#testinput') as HTMLInputElement).value;
-                                                if(testvalue.includes(',') && !testvalue.includes('[')) {
-                                                    testvalue = `[${testvalue}]`;
-                                                }
-                                                try {
-                                                    testvalue = JSON.parse(testvalue);  
-                                                    (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = fn(testvalue);
-                                                } catch(er) {
-                                                    (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
-                                                } 
-                                            }
-                                        } catch (er) {
-                                            (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
-                                        }
-                                    }
-                                }
-                            } as ElementProps,
-                            // 'suggested':{
-                            //     tagName:'div',
-                            //     innerHTML:`Recognized chart/csv output format: return {[key:string]:number|number[]} where you are returning an object with key:value pairs for tagged channels and numbers/arrays to be appended`
-                            // } as ElementProps,
-                            'decodernameLabel':{
-                                tagName:'label',
-                                innerText:'Name Decoder:',
-                                children:{
-                                    'decodername':{
-                                        tagName:'input',
-                                        attributes:{
-                                            type:'text',
-                                            value:'testdecoder',
-                                            placeholder:'mydecoder'
-                                        }
-                                    }
-                                }
-                            } as ElementProps,
-                            'submitdecoder':{
-                                tagName:'button',
-                                innerText:'Set',
-                                attributes:{
-                                    onclick:(ev)=>{
-                                        let elm = (ev.target as HTMLInputElement);
-                                        let value = (elm.parentNode.querySelector('#testfunction') as HTMLInputElement).value;
-                                        try {
-                                            let fn = (0, eval)(value);
-                                            if(typeof fn === 'function') {
-                                                let testvalue = (elm.parentNode.querySelector('#testinput') as HTMLInputElement).value;
-                                                if(testvalue.includes(',') && !testvalue.includes('[')) {
-                                                    testvalue = `[${testvalue}]`;
-                                                }
-                                                try {
-                                                    testvalue = JSON.parse(testvalue);  
-                                                    (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = fn(testvalue);
-                                                    let name = (elm.parentNode.querySelector('#decodername') as HTMLInputElement).value;
-                                                    if(!name) name = 'mydecoder';
-                                                    decoders[name] = fn; //set the decoder since it was successful
+//                                         try {
+//                                             let fn = (0, eval)(value);
+//                                             if(typeof fn === 'function') {
+//                                                 let testvalue = (elm.parentNode.querySelector('#testinput') as HTMLInputElement).value;
+//                                                 if(testvalue.includes(',') && !testvalue.includes('[')) {
+//                                                     testvalue = `new DataView(new Uint8Array([${testvalue}]).buffer)`;
+//                                                 }
+//                                                 try {
+//                                                     testvalue = JSON.parse(testvalue);  
+//                                                     (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = fn(testvalue);
+//                                                 } catch(er) {
+//                                                     (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
+//                                                 } 
+//                                             }
+//                                         } catch (er) {
+//                                             (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
+//                                         }
+//                                     }
+//                                 }
+//                             } as HTMLNodeProperties,
+//                             'testoutput':{
+//                                 tagName:'div',
+//                                 style:{
+//                                     minHeight:'50px',
+//                                     minWidth:'50px',
+//                                     color:'white',
+//                                     backgroundColor:'black',
+//                                     overflowX:'scroll'
+//                                 }
+//                             } as HTMLNodeProperties,
+//                             'testdecoder':{
+//                                 tagName:'button',
+//                                 innerText:'Test',
+//                                 __attributes:{
+//                                     onclick:(ev)=>{
+//                                         let elm = (ev.target as HTMLInputElement);
+//                                         let value = (elm.parentNode.querySelector('#testfunction') as HTMLInputElement).value;
+//                                         try {
+//                                             let fn = (0, eval)(value);
+//                                             if(typeof fn === 'function') {
+//                                                 let testvalue = (elm.parentNode.querySelector('#testinput') as HTMLInputElement).value;
+//                                                 if(testvalue.includes(',') && !testvalue.includes('[')) {
+//                                                     testvalue = `[${testvalue}]`;
+//                                                 }
+//                                                 try {
+//                                                     testvalue = JSON.parse(testvalue);  
+//                                                     (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = fn(testvalue);
+//                                                 } catch(er) {
+//                                                     (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
+//                                                 } 
+//                                             }
+//                                         } catch (er) {
+//                                             (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
+//                                         }
+//                                     }
+//                                 }
+//                             } as HTMLNodeProperties,
+//                             // 'suggested':{
+//                             //     tagName:'div',
+//                             //     innerHTML:`Recognized chart/csv output format: return {[key:string]:number|number[]} where you are returning an object with key:value pairs for tagged channels and numbers/arrays to be appended`
+//                             // } as HTMLNodeProperties,
+//                             'decodernameLabel':{
+//                                 tagName:'label',
+//                                 innerText:'Name Decoder:',
+//                                 __children:{
+//                                     'decodername':{
+//                                         tagName:'input',
+//                                         __attributes:{
+//                                             type:'text',
+//                                             value:'testdecoder',
+//                                             placeholder:'mydecoder'
+//                                         }
+//                                     }
+//                                 }
+//                             } as HTMLNodeProperties,
+//                             'submitdecoder':{
+//                                 tagName:'button',
+//                                 innerText:'Set',
+//                                 __attributes:{
+//                                     onclick:(ev)=>{
+//                                         let elm = (ev.target as HTMLInputElement);
+//                                         let value = (elm.parentNode.querySelector('#testfunction') as HTMLInputElement).value;
+//                                         try {
+//                                             let fn = (0, eval)(value);
+//                                             if(typeof fn === 'function') {
+//                                                 let testvalue = (elm.parentNode.querySelector('#testinput') as HTMLInputElement).value;
+//                                                 if(testvalue.includes(',') && !testvalue.includes('[')) {
+//                                                     testvalue = `[${testvalue}]`;
+//                                                 }
+//                                                 try {
+//                                                     testvalue = JSON.parse(testvalue);  
+//                                                     (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = fn(testvalue);
+//                                                     let name = (elm.parentNode.querySelector('#decodername') as HTMLInputElement).value;
+//                                                     if(!name) name = 'mydecoder';
+//                                                     decoders[name] = fn; //set the decoder since it was successful
 
-                                                    let option = `<option value='${name}'>${name}</option>`;
-                                                    document.querySelectorAll('select').forEach((e) => {
-                                                        if(e.id.includes('decoder')) {
-                                                            e.insertAdjacentHTML('beforeend',option);
-                                                        } //update existing selectors
-                                                    })
+//                                                     let option = `<option value='${name}'>${name}</option>`;
+//                                                     document.querySelectorAll('select').forEach((e) => {
+//                                                         if(e.id.includes('decoder')) {
+//                                                             e.insertAdjacentHTML('beforeend',option);
+//                                                         } //update existing selectors
+//                                                     })
 
-                                                } catch(er) {
-                                                    (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
-                                                } 
-                                            }
-                                        } catch (er) {
-                                            (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
-                                        }
-                                    }
-                                }
-                            } as ElementProps
-                        }
-                    } as ElementProps
+//                                                 } catch(er) {
+//                                                     (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
+//                                                 } 
+//                                             }
+//                                         } catch (er) {
+//                                             (elm.parentNode.querySelector('#testoutput') as HTMLElement).innerText = er;
+//                                         }
+//                                     }
+//                                 }
+//                             } as HTMLNodeProperties
+//                         }
+//                     } as HTMLNodeProperties
                 }
-            } as ElementProps
+            } as HTMLNodeProperties
         } 
-    } as ComponentProps
+    } as HTMLNodeProperties
 };
 
 
 
 const router = new Router({
     roots:{
-        workers,
-        workerCanvasRoutes,
-        domtree
+        ...workers,
+        ...workerCanvasRoutes,
+        ...domtree
     },
-    loaders:{htmlloader}
+    loaders:{
+        wchtmlloader
+    }
 });
 
 

@@ -4,11 +4,11 @@ import {
     workerCanvasRoutes,
      //GPUService 
     } from 'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
-import { WebSerial } from './src/serial/serialstream'; //extended classes need to be imported for compilation
-import { decoders } from './src/devices/index';
+import { WebSerial } from '../src/serial/serialstream'; //extended classes need to be imported for compilation
+import { decoders } from '../src/devices/index';
 import { WebglLinePlotUtil } from 'webgl-plot-utils'//'../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils'//
-import { ByteParser } from "./src/util/ByteParser";
-import { BiquadChannelFilterer } from './src/util/BiquadFilters';
+import { ByteParser } from "../src/util/ByteParser";
+import { BiquadChannelFilterer } from '../src/util/BiquadFilters';
 //import * as bfs from './storage/BFSUtils'
 
 declare var WorkerGlobalScope;
