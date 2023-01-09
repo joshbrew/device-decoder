@@ -13,7 +13,7 @@ export const bme280codec = (data:any) => {
     else arr = data;
 
     let output:any = {
-        timestamp:[],
+        timestamp:Date.now(),
         temp:[],
         pressure:[],
         altitude:[] //in meters
