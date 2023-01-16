@@ -112,53 +112,7 @@ You can add your own device profiles easily with a custom name and and the worke
 
 If your device profile is using imported utilities, it cannot simply be transferred unless you know what utilities are available on globalThis on the worker, so you need to create your own worker and make sure a modified Devices list is present. We demonstrated this a bit in our own workers, e.g. with our usage of ByteParser.
 
-
-#### See [`src/devices/index.ts`](./src/devices/index.ts) for supported settings
-
-### BLE
-
-Using `@capacitor-community/bluetooth-le` for an interoperable Web Bluetooth API + Native Android or IOS library,
-we have a nice set of controls for easily creating bluetooth LE drivers that are lightweight and interoperable. The Web Bluetooth APIs are either broken or locked on mobile so this is the best workaround, and does not require differentiating code based on platform.
-
-To add your own BLE drivers, you can model your drivers after this format then set the settings accordingly in `index.ts`
-
-Here is a very simple example from [`./src/devices/blueberry.ts`](./src/devices/blueberry.ts):
-
-```ts
-
-//turn incoming raw data into a readable object format
-export function blueberrycodec(value:DataView) {
-
-    let output = {
-        LED1: value.getInt32(2),
-        LED2: value.getInt32(6),
-        LED3: value.getInt32(10)
-    }
-
-    return output;
-}
-
-//write down the settings for your device
-export const blueberryBLESettings = {
-    deviceType:'BLE', //required
-    deviceName:'blueberry', //required
-    namePrefix:'blueberry',
-    services:{
-        '0f0e0d0c-0b0a-0908-0706-050403020100':{
-            '1f1e1d1c-1b1a-1918-1716-151413121110':{
-                write:undefined //e.g. new Uint8Array([0xA0],[redValue], [greenValue], [blueValue]); //for rgb controller
-            },
-            '3f3e3d3c-3b3a-3938-3736-353433323130':{
-                codec:blueberrycodec, //specific callback for this characteristic
-                notify:true, //subscribe for notifications
-            }
-        }
-    }
-} as BLEDeviceSettings
-```
-
-
-You can see the expected settings for each type of device here:
+You can see the expected settings for each type of device profile here:
 ```ts
 
 
@@ -219,7 +173,51 @@ type CustomDeviceSettings = {
 
 ```
 
+## Usage:
 
+#### See [`src/devices/index.ts`](./src/devices/index.ts) for supported settings
+
+### BLE
+
+Using `@capacitor-community/bluetooth-le` for an interoperable Web Bluetooth API + Native Android or IOS library,
+we have a nice set of controls for easily creating bluetooth LE drivers that are lightweight and interoperable. The Web Bluetooth APIs are either broken or locked on mobile so this is the best workaround, and does not require differentiating code based on platform.
+
+To add your own BLE drivers, you can model your drivers after this format then set the settings accordingly in `index.ts`
+
+Here is a very simple example from [`./src/devices/blueberry.ts`](./src/devices/blueberry.ts):
+
+```ts
+
+//turn incoming raw data into a readable object format
+export function blueberrycodec(value:DataView) {
+
+    let output = {
+        LED1: value.getInt32(2),
+        LED2: value.getInt32(6),
+        LED3: value.getInt32(10)
+    }
+
+    return output;
+}
+
+//write down the settings for your device
+export const blueberryBLESettings = {
+    deviceType:'BLE', //required
+    deviceName:'blueberry', //required
+    namePrefix:'blueberry',
+    services:{
+        '0f0e0d0c-0b0a-0908-0706-050403020100':{
+            '1f1e1d1c-1b1a-1918-1716-151413121110':{
+                write:undefined //e.g. new Uint8Array([0xA0],[redValue], [greenValue], [blueValue]); //for rgb controller
+            },
+            '3f3e3d3c-3b3a-3938-3736-353433323130':{
+                codec:blueberrycodec, //specific callback for this characteristic
+                notify:true, //subscribe for notifications
+            }
+        }
+    }
+} as BLEDeviceSettings
+```
 
 And to add specific chart settings in the debugger or if you want to use our webgl plot util in other apps:
 
