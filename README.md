@@ -3,6 +3,10 @@
 
 This supports Web Bluetooth API + Mobile Native (via `@capacitor-community/bluetooth-le`) and Web Serial API using convenient wrappers.
 
+API wrappers (usable independently): 
+- [`ble_client.ts`](./src/ble) wraps @capacitor-community/bluetooth-le with easier handles. `npm i ble-wrapper`
+- [`serialstream.ts`](./src/serial) wraps the Web Serial API with easy handles and buffering + transform stream support. `npm i webserial-wrapper`
+
 Using this library, we have created:
 - A general purpose debugger for BLE and USB streaming devices ([source](./debugger), [website](https://devicedebugger.netlify.app))
 - An EEG acquisition system with filters and coherence analysis ([source](https://github.com/brainsatplay/graphscript/examples/eegnfb))
@@ -109,11 +113,9 @@ let info = initDevice(
 )
 ```
 
-## Contributing
-### Repo Contents
-[`device.frontend.ts`](./src/device.frontend.ts) provides a general purpose library for BLE and USB device streaming.
+You may also specify `roots` in the config object which will subscribe to all outputs from the stream worker thread to be used with [`graphscript`](https://github.com/brainsatplay/graphscript) formatting. In the [`eegnfb`](https://github.com/brainsatplay/graphscript/examples/eegnfb) example in the GS repo we demonstrated piping multiple workers this way e.g. to run algorithms or build CSV files in IndexedDB.
 
-This library, however, is composed of independent and minimal BLE and USB API modules. [`ble_client.ts`](./src/ble) wraps @capacitor-community/bluetooth-le with easier handles, whereas [`serialstream.ts`](./src/serial) wraps the Web Serial API with easy handles and buffering + transform stream support.
+## Contributing
 
 ### How to Write your Own Drivers
 > **Note:** To add your new driver the library's source, in [`./src/devices/index.ts`](./src/devices/index.ts), link the new settings to the Devices object. You can add chart and filter settings too which can be enabled following the streamWorkerRoutes calls, which right now are demonstrated in a couple examples.
