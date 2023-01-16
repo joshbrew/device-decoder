@@ -387,7 +387,7 @@ export const customDevice = {
         //e.g.
         let info = Object.assign(Object.assign({},customDevice),settings); //e.g. create a copy of this settings object for this connection instance
         
-        let device = Device() //some driver
+        let device = Device() //e.g. some driver
         
         device.ondata = info.ondata;
         

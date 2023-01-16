@@ -81,13 +81,15 @@ export class BLEClient extends ByteParser {
                 res(await this.reconnect(options.deviceId));
             } else {
                 if(options) {
-                    let deviceRequest:any = {
-                        filters:[{services:services}]
-                    };
-                    if(!this.isMobile()) deviceRequest.optionalServices = services; //required on web
-                    if(options?.namePrefix) deviceRequest.filters[0].namePrefix = options.namePrefix;// = options.namePrefix;
-                    if(options?.name) deviceRequest.filters[0].name = options.name;// = options.namePrefix;
-                
+
+                    let deviceRequest = {
+                        services:Array.from(Object.keys(options.services)),
+                        name:options.name,
+                        namePrefix:options.namePrefix
+                    }
+
+                    console.log(deviceRequest);
+                    
                     this.client.requestDevice(deviceRequest)
                         .then((device) => {
                             res(this.setupDevice(device, options));

@@ -1,6 +1,6 @@
 {
     "name": "ble-wrapper",
-    "version": "1.0.2",
+    "version": "1.0.5",
     "description": "capacitor-community/bluetooth-le wrapper for quicker config. IOS/Android-native, & Web Bluetooth in one small package",
     "main": "dist/ble_client.js",
     "module":"dist/ble_client.esm.js",
@@ -23,7 +23,7 @@
     "author": "Joshua Brewster",
     "license": "AGPL-3.0-or-later",
     "dependencies": {
-        "@capacitor-community/bluetooth-le": "~2.0.1"
+        "@capacitor-community/bluetooth-le": "~2.1.0"
     },
     "devDependencies": {
         "@types/node": "^18.0.5",
