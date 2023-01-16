@@ -81,13 +81,13 @@ The default `Devices` object is organized as follows:
 N/A (for now)
 
 #### CUSTOM
-N/A (for now)
 
-> **Note:** All drivers contained beneath a `CUSTOM` prefix are contained in a separate `device-decoder.third-party` package as they contain much larger third party drivers that do not fit into our format readily. 
-> 
-> As such, they've been formatted with simple objects to generalize easily and get the multithreading benefits of `device-decoder`.
->
-> You can create these simple objects to pipe anything through our threading system!
+- `simulator`: generates sine waves
+- `device-decoder.third-party` contains muse and ganglion drivers.
+
+These drivers are formatted with simple objects to generalize easily and get the multithreading benefits of `device-decoder`.
+
+You can create these simple objects to pipe anything through our threading system!
 
 ### Monitoring Multiple Characteristics
 For BLE devices with multiple notification or read characteristics, you can supply an object to the `ondecoded` property in `initDevice`. This allows you to specify callback functions for each characteristic. The routes will subscribe to the dedicating stream parsing worker (one per initDevice call) and will receive all outputs from there—so you will need to constrain the pipeline from there yourself. 
@@ -190,7 +190,7 @@ export const serialSettings = {
 ```
 
 #### Custom API
-If you have an existing API that acquires or generates data, you can wrap this in a `device-decoder` device profile to take advantage of the same charting and filtering features:
+If you have an existing API that acquires or generates data, you can wrap this in a `device-decoder` device profile to take advantage of the same threading features:
 
 ```js
 
@@ -229,7 +229,7 @@ export const customDevice = {
 ```
 
 ### Adding Chart and Filter Settings
-You may also add chart and filter settings to apply in the worker codecs automatically:
+This is just an extra feature for the debugger example and in our other examples. You may ignore this otherwise.
 
 ```js
 export const chartSettings = {
