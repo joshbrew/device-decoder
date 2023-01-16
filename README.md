@@ -77,8 +77,6 @@ The default `Devices` object is organized as follows:
 - `muse`: Integrates with the [muse-js](https://github.com/urish/muse-js) library.
 - `ganglion`: Modifies the [ganglion-ble](https://github.com/neurosity/ganglion-ble/tree/master/src) library.
 
-#### USB_CUSTOM
-N/A (for now)
 
 #### CUSTOM
 
