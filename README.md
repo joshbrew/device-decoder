@@ -88,7 +88,8 @@ These drivers are formatted with simple objects to generalize easily and get the
 You can create these simple objects to pipe anything through our threading system!
 
 ### Monitoring Multiple Characteristics
-For BLE devices with multiple notification or read characteristics, you can supply an object to the `ondecoded` property in `initDevice`. This allows you to specify callback functions for each characteristic. The routes will subscribe to the dedicating stream parsing worker (one per initDevice call) and will receive all outputs from there—so you will need to constrain the pipeline from there yourself. 
+For BLE devices with multiple notification or read characteristics, you can supply an object to the `ondecoded` property in `initDevice`. 
+This allows you to specify callback functions for each characteristic. 
 
 You will need to know which characteristics to specify from the device profile.
 ```js
