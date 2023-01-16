@@ -1,7 +1,7 @@
 # device-decoder
 `device-decoder` is a JavaScript library for uniformly and efficiently working with streaming devices on web pages and native apps.
 
-This supports Web Bluetooth API + Mobile Native (via `@capacitor-community/bluetooth-le`) and Web Serial API using convenient wrappers.
+This supports Web Bluetooth API + Native Mobile (via [`@capacitor-community/bluetooth-le`](https://github.com/capacitor-community/bluetooth-le)) and Web Serial API using convenient wrappers. Android has severe limits with Web Bluetooth (e.g. 20 byte MTU limit, 512 byte limit elsewhere) so the native library is necessary for mobile builds.
 
 API wrappers (usable independently): 
 - [`ble_client.ts`](./src/ble) wraps @capacitor-community/bluetooth-le with easier handles. `npm i ble-wrapper`
