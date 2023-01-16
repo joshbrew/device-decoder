@@ -414,48 +414,7 @@ export const customDevice = {
 
 ### Finally
 
-In [`./src/devices/index.ts`](./src/devices/index.ts), link the new settings to the relevant objects 
-
-```ts
-
-//containe unique (non-default) BLE and Serial device connection settings + codecs to parse key:value pairs from streamed data channels
-export const Devices = {
-    BLE:{
-        'nrf5x':nrf5xBLESettings,
-        'hegduino':hegduinoBLESettings,
-        'cognixionONE':cognixionONEBLESettings,
-        'statechanger':statechangerBLESettings,
-        'blueberry':blueberryBLESettings,
-        'blueberry2':blueberry2BLESettings,
-        'heart_rate':heartRateBLESettings //generic bluetooth heart rate characteristic (compatible with many devices)
-    },
-    USB:{
-        'nrf5x':nrf5xSerialSettings,
-        'freeEEG32':freeeeg32SerialSettings,
-        'freeEEG32_optical':freeeeg32_optical_SerialSettings,
-        'freeEEG128':freeeeg128SerialSettings,
-        'hegduino':hegduinoSerialSettings,
-        'cyton':cytonSerialSettings,
-        'cyton_daisy':cytonSerialSettings,
-        'peanut':peanutSerialSettings,
-        'statechanger':statechangerSerialSettings,
-        'cognixionONE':cytonSerialSettings
-    },
-    BLE_CUSTOM:{ //CUSTOM indicates drivers not written by us that do not fit into our format readily, but we can generalize easily to get the multithreading benefits
-        'muse':museSettings,
-        'ganglion':ganglionSettings
-    },
-    USB_CUSTOM : {},
-    CUSTOM : {}
-};
-
-// For device debugger:
-//...filterPresets
-//...chartSettings
-//...decoders //decoders to transform any raw outputs not specified to a device
-
-```
-
+To add your new driver the library's source, in [`./src/devices/index.ts`](./src/devices/index.ts), link the new settings to the Devices object. You can add chart and filter settings too which can be enabled following the streamWorkerRoutes calls, which right now are demonstrated in a couple examples.
 
 ### Stream Worker Template
 
