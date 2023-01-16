@@ -163,7 +163,7 @@ export function initDevice(
             for(const characteristic in (settings as any).services[primaryUUID]) {
                 if(typeof options.ondecoded === 'function') {
                     if((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.notify) {
-                        (settings as any).services[primaryUUID][characteristic].notifyCallback = (data:DataView) => {
+                        if(!(settings as any).services[primaryUUID][characteristic].notifyCallback) (settings as any).services[primaryUUID][characteristic].notifyCallback = (data:DataView) => {
                             (streamworker as WorkerInfo).run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],[data.buffer]).then(options.ondecoded as any);
                         }
                         break; //only subscribe to first notification in our list if only one ondecoded function provided
@@ -171,12 +171,12 @@ export function initDevice(
                 } else if(typeof options.ondecoded === 'object') {
                     if(options.ondecoded[characteristic]) {
                         if((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.notify) {
-                            (settings as any).services[primaryUUID][characteristic].notifyCallback = (data:DataView) => {
+                            if(!(settings as any).services[primaryUUID][characteristic].notifyCallback) (settings as any).services[primaryUUID][characteristic].notifyCallback = (data:DataView) => {
                                 streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],[data.buffer]).then(options.ondecoded[characteristic]);
                             }
                         } 
                         if ((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.read) {
-                            (settings as any).services[characteristic].readCallback = (data:DataView) => {
+                            if(!(settings as any).services[primaryUUID][characteristic].readCallback) (settings as any).services[characteristic].readCallback = (data:DataView) => {
                                 streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],[data.buffer]).then(options.ondecoded[characteristic]);
                             }
                         }
