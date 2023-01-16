@@ -12,6 +12,7 @@ The main dist includes a globalThis.BLEClient declaration for browser inclusion 
 ```ts
 
 type DeviceOptions = {
+    name?:string;
     namePrefix?: string;
     deviceId?: string;
     onConnect?: () => void;
