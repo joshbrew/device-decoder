@@ -35,12 +35,16 @@ export { Devices, gsworker, filterPresets, chartSettings, decoders, FilterSettin
 
 //create streaming threads
 export function initDevice(
-    deviceType:'BLE'|'USB'|'OTHER'|'BLE_OTHER'|'USB_OTHER', //other includes prewritten drivers that don't fit our format very well, e.g. cloud streaming drivers or the musejs driver as they are self contained
-    deviceName:string, //one of the supported settings in Devices
+    settings:any,
     options:{ //you can update ondecoded and ondisconnect at any time
-        devices?:any, //defaults to base Devices list, else apply the third-party dist
+        devices?:{
+            [key:string]:{
+                [key:string]:any
+            }
+        },
         ondecoded:((data:any) => void)|{[key:string]:(data:any)=>void}, //a single ondata function or an object with keys corresponding to BLE characteristics
         onconnect?:((device:any) => void),
+        beforedisconnect?:((device:any) => void),
         ondisconnect?:((device:any) => void),
         roots?:{ //use secondary workers to run processes and report results back to the main thread or other
             [key:string]:WorkerRoute
@@ -49,15 +53,24 @@ export function initDevice(
         service?:WorkerService //can load up our own worker service, the library provides a default service
     }
 ) {
-    if(!options.devices) options.devices = Devices;
-    const settings = options.devices[deviceType][deviceName];
-
     if(!settings) return undefined;
+
+    let deviceType = settings.deviceType;
+    let deviceName = settings.deviceName;
 
     if(!options.workerUrl) options.workerUrl = gsworker;
     if(!options.service) options.service = workers;
 
     let streamworker = options.service.addWorker({url:options.workerUrl});
+
+    if(!options.devices) options.devices = Devices;
+    if(!options.devices[deviceType][deviceName]) {
+        let cpy = Object.assign({},settings);
+        for(const key in cpy) {
+            if(typeof cpy[key] === 'function') cpy[key] = cpy[key].toString();
+        }
+        streamworker.send({ route:'receiveDevice', args:cpy });
+    }
 
     if(options.roots) {
         for(const key in options.roots) {
@@ -70,7 +83,7 @@ export function initDevice(
         options.service.load(options.roots);
     }
 
-    if(deviceType.includes('OTHER')) {
+    if(deviceType.includes('CUSTOM')) {
 
         return new Promise (async (res,rej) => {
 
@@ -81,7 +94,7 @@ export function initDevice(
                 });
             };
 
-            settings.ondisconnect = () => { //set the ondisconnect command for the OTHER device spec
+            settings.ondisconnect = () => { //set the ondisconnect command for the CUSTOM device spec
                 options.service.terminate(streamworker._id as string);
                 if(options.roots) {
                     for(const key in options.roots) {
@@ -101,6 +114,7 @@ export function initDevice(
                     streamworker
                 },
                 disconnect:() => { 
+                    if(options.beforedisconnect) options.beforedisconnect(info);
                     settings.disconnect(init); 
                     if(options.ondisconnect) options.ondisconnect(info); 
                     if(options.roots) {

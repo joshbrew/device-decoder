@@ -19,6 +19,8 @@ const sps = 250;
 
 export const museSettings = { //include muse-js and import {MuseClient} from 'muse-js' for this to work
     sps, //base eeg sps, accelerometer is something else I think, I dunno
+    deviceType:'USB_CUSTOM',
+    deviceName:'muse',
     connect:(settings:any={}) => {
         return new Promise(async (res,rej) => {
             let _id = `muse${Math.floor(Math.random()*1000000000000000)}`;
@@ -141,11 +143,11 @@ export const museSettings = { //include muse-js and import {MuseClient} from 'mu
     },
     disconnect:(info) => {
         info.client.disconnect();
-        info.settings.ondisconnect(info);
     },
     onconnect:(info)=>{
         console.log('muse connected!', info);
     }, 
+    beforedisconnect:(info) => {},
     ondisconnect:(info)=>{
         console.log('muse disconnected!', info);
     },

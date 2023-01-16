@@ -41,6 +41,8 @@ export function hegduinocodec(value:any) {
 const sps = 40;
 
 export const hegduinoSerialSettings = {
+    deviceType:'USB',
+    deviceName:'hegduino',
     baudRate:115200,
     write:'t\n', //old firmware needs this
     codec:hegduinocodec,
@@ -51,6 +53,8 @@ export const hegduinoV1SerialSettings = Object.assign({}, hegduinoSerialSettings
 hegduinoV1SerialSettings.sps = 19;
 
 export const hegduinoBLESettings = {
+    deviceType:'BLE',
+    deviceName:'hegduino',
     sps, //only one output, so we can put an easier to find reference here 
     services:{
         ["6E400001-B5A3-F393-E0A9-E50E24DCCA9E".toLowerCase()]:{ //SERVICE_UUID -- for data

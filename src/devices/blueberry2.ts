@@ -32,6 +32,8 @@ export function blueberrylongcodec(value:DataView) {
 const sps = 40;
 
 export const blueberry2BLESettings = {
+    deviceType:'BLE',
+    deviceName:'blueberry2',
     namePrefix:'blueberry',
     services:{
         '0f0e0d0c-0b0a-0908-0706-050403020100':{

@@ -1,5 +1,6 @@
 import { 
-    WorkerService
+    WorkerService,
+    WorkerInfo
 } from 'graphscript' //'../../graphscript/services/worker/Worker.service'//
 import { SerialPortOptions, WebSerial } from './serial/serialstream'; //extended classes need to be imported for compilation
 import { decoders, Devices } from './devices/index';
@@ -17,11 +18,11 @@ import { parseFunctionFromText } from 'graphscript/src/services/utils';
 // set these variables as service graph props instead but this is a bit simpler.
 export function loadStreamWorkerGlobals() {
     //globalThis sets equivalent of window variables on worker
+    globalThis.Devices = Devices; //you can update this list and load it in your own worker file if they are complex drivers e.g. with additional imports, but you can refer e.g. to ByteParser from globalThis
     globalThis.WebSerial = WebSerial;
     globalThis.decoders = decoders;
     globalThis.decoder = 'raw';
     globalThis.ByteParser = ByteParser;
-    globalThis.Devices = Devices;
     globalThis.filtering = true;
     globalThis.filters = {};
     globalThis.BiquadChannelFilterer = BiquadChannelFilterer;
@@ -36,12 +37,31 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
 }
 
 export const streamWorkerRoutes = { //serial API routes
+    'transferDevice':function transferDevice(device:{[key:string]:any}, worker:WorkerInfo) {
+        let cpy = Object.assign({},device);
+        for(const key in cpy) {
+            if(typeof cpy[key] === 'function') cpy[key] = cpy[key].toString();
+        }
+        worker.send({ route:'receiveDevice', args:cpy });
+    },
+    'receiveDevice':function receiveDevice(device:{[key:string]:any}) {
+        for(const key in device) {
+            if(typeof device[key] === 'string') {
+                let fn = parseFunctionFromText(device[key]);
+                if(typeof fn === 'function') {
+                    device[key] = fn;
+                }
+            }
+        }
+        if(!globalThis.Devices[device.deviceType]) globalThis.Devices[device.deviceType] = {};
+        globalThis.Devices[device.deviceType][device.deviceName] = device; //now primed
+    },
     'receiveDecoder':function receiveDecoder(decoder:any, decoderName:string) {
         globalThis.decoders[decoderName] = (0, eval)('('+decoder+')');
-},
+    },
     'receiveCodec':function receiveDeviceCodec(
         decoder:any, 
-        deviceType:'BLE'|'USB'|'BLE_OTHER'|'USB_OTHER'|'OTHER',
+        deviceType:'BLE'|'USB'|'BLE_CUSTOM'|'USB_CUSTOM'|'CUSTOM',
         device:string, //serial devices get one codec, ble devices get a codec per read/notify characteristic property
         service?:string,
         characteristic?:string
@@ -105,7 +125,7 @@ export const streamWorkerRoutes = { //serial API routes
         //console.log(decoded, this.__node.graph)
         return decoded;
     },
-    'setActiveDecoder':function setActiveDecoder(deviceType:'BLE'|'USB'|'BLE_OTHER'|'USB_OTHER'|'OTHER',device:string,service?:string,characteristic?:string) {
+    'setActiveDecoder':function setActiveDecoder(deviceType:'BLE'|'USB'|'BLE_CUSTOM'|'USB_CUSTOM'|'CUSTOM',device:string,service?:string,characteristic?:string) {
         //console.log('received decoder:',decoderName)
         if(globalThis.Devices[deviceType][device]?.codec) 
             globalThis.decoder = globalThis.Devices[deviceType][device]?.codec;
@@ -116,7 +136,7 @@ export const streamWorkerRoutes = { //serial API routes
     },
     'decodeDevice':function decodeDevice( //run a decoder based on a supported device spec
         data:any, 
-        deviceType:'BLE'|'USB'|'BLE_OTHER'|'USB_OTHER'|'OTHER',
+        deviceType:'BLE'|'USB'|'CUSTOM_BLE'|'CUSTOM_USB'|'CUSTOM',
         device:string, //serial devices get one codec, ble devices get a codec per read/notify characteristic property
         service?:string,
         characteristic?:string
@@ -129,7 +149,7 @@ export const streamWorkerRoutes = { //serial API routes
     },
     'decodeAndParseDevice':function decodeAndParseDevice(
         data:any, 
-        deviceType:'BLE'|'USB'|'BLE_OTHER'|'USB_OTHER'|'OTHER',
+        deviceType:'BLE'|'USB'|'CUSTOM_BLE'|'CUSTOM_USB'|'CUSTOM',
         deviceName:string, //serial devices get one codec, ble devices get a codec per read/notify characteristic property
         service?:string,
         characteristic?:string

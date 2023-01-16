@@ -5,6 +5,8 @@ import { max3010xcodec } from './max30102';
 import { mpu6050codec } from './mpu6050';
 export declare function nrf5x_usbcodec(data: any): any;
 export declare const nrf5xSerialSettings: {
+    deviceType: string;
+    deviceName: string;
     baudRate: number;
     buffering: {
         searchBytes: Uint8Array;
@@ -13,6 +15,8 @@ export declare const nrf5xSerialSettings: {
     sps: number;
 };
 export declare const nrf5xBLESettings: {
+    deviceType: string;
+    deviceName: string;
     sps: number;
     services: {
         '0000cafe-b0ba-8bad-f00d-deadbeef0000': {

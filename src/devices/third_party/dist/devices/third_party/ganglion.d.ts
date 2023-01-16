@@ -2,6 +2,8 @@ import { WebglLinePlotProps } from "webgl-plot-utils";
 import { FilterSettings } from "../../util/BiquadFilters";
 export declare const ganglionSettings: {
     sps: number;
+    deviceType: string;
+    deviceName: string;
     connect: (settings?: any) => Promise<unknown>;
     codec: (reading: any) => {
         0: any;
@@ -24,6 +26,7 @@ export declare const ganglionSettings: {
     };
     disconnect: (info: any) => void;
     onconnect: (info: any) => void;
+    beforedisconnect: (info: any) => void;
     ondisconnect: (info: any) => void;
     ondata: (data: any) => void;
 };

@@ -12,6 +12,8 @@ export declare function cognixionONE_EEG_codec(data: any): {
     timestamp: number;
 };
 export declare const cognixionONEBLESettings: {
+    deviceType: string;
+    deviceName: string;
     services: {
         [x: string]: {
             [x: string]: {
@@ -30,6 +32,21 @@ export declare const cognixionONEBLESettings: {
             };
         };
     };
+    sps: number;
+};
+export declare const cognixionONESerialSettings: {
+    deviceType: "USB";
+    deviceName: string;
+    sps?: number;
+    buffering?: {
+        searchBytes: Uint8Array;
+    };
+    codec: (data: any) => {
+        [key: string]: any;
+    };
+} & import("../serial/serialstream").SerialPortOptions & {
+    deviceType: string;
+    deviceName: string;
     sps: number;
 };
 export declare const cognixionONEChartSettings: Partial<WebglLinePlotProps>;

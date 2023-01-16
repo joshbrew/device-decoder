@@ -68,6 +68,8 @@ export declare const PeanutCodes: {
 };
 export declare function peanutcodec(data: any): any;
 export declare const peanutSerialSettings: {
+    deviceType: string;
+    deviceName: string;
     baudRate: number;
     bufferSize: number;
     write: string;

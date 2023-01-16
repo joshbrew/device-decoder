@@ -1,8 +1,8 @@
 
 import { WebglLinePlotProps } from "webgl-plot-utils";
-import { SerialPortOptions } from "../serial/serialstream";
 import { FilterSettings } from "../util/BiquadFilters";
 import { ByteParser } from "../util/ByteParser";
+import { SerialDeviceSettings } from "./types";
 
 const accScale = 0.002 / Math.pow(2, 4)
 
@@ -63,6 +63,8 @@ export function daisycytoncodec(data:any) {
 const sps = 250;
 
 export const cytonSerialSettings = {
+    deviceType:'USB',
+    deviceName:'cyton',
     baudRate:115200,
     codec:cytoncodec,
     write:'b',
@@ -71,9 +73,11 @@ export const cytonSerialSettings = {
         searchBytes:new Uint8Array([192,160]),
     },
     sps
-} as SerialPortOptions;
+} as SerialDeviceSettings;
 
 export const daisycytonSerialSettings = {
+    deviceType:'USB',
+    deviceName:'cyton_daisy',
     baudRate:115200,
     codec:daisycytoncodec,
     write:'b',
@@ -82,7 +86,7 @@ export const daisycytonSerialSettings = {
         searchBytes:new Uint8Array([192,160]),
     },
     sps
-} as SerialPortOptions;
+} as SerialDeviceSettings;
 
 const defaultChartSetting = {nSec:10, sps, units:'mV'};
 const defaultChartSetting2 = {nSec:10, sps};

@@ -60,6 +60,8 @@ export function peanutcodec(data:any) {
 }
 
 export const peanutSerialSettings = {
+    deviceType:'USB',
+    deviceName:'peanut',
     baudRate:38400,
     bufferSize:400, //less crashy
     write:'protocol 3\n', //need to send this on connect to initialize the output stream properly

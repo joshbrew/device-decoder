@@ -1,5 +1,7 @@
 export declare const simulatorSettings: {
     sps: number;
+    deviceType: string;
+    deviceName: string;
     simulate: {
         '0': {
             sps: number;

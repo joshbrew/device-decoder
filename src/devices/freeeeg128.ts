@@ -31,6 +31,8 @@ export function freeeeg128codec(data:any) {
 const sps = 250;
 
 export const freeeeg128SerialSettings = {
+    deviceType:'USB',
+    deviceName:'freeeeg128',
     baudRate:921600,
     bufferSize:2000,
     frequency:1.9,

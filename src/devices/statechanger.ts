@@ -41,11 +41,17 @@ export function statechangercodec(value:any) {
 }
 
 export const statechangerSerialSettings = {
+    deviceType:'USB',
+    deviceName:'statechanger',
     baudRate:115200,
-    codec:statechangercodec
+    codec:statechangercodec,
+    sps:20
 }
 
 export const statechangerBLESettings = {
+    deviceType:'BLE',
+    deviceName:'statechanger',
+    sps:20,
     services:{
         ["6E400001-B5A3-F393-E0A9-E50E24DCCA9E".toLowerCase()]:{ //SERVICE_UUID -- for data
             '6e400002-b5a3-f393-e0a9-e50e24dcca9e':{ //write //CHARACTERISTIC_UUID_RX

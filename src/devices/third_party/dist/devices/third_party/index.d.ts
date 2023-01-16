@@ -4,15 +4,20 @@ export declare const Devices3rdParty: {
     BLE_OTHER: {
         muse: {
             sps: number;
+            deviceType: string;
+            deviceName: string;
             connect: (settings?: any) => Promise<unknown>;
             codec: (reading: any) => any;
             disconnect: (info: any) => void;
             onconnect: (info: any) => void;
+            beforedisconnect: (info: any) => void;
             ondisconnect: (info: any) => void;
             ondata: (data: any) => void;
         };
         ganglion: {
             sps: number;
+            deviceType: string;
+            deviceName: string;
             connect: (settings?: any) => Promise<unknown>;
             codec: (reading: any) => {
                 0: any;
@@ -35,6 +40,7 @@ export declare const Devices3rdParty: {
             };
             disconnect: (info: any) => void;
             onconnect: (info: any) => void;
+            beforedisconnect: (info: any) => void;
             ondisconnect: (info: any) => void;
             ondata: (data: any) => void;
         };

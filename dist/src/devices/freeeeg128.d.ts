@@ -2,6 +2,8 @@ import { WebglLinePlotProps } from "webgl-plot-utils";
 import { FilterSettings } from "../util/BiquadFilters";
 export declare function freeeeg128codec(data: any): any;
 export declare const freeeeg128SerialSettings: {
+    deviceType: string;
+    deviceName: string;
     baudRate: number;
     bufferSize: number;
     frequency: number;

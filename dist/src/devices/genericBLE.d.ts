@@ -3,6 +3,8 @@ export declare function hrcodec(data: DataView): {
     timestamp: number;
 };
 export declare const heartRateBLESettings: {
+    deviceType: string;
+    deviceName: string;
     services: {
         heart_rate: {
             heart_rate_measurement: {

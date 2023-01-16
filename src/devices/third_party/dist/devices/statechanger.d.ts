@@ -13,8 +13,11 @@ export declare function statechangercodec(value: any): string | {
     right_heg: number;
 };
 export declare const statechangerSerialSettings: {
+    deviceType: string;
+    deviceName: string;
     baudRate: number;
     codec: typeof statechangercodec;
+    sps: number;
 };
 export declare const statechangerBLESettings: BLEDeviceOptions;
 export declare const statechangerChartSettings: Partial<WebglLinePlotProps>;

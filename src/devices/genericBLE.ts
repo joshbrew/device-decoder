@@ -9,6 +9,8 @@ export function hrcodec(data:DataView) {
 
 //this is a generic bluetooth gatt
 export const heartRateBLESettings = {
+    deviceType:'BLE',
+    deviceName:'heartrate',
     services:{
         'heart_rate': {
             'heart_rate_measurement':{

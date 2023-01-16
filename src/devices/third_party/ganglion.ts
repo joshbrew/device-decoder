@@ -17,6 +17,8 @@ const sps = 250;
 
 export const ganglionSettings = { //include muse-js and import {MuseClient} from 'muse-js' for this to work
     sps,
+    deviceType:'CUSTOM_BLE',
+    deviceName:'ganglion',
     connect:(settings:any={}) => {
         return new Promise(async (res,rej) => {
             let _id = `ganglion${Math.floor(Math.random()*1000000000000000)}`;
@@ -80,11 +82,13 @@ export const ganglionSettings = { //include muse-js and import {MuseClient} from
     },
     disconnect:(info) => {
         info.client.disconnect();
-        info.settings.ondisconnect(info);
     },
     onconnect:(info)=>{
         console.log('ganglion connected!', info);
     }, 
+    beforedisconnect:(info) => {
+
+    },
     ondisconnect:(info)=>{
         console.log('ganglion disconnected!', info);
     },

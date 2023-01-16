@@ -139,6 +139,77 @@ export const nrf5xBLESettings = {
     }
 }
 
+
+```
+
+
+
+You can see the expected settings for each type of device here:
+```ts
+
+
+type BLEDeviceSettings = {
+    deviceType:'BLE',
+    deviceName:string,
+    sps?:number, //samples per second
+    codec?:(data:any) => {[key:string]:any}, //transform data into a dictionary (preferred)
+    services?:{ 
+        [key:string]:{ // service uuid you want to set and all of the characteristic settings and responses, keys are UUIDs
+            [key:string]:{ // services can have an arbitrary number of characteristics, keys are UUIDs
+                codec?:(data:any) => {[key:string]:any},  //this is an additional setting for BLE characteristic specifications
+                
+                read?:boolean, //should we read on connect
+                readOptions?:TimeoutOptions,
+                readCallback?:((result:DataView)=>void),
+                write?:string|number|ArrayBufferLike|DataView, //should we write on connect and what should we write?
+                writeOptions?:TimeoutOptions,
+                writeCallback?:(()=>void),
+                notify?:boolean, //can this characteristic notify?
+                notifyCallback?:((result:DataView)=>void)
+                [key:string]:any
+            }
+        }
+    }
+} & BLEDeviceOptions
+
+type SerialDeviceSettings = {
+    deviceType:'USB',
+    deviceName:string,
+    sps?:number, //samples per second
+    buffering?:{
+        searchBytes:Uint8Array
+    },
+    codec:(data:any) => {[key:string]:any}, //transform data into a dictionary (preferred)
+} & SerialPortOptions
+
+type CustomDeviceSettings = {
+    deviceType:'CUSTOM'|'BLE_CUSTOM'|'USB_CUSTOM',
+    deviceName:string,
+    sps?:any, //samples per second
+    connect:(settings:any) => {
+        _id:string, //info object used in later callbacks
+        [key:string]:any
+    },
+    codec:(data:any) => { //transform data into a dictionary (preferred) //this runs on a thread so you can do more complex stuff at high speeds
+        [key:string]:any
+    },
+    disconnect:(info) => void,
+    //optional callbacks:
+    onconnect?:(info) => void,
+    beforedisconnect?:(info) => void,
+    ondisconnect?:(info) => void,
+    read?:(command:any) => any,
+    write?:(command:any) => any
+}
+
+
+```
+
+
+You may also add filter settings to apply in the worker codecs automatically. There are additional controls to toggle them on the fly if you dig into the stream.worker's routes
+
+```ts
+
 export const nrf5x_usbChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
         '0':{nSec:10, sps:250},
@@ -185,7 +256,6 @@ export const nrf5x_usbFilterSettings:{[key:string]:FilterSettings} = {
 
 ```
 
-You may also add filter settings to apply in the worker codecs automatically. There are additional controls to toggle them on the fly if you dig into the stream.worker's routes
 
 ### Other
 

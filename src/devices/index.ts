@@ -29,9 +29,7 @@ import { heartRateBLESettings, hrcodec } from './genericBLE';
 import { bme280codec } from './bme280';
 import { simulatorSettings } from './simulator';
 
-
-
-
+export * from './types'
 
 //containe unique (non-default) BLE and Serial device connection settings + codecs to parse key:value pairs from streamed data channels
 export const Devices = {
@@ -58,15 +56,16 @@ export const Devices = {
         'statechanger':statechangerSerialSettings,
         'cognixionONE':cytonSerialSettings
     },
-    BLE_OTHER : {
+    BLE_CUSTOM : {
         //muse:museSettings, //these are bloated so we will separate dists
         //ganglion:ganglionSettings
     },
-    USB_OTHER : {},
-    OTHER : {
+    USB_CUSTOM : {},
+    CUSTOM : {
         'simulator':simulatorSettings
     }
 };
+
 
 export const defaultChartSettings:any = {
     lines:{

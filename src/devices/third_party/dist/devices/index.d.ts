@@ -11,9 +11,12 @@ import { peanutcodec } from './peanut';
 import { nrf5x_usbcodec } from './nrf5x_usb';
 import { statechangercodec } from './statechanger';
 import { hrcodec } from './genericBLE';
+export * from './types';
 export declare const Devices: {
     BLE: {
         nrf5x: {
+            deviceType: string;
+            deviceName: string;
             sps: number;
             services: {
                 '0000cafe-b0ba-8bad-f00d-deadbeef0000': {
@@ -55,12 +58,16 @@ export declare const Devices: {
         };
         hegduino: import("../ble/ble_client").BLEDeviceOptions;
         hegduinoV1: {
+            deviceType: string;
+            deviceName: string;
             baudRate: number;
             write: string;
             codec: typeof hegduinocodec;
             sps: number;
         };
         cognixionONE: {
+            deviceType: string;
+            deviceName: string;
             services: {
                 [x: string]: {
                     [x: string]: {
@@ -85,6 +92,8 @@ export declare const Devices: {
         blueberry: import("../ble/ble_client").BLEDeviceOptions;
         blueberry2: import("../ble/ble_client").BLEDeviceOptions;
         heart_rate: {
+            deviceType: string;
+            deviceName: string;
             services: {
                 heart_rate: {
                     heart_rate_measurement: {
@@ -98,6 +107,8 @@ export declare const Devices: {
     };
     USB: {
         nrf5x: {
+            deviceType: string;
+            deviceName: string;
             baudRate: number;
             buffering: {
                 searchBytes: Uint8Array;
@@ -106,6 +117,8 @@ export declare const Devices: {
             sps: number;
         };
         freeEEG32: {
+            deviceType: string;
+            deviceName: string;
             baudRate: number;
             bufferSize: number;
             frequency: number;
@@ -116,6 +129,8 @@ export declare const Devices: {
             };
         };
         freeEEG32_optical: {
+            deviceType: string;
+            deviceName: string;
             baudRate: number;
             bufferSize: number;
             frequency: number;
@@ -126,6 +141,8 @@ export declare const Devices: {
             };
         };
         freeEEG128: {
+            deviceType: string;
+            deviceName: string;
             baudRate: number;
             bufferSize: number;
             frequency: number;
@@ -136,20 +153,26 @@ export declare const Devices: {
             };
         };
         hegduino: {
+            deviceType: string;
+            deviceName: string;
             baudRate: number;
             write: string;
             codec: typeof hegduinocodec;
             sps: number;
         };
         hegduinoV1: {
+            deviceType: string;
+            deviceName: string;
             baudRate: number;
             write: string;
             codec: typeof hegduinocodec;
             sps: number;
         };
-        cyton: import("../serial/serialstream").SerialPortOptions;
-        cyton_daisy: import("../serial/serialstream").SerialPortOptions;
+        cyton: import("./types").SerialDeviceSettings;
+        cyton_daisy: import("./types").SerialDeviceSettings;
         peanut: {
+            deviceType: string;
+            deviceName: string;
             baudRate: number;
             bufferSize: number;
             write: string;
@@ -160,16 +183,21 @@ export declare const Devices: {
             sps: number;
         };
         statechanger: {
+            deviceType: string;
+            deviceName: string;
             baudRate: number;
             codec: typeof statechangercodec;
+            sps: number;
         };
-        cognixionONE: import("../serial/serialstream").SerialPortOptions;
+        cognixionONE: import("./types").SerialDeviceSettings;
     };
-    BLE_OTHER: {};
-    USB_OTHER: {};
-    OTHER: {
+    BLE_CUSTOM: {};
+    USB_CUSTOM: {};
+    CUSTOM: {
         simulator: {
             sps: number;
+            deviceType: string;
+            deviceName: string;
             simulate: {
                 '0': {
                     sps: number;

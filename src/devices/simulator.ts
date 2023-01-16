@@ -12,6 +12,8 @@
 
 export const simulatorSettings = { 
     sps:250, 
+    deviceType:'CUSTOM',
+    deviceName:'simulator',
     simulate: { //todo: make this more functional rather than only allowing a single amplitude sine wave, otherwise you can simply adjust these settings to generate new data 
         '0':{sps:250, freq:1, amplitude:1, offset:0},
         '1':{sps:250, freq:10, amplitude:1, offset:0},

@@ -37,6 +37,8 @@ export function nrf5x_usbcodec(data:any) {
 }
 
 export const nrf5xSerialSettings = {
+    deviceType:'USB',
+    deviceName:'nrf5x',
     baudRate:115200,
     buffering:{
         searchBytes:new Uint8Array([240,240])
@@ -46,6 +48,8 @@ export const nrf5xSerialSettings = {
 }
 
 export const nrf5xBLESettings = {
+    deviceType:'BLE',
+    deviceName:'nrf5x',
     sps:250, //base eeg/emg sps, peripheral sensors are different
     services:{
         '0000cafe-b0ba-8bad-f00d-deadbeef0000':{

@@ -18,6 +18,8 @@ export function blueberrycodec(value:DataView) {
 const sps = 40; //default sample rate.
 
 export const blueberryBLESettings = {
+    deviceType:'BLE',
+    deviceName:'blueberry',
     namePrefix:'blueberry',
     services:{
         '0f0e0d0c-0b0a-0908-0706-050403020100':{

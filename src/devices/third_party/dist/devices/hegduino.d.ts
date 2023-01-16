@@ -10,12 +10,16 @@ export declare function hegduinocodec(value: any): string | {
     temperature: number;
 };
 export declare const hegduinoSerialSettings: {
+    deviceType: string;
+    deviceName: string;
     baudRate: number;
     write: string;
     codec: typeof hegduinocodec;
     sps: number;
 };
 export declare const hegduinoV1SerialSettings: {
+    deviceType: string;
+    deviceName: string;
     baudRate: number;
     write: string;
     codec: typeof hegduinocodec;
@@ -23,6 +27,8 @@ export declare const hegduinoV1SerialSettings: {
 };
 export declare const hegduinoBLESettings: BLEDeviceOptions;
 export declare const hegduinoV1BLESettings: {
+    deviceType: string;
+    deviceName: string;
     baudRate: number;
     write: string;
     codec: typeof hegduinocodec;

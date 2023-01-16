@@ -2,6 +2,8 @@ import { WebglLinePlotProps } from "webgl-plot-utils";
 import { FilterSettings } from "../util/BiquadFilters";
 export declare function freeeeg32codec(data: any): any;
 export declare const freeeeg32SerialSettings: {
+    deviceType: string;
+    deviceName: string;
     baudRate: number;
     bufferSize: number;
     frequency: number;
@@ -12,6 +14,8 @@ export declare const freeeeg32SerialSettings: {
     };
 };
 export declare const freeeeg32_optical_SerialSettings: {
+    deviceType: string;
+    deviceName: string;
     baudRate: number;
     bufferSize: number;
     frequency: number;

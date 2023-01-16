@@ -32,6 +32,8 @@ export function freeeeg32codec(data:any) {
 const sps = 512;
 
 export const freeeeg32SerialSettings = {
+    deviceType:'USB',
+    deviceName:'freeeeg32',
     baudRate:921600, //921600 baud
     bufferSize:2000,
     frequency:1.9, //512sps
@@ -44,6 +46,8 @@ export const freeeeg32SerialSettings = {
 }
 
 export const freeeeg32_optical_SerialSettings = {
+    deviceType:'USB',
+    deviceName:'freeeeg32_optical',
     baudRate:1000000, //1M baud, I forget why
     bufferSize:2000,
     frequency:1.9,

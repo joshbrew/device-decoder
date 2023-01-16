@@ -1,6 +1,7 @@
 import {ByteParser} from '../util/ByteParser'
 import { WebglLinePlotProps } from 'webgl-plot-utils';
 import { FilterSettings } from '../util/BiquadFilters';
+import { cytonSerialSettings } from './cyton';
 
 //BLE mode CNX_EEG_raw_data_struct packet structure: [ctr, [0,1,2],[3,4,5],[6,7,8],[9,10,11],[12,13,14],[15,16,17],[18,19,20],[21,22,23], 0x00], up to 7 per BLE packet but variable. 
 // Less channels pack less bytes inbetween rather than setting zeros??
@@ -45,6 +46,8 @@ const sps = 250;
 
 //For the USB raw stream, use the cyton codec
 export const cognixionONEBLESettings = {
+    deviceType:'BLE',
+    deviceName:'cognixionONE',
     services:{
         ['82046698-6313-4BB1-9645-6BA28BF86DF5'.toLowerCase()]:{
             ['8204669A-6313-4BB1-9645-6BA28BF86DF5'.toLowerCase()]:{  //raw data stream
@@ -67,6 +70,15 @@ export const cognixionONEBLESettings = {
     },
     sps //base eeg sps (we don't know about the other sensors yet)
 }
+
+export const cognixionONESerialSettings = Object.assign(
+    cytonSerialSettings,
+    {
+        deviceType:'BLE',
+        deviceName:'cognixionONE',
+        sps
+    }
+);
 
 const defaultChartSetting = {nSec:10, sps, units:'mV'};
 export const cognixionONEChartSettings:Partial<WebglLinePlotProps> = {
