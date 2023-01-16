@@ -1,113 +1,100 @@
 # device-decoder
+`device-decoder` is a JavaScript library for uniformly and efficiently working with streaming devices on web pages and native apps.
 
-`npm i device-decoder`
+This supports Web Bluetooth API + Mobile Native (via `@capacitor-community/bluetooth-le`) and Web Serial API using convenient wrappers.
 
-This is a streamlined package to work with streaming devices in-browser or in-app efficiently and create a uniform pattern for outputs. 
+Using this library, we have created:
+- A general purpose debugger for BLE and USB streaming devices ([source](./debugger), [website](https://devicedebugger.netlify.app))
+- An EEG acquisition system with filters and coherence analysis ([source](https://github.com/brainsatplay/graphscript/examples/eegnfb))
+- An HEG-FNIRS acquisition system with auditory feedback ([source](https://github.com/brainsatplay/graphscript/examples/audiofeedback))
+- A multimodal data acquisition system with alerts for specific sensors ([source](https://github.com/brainsatplay/js-biosensor-modules), [website](https://modules.brainsatplay.com/))
 
+## Installation
+You can use the `device-decoder` library in your project in a few different ways. 
 
-Examples: 
+If you're using NPM to manage your project, you can install the library with the following command:
 
-- General purpose debugger with example codecs: [./debugger](./debugger), [Live Link](https://devicedebugger.netlify.app)
-- EEG with filters and Coherence FFTs example: [`https://github.com/brainsatplay/graphscript/examples/eegnfb`](https://github.com/brainsatplay/graphscript/examples/eegnfb)
-- HEG-FNIRS with audio feedback example: [`https://github.com/brainsatplay/graphscript/examples/audiofeedback`](https://github.com/brainsatplay/graphscript/examples/audiofeedback)
-- 4 sensors off one BLE device with alerts for specific sensors: [`https://github.com/brainsatplay/js-biosensor-modules`](https://github.com/brainsatplay/js-biosensor-modules), [Live Link](https://nrf5xsensortest.netlify.app/)
-
-##### General purpose wrapper: 
-
-- [`device.frontend.ts`](./src/device.frontend.ts)
-
-##### Standalone BLE and USB API wrappers:
-
-These are installable as independent and very minimal packages, the BLE library includes capacitor's BLE library for native mobile support (better than Web Bluetooth)
-
-- [`ble_client.ts`](./src/ble) wraps @capacitor-community/bluetooth-le with easier handles
-- [`serialstream.ts`](./src/serial) wraps the Web Serial API with easy handles and buffering + transform stream support
-
-## Usage:
-
-Use `initDevice` and provide settings based on the above Devices object to create a multithreaded decoding and rendering pipeline.
-
-```ts
-
-import {Devices, initDevice} from 'device-decoder'
-
-let info = initDevice(
-    Devices['BLE']['hegduino'],
-    {
-        //devices:Devices //e.g. a custom device list?
-        //workerUrl:'./stream.worker.js', //e.g. a custom worker? Needs to follow the base template (at bottom of readme) 
-        ondecoded:(data)=>{ //data received back from codec thread
-            console.log(data)
-        },
-        onconnect: (deviceInfo) => {}, //optionally specify an onconnect handler
-        ondisconnect:(deviceInfo) => {}, //optionally specify an ondisconnect handler
-    }
-    //renderSettings //e.g. specify a thread with rendering functions that receives data directly from the decoder thread (no round trip to main thread)
-);
-
-if(info) { //returns a promise
-    info.then((result) => {
-        console.log(result);
-        let disc = document.createElement('button');
-        disc.innerHTML = `Disconnect hegduino (BLE)`;
-        disc.onclick = () => {
-            result.disconnect();
-            disc.remove();
-        }
-        document.body.appendChild(disc);
-    })
-}
+```bash
+npm install device-decoder
 ```
 
-
-Supports Web Bluetooth API + Mobile Native (via `@capacitor-community/bluetooth-le`) and Web Serial API with convenient wrappers.
-
-You can also import initDevice and Devices directly into browser from the cdnjs link (installed to window.initDevice and window.Devices) via 
+Otherwise, it may be more convenient to use a **CDN link** to import the library directly into your project:
 ```html
 <script src="https://cdn.jsdelivr.net/npm/device-decoder@latest/dist/device.frontend.js"></script>
 ```
 
-NOTE: that for BLE devices with multiple notification or read characteristics, you can supply an object to the `ondecoded` property in initDevice and then specify callback functions per-characteristic. The routes will subscribe to the dedicating stream parsing worker (one per initDevice call) and will receive all outputs from there so you will need to constrain the pipeline from there yourself. 
-
-```ts
-//contains unique (non-default) BLE and Serial device connection settings + codecs to parse key:value pairs from streamed data channels
-export const Devices = {
-    BLE:{
-        'nrf5x':nrf5xBLESettings,
-        'hegduino':hegduinoBLESettings,
-        'cognixionONE':cognixionONEBLESettings,
-        'statechanger':statechangerBLESettings,
-        'blueberry':blueberryBLESettings,
-        'blueberry2':blueberry2BLESettings,
-        'heart_rate':heartRateBLESettings //generic bluetooth heart rate characteristic (compatible with many devices)
-    },
-    USB:{
-        'nrf5x':nrf5xSerialSettings,
-        'freeEEG32':freeeeg32SerialSettings,
-        'freeEEG32_optical':freeeeg32_optical_SerialSettings,
-        'freeEEG128':freeeeg128SerialSettings,
-        'hegduino':hegduinoSerialSettings,
-        'cyton':cytonSerialSettings,
-        'cyton_daisy':cytonSerialSettings,
-        'peanut':peanutSerialSettings,
-        'statechanger':statechangerSerialSettings,
-        'cognixionONE':cytonSerialSettings
-    },
-    BLE_CUSTOM:{ //CUSTOM indicates drivers not written by us that do not fit into our format readily, but we can generalize easily to get the multithreading benefits
-        'muse':museSettings,
-        'ganglion':ganglionSettings
-    },
-    USB_CUSTOM : {},
-    CUSTOM : {}
-};
-
+Regardless of your import source, you may find it useful to use **ES Modules** to explicitly include variables from the library in your code:
+```js
+import { Devices, initDevice } from 'device-decoder'
 ```
 
-The `CUSTOM` drivers are contained in a separate `device-decoder.third-party` package as they contain much larger third party drivers that have been formatted with simple objects you can also create yourself to pipe through our threading system.
+```js
+import { Devices, initDevice } from 'https://cdn.jsdelivr.net/npm/device-decoder@latest/dist/device.frontend.js'
+```
+
+## Getting Started
+Provide a configuration object from `Devices` as the first argument in `initDevice` to initialize a multithreaded decoding and rendering pipeline.
+
+```js
+
+let info = initDevice(
+    Devices['BLE']['hegduino'],
+
+    // Optional settings
+    {
+        //devices: Devices // A custom device list
+        //workerUrl: './stream.worker.js' // Specify a custom worker (using the template at the bottom of this documentation file)
+        ondecoded: (data) => console.log(data),
+        onconnect: (deviceInfo) => console.log(deviceInfo),
+        ondisconnect: (deviceInfo) => console.log(deviceInfo) 
+    }
+)
+```
+
+The default `Devices` object is organized as follows:
+
+#### BLE
+- `nrf5x`: Connect to our [nRF52 microcontroller prototypes](https://github.com/brainsatplay/nRF52-Biosensing-Boards) over BLE.
+- `hegduino`: Connect to the [HEGduino](https://github.com/joshbrew/HEG_ESP32) over BLE.
+- `cognixionONE`: Connect to the [Cognixion ONE](https://one.cognixion.com/) over BLE.
+- `statechanger`:  Connect to the Statechanger HEG over BLE.
+- `blueberry`:  Connect to the [Blueberry](https://blueberryx.com/) over USB.
+- `blueberry2`: Connect to the [Blueberry](https://blueberryx.com/) (v2) over USB.
+- `heart_rate`: Connect to the generic bluetooth heart rate characteristic (compatible with many devices)
+
+#### USB
+- `nrf5x`: Connect to our [nRF52 microcontroller prototypes](https://github.com/brainsatplay/nRF52-Biosensing-Boards) over USB.
+- `freeEEG32`: Connect to the [FreeEEG32](https://github.com/neuroidss/FreeEEG32-beta) over USB.
+- `freeEEG32_optical`: Connect to the [FreeEEG32](https://github.com/neuroidss/FreeEEG32-beta) over optical USB.
+- `freeEEG128`: Connect to the [FreeEEG128](https://github.com/neuroidss/FreeEEG128-alpha) over USB.
+- `hegduino`: Connect to the [HEGduino](https://github.com/joshbrew/HEG_ESP32) over USB.
+- `cyton`: Connect to the [OpenBCI Cyton](https://shop.openbci.com/products/cyton-biosensing-board-8-channel) over USB.
+- `cyton_daisy`: Connect to the [OpenBCI Cyton + Daisy](https://shop.openbci.com/products/cyton-daisy-biosensing-boards-16-channel) over USB.
+- `peanut`: Connect to the Peanut HEG over USB.
+- `statechanger`: Connect to the Statechanger HEG over USB.
+- `cognixionONE`: Connect to the [Cognixion ONE](https://one.cognixion.com/) over USB.
+
+#### BLE_CUSTOM
+- `muse`: Integrates with the [muse-js](https://github.com/urish/muse-js) library.
+- `ganglion`: Modifies the [ganglion-ble](https://github.com/neurosity/ganglion-ble/tree/master/src) library.
+
+#### USB_CUSTOM
+N/A (for now)
+
+#### CUSTOM
+N/A (for now)
+
+> **Note:** All drivers contained beneath a `CUSTOM` prefix are contained in a separate `device-decoder.third-party` package as they contain much larger third party drivers that do not fit into our format readily. 
+> 
+> As such, they've been formatted with simple objects to generalize easily and get the multithreading benefits of `device-decoder`.
+>
+> You can create these simple objects to pipe anything through our threading system!
+
+### Monitoring Multiple Characteristics
+For BLE devices with multiple notification or read characteristics, you can supply an object to the `ondecoded` property in `initDevice`. This allows you to specify callback functions for each characteristic. The routes will subscribe to the dedicating stream parsing worker (one per initDevice call) and will receive all outputs from there—so you will need to constrain the pipeline from there yourself. 
 
 
 ## Device Drivers
-
 We've whittled down the work required to support device streaming in the web down to a few definitions that you can use for settings in our framework.
 
 You can add your own device profiles easily with a custom name and and the workers will handle transferring custom profiles to threads.
@@ -177,9 +164,16 @@ type CustomDeviceSettings = {
 
 #### See [`src/devices/index.ts`](./src/devices/index.ts) for supported settings
 
-## Write your own drivers:
+## Contributing
+### Repo Contents
+[`device.frontend.ts`](./src/device.frontend.ts) provides a general purpose library for BLE and USB device streaming.
 
-### BLE
+This library, however, is composed of independent and minimal BLE and USB API modules. [`ble_client.ts`](./src/ble) wraps @capacitor-community/bluetooth-le with easier handles, whereas [`serialstream.ts`](./src/serial) wraps the Web Serial API with easy handles and buffering + transform stream support.
+
+### How to Write your Own Drivers
+> **Note:** To add your new driver the library's source, in [`./src/devices/index.ts`](./src/devices/index.ts), link the new settings to the Devices object. You can add chart and filter settings too which can be enabled following the streamWorkerRoutes calls, which right now are demonstrated in a couple examples.
+
+#### BLE
 
 Using `@capacitor-community/bluetooth-le` for an interoperable Web Bluetooth API + Native Android or IOS library,
 we have a nice set of controls for easily creating bluetooth LE drivers that are lightweight and interoperable. The Web Bluetooth APIs are either broken or locked on mobile so this is the best workaround, and does not require differentiating code based on platform.
@@ -270,7 +264,7 @@ export const nrf5xBLESettings = {
 
 ```
 
-### USB
+#### USB
 
 Adding USB drivers is pretty similar, here is an example of cross USB and BLE support from [`./src/devices/nrf5x.ts`](./src/devices/nrf5x.ts) which is a custom device that has modular sensor support.
 
@@ -373,7 +367,7 @@ export const nrf5x_usbFilterSettings:{[key:string]:FilterSettings} = {
 
 ```
 
-### CUSTOM
+#### Custom API
 
 Say we want to support a driver that does not give us the raw data but want to feed it into our multithreading pipeline and general application settings. See [`muse.ts`](./muse.ts) for an implementation with conditionally included dependencies.
 
@@ -416,14 +410,8 @@ export const customDevice = {
 
 ```
 
-### Finally
-
-To add your new driver the library's source, in [`./src/devices/index.ts`](./src/devices/index.ts), link the new settings to the Devices object. You can add chart and filter settings too which can be enabled following the streamWorkerRoutes calls, which right now are demonstrated in a couple examples.
-
 ### Stream Worker Template
-
-This is the required base template for our web worker system. You can update the Devices list yourself with your own custom list this way,
-else there is a worekr baked into the library.
+This is the required base template for our web worker system. You can update the Devices list yourself with your own custom list this way. Otherwise, there is a worker service baked into the library.
 
 ```ts
 import { 
@@ -471,6 +459,76 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
 
 export default self as any;
 
-
-
 ```
+
+## Acknowledgments
+This repository is maintained by [Garrett Flynn](https://github.com/garrettmflynn) and [Joshua Brewster](https://github.com/joshbrew), who use contract work and community contributions through [Open Collective](https://opencollective.com/brainsatplay) to support themselves.
+
+### Backers
+[Support us with a monthly donation](https://opencollective.com/brainsatplay#backer) and help us continue our activities!
+
+<a href="https://opencollective.com/brainsatplay/backer/0/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/0/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/1/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/1/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/2/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/2/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/3/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/3/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/4/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/4/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/5/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/5/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/6/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/6/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/7/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/7/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/8/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/8/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/9/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/9/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/10/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/10/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/11/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/11/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/12/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/12/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/13/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/13/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/14/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/14/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/15/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/15/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/16/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/16/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/17/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/17/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/18/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/18/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/19/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/19/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/20/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/20/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/21/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/21/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/22/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/22/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/23/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/23/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/24/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/24/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/25/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/25/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/26/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/26/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/27/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/27/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/28/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/28/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/backer/29/website" target="_blank"><img src="https://opencollective.com/brainsatplay/backer/29/avatar.svg"></a>
+
+### Sponsors
+
+[Become a sponsor](https://opencollective.com/brainsatplay#sponsor) and get your logo here with a link to your site!
+
+<a href="https://opencollective.com/brainsatplay/sponsor/0/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/1/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/2/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/3/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/4/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/5/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/6/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/6/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/7/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/7/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/8/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/8/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/9/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/9/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/10/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/10/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/11/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/11/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/12/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/12/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/13/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/13/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/14/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/14/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/15/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/15/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/16/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/16/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/17/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/17/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/18/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/18/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/19/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/19/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/20/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/20/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/21/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/21/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/22/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/22/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/23/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/23/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/24/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/24/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/25/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/25/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/26/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/26/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/27/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/27/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/28/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/28/avatar.svg"></a>
+<a href="https://opencollective.com/brainsatplay/sponsor/29/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/29/avatar.svg"></a>
