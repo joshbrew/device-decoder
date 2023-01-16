@@ -16,6 +16,15 @@ Examples:
 
 - [`device.frontend.ts`](./src/device.frontend.ts)
 
+##### Standalone BLE and USB API wrappers:
+
+These are installable as independent and very minimal packages, the BLE library includes capacitor's BLE library for native mobile support (better than Web Bluetooth)
+
+- [`ble_client.ts`](./src/ble) wraps @capacitor-community/bluetooth-le with easier handles
+- [`serialstream.ts`](./src/serial) wraps the Web Serial API with easy handles and buffering + transform stream support
+
+## Usage:
+
 Use `initDevice` and provide settings based on the above Devices object to create a multithreaded decoding and rendering pipeline.
 
 ```ts
@@ -97,13 +106,6 @@ export const Devices = {
 The `CUSTOM` drivers are contained in a separate `device-decoder.third-party` package as they contain much larger third party drivers that have been formatted with simple objects you can also create yourself to pipe through our threading system.
 
 
-##### Standalone BLE and USB API wrappers:
-
-These are installable as independent and very minimal packages, the BLE library includes capacitor's BLE library for native mobile support (better than Web Bluetooth)
-
-- [`ble_client.ts`](./src/ble) wraps @capacitor-community/bluetooth-le with easier handles
-- [`serialstream.ts`](./src/serial) wraps the Web Serial API with easy handles and buffering + transform stream support
-
 ## Device Drivers
 
 We've whittled down the work required to support device streaming in the web down to a few definitions that you can use for settings in our framework.
@@ -173,9 +175,9 @@ type CustomDeviceSettings = {
 
 ```
 
-## Usage:
-
 #### See [`src/devices/index.ts`](./src/devices/index.ts) for supported settings
+
+## Write your own drivers:
 
 ### BLE
 
