@@ -250,22 +250,18 @@ export const nrf5xBLESettings = {
             },
             '0002cafe-b0ba-8bad-f00d-deadbeef0000':{ //ads131m08
                 notify:true,
-                notifyCallback:undefined,
                 codec:ads131m08codec
             },
             '0003cafe-b0ba-8bad-f00d-deadbeef0000':{ //max30102
                 notify:true,
-                notifyCallback:undefined,
                 codec:max3010xcodec
             },
             '0004cafe-b0ba-8bad-f00d-deadbeef0000':{ //mpu6050
                 notify:true,
-                notifyCallback:undefined,
                 codec:mpu6050codec
             },
             '0006cafe-b0ba-8bad-f00d-deadbeef0000':{ //ads131m08-2
                 notify:true,
-                notifyCallback:undefined,
                 codec:ads131m08codec
             }
         }// each notification is for a different sensor
