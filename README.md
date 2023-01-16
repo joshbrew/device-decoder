@@ -73,15 +73,15 @@ The default `Devices` object is organized as follows:
 - `statechanger`: Connect to the Statechanger HEG over USB.
 - `cognixionONE`: Connect to the [Cognixion ONE](https://one.cognixion.com/) over USB.
 
-#### BLE_CUSTOM
+#### CUSTOM
+
+- `simulator`: generates sine waves. You can easily modify this protocol.
+
+#### BLE_CUSTOM (under `device-decoder.third_party`)
 - `muse`: Integrates with the [muse-js](https://github.com/urish/muse-js) library.
 - `ganglion`: Modifies the [ganglion-ble](https://github.com/neurosity/ganglion-ble/tree/master/src) library.
 
-
-#### CUSTOM
-
-- `simulator`: generates sine waves
-- `device-decoder.third-party` contains muse and ganglion drivers.
+Other ideas would be creating media stream drivers to run processes on threads e.g. for audio and video.
 
 These drivers are formatted with simple objects to generalize easily and get the multithreading benefits of `device-decoder`.
 
@@ -90,14 +90,19 @@ You can create these simple objects to pipe anything through our threading syste
 ### Monitoring Multiple Characteristics
 For BLE devices with multiple notification or read characteristics, you can supply an object to the `ondecoded` property in `initDevice`. This allows you to specify callback functions for each characteristic. The routes will subscribe to the dedicating stream parsing worker (one per initDevice call) and will receive all outputs from there—so you will need to constrain the pipeline from there yourself. 
 
+You will need to know which characteristics to specify from the device profile.
 ```js
+
+let service = Array.from(Object.keys(Devices['BLE']['nrf5x'].services))[0];
+let characteristics = Array.from(Object.keys(Devices['BLE']['nrf5x'].services[service]));
+
 let info = initDevice(
     Devices['BLE']['nrf5x'],
 
     {
         ondecoded: {
-            'one': (data) => console.log(data),
-            'two': (data) => console.log(data)
+            [characteristics[0]]: (data) => console.log(data),
+            [characteristics[1]]: (data) => console.log(data)
         },
     }
 )
