@@ -1,10 +1,10 @@
 {
   "name": "device-decoder",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Customizable multithreaded BLE and USB (or other) device connecting, sensor decoding, and (threaded) output rendering",
   "main": "dist/device.frontend.js",
   "module": "dist/device.frontend.esm.js",
-  "types": "dist/device.frontend.d.ts",
+  "types": "dist/src/device.frontend.d.ts",
   "scripts": {
     "start": "tinybuild",
     "build": "tinybuild build",
