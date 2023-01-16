@@ -474,9 +474,9 @@ import {
 } from 'graphscript'//"../../GraphServiceRouter/index"//'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
 import { 
     streamWorkerRoutes 
-} from './stream.routes';
+} from 'device-decoder/src/stream.routes' //'./stream.routes'; //
 
-import { Devices } from './devices';
+import { Devices } from 'device-decoder/src/devices' //'./devices'; //or a custom device list
 
 // import { 
 //     algorithms,
