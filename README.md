@@ -236,6 +236,44 @@ export const blueberryChartSettings:Partial<WebglLinePlotProps> = {
 
 ```
 
+More complicated BLE device profile for our nrf5x prototype:
+
+```ts
+
+export const nrf5xBLESettings = {
+    deviceType:'BLE',
+    deviceName:'nrf5x',
+    services:{
+        '0000cafe-b0ba-8bad-f00d-deadbeef0000':{
+            '0001cafe-b0ba-8bad-f00d-deadbeef0000':{
+                write:undefined
+            },
+            '0002cafe-b0ba-8bad-f00d-deadbeef0000':{ //ads131m08
+                notify:true,
+                notifyCallback:undefined,
+                codec:ads131m08codec
+            },
+            '0003cafe-b0ba-8bad-f00d-deadbeef0000':{ //max30102
+                notify:true,
+                notifyCallback:undefined,
+                codec:max3010xcodec
+            },
+            '0004cafe-b0ba-8bad-f00d-deadbeef0000':{ //mpu6050
+                notify:true,
+                notifyCallback:undefined,
+                codec:mpu6050codec
+            },
+            '0006cafe-b0ba-8bad-f00d-deadbeef0000':{ //ads131m08-2
+                notify:true,
+                notifyCallback:undefined,
+                codec:ads131m08codec
+            }
+        }// each notification is for a different sensor
+    }
+}
+
+```
+
 ### USB
 
 Adding USB drivers is pretty similar, here is an example of cross USB and BLE support from [`./src/devices/nrf5x.ts`](./src/devices/nrf5x.ts) which is a custom device that has modular sensor support.
@@ -292,38 +330,6 @@ export const nrf5xSerialSettings = {
 You may also add filter settings to apply in the worker codecs automatically. There are additional controls to toggle them on the fly if you dig into the stream.worker's routes
 
 ```ts
-
-export const nrf5xBLESettings = {
-    deviceType:'BLE',
-    deviceName:'nrf5x',
-    services:{
-        '0000cafe-b0ba-8bad-f00d-deadbeef0000':{
-            '0001cafe-b0ba-8bad-f00d-deadbeef0000':{
-                write:undefined
-            },
-            '0002cafe-b0ba-8bad-f00d-deadbeef0000':{ //ads131m08
-                notify:true,
-                notifyCallback:undefined,
-                codec:ads131m08codec
-            },
-            '0003cafe-b0ba-8bad-f00d-deadbeef0000':{ //max30102
-                notify:true,
-                notifyCallback:undefined,
-                codec:max3010xcodec
-            },
-            '0004cafe-b0ba-8bad-f00d-deadbeef0000':{ //mpu6050
-                notify:true,
-                notifyCallback:undefined,
-                codec:mpu6050codec
-            },
-            '0006cafe-b0ba-8bad-f00d-deadbeef0000':{ //ads131m08-2
-                notify:true,
-                notifyCallback:undefined,
-                codec:ads131m08codec
-            }
-        }// each notification is for a different sensor
-    }
-}
 
 export const nrf5x_usbChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
