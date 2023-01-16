@@ -36,7 +36,6 @@ import { Devices, initDevice } from 'https://cdn.jsdelivr.net/npm/device-decoder
 Provide a configuration object from `Devices` as the first argument in `initDevice` to initialize a multithreaded decoding and rendering pipeline.
 
 ```js
-
 let info = initDevice(
     Devices['BLE']['hegduino'],
 
@@ -54,7 +53,7 @@ let info = initDevice(
 The default `Devices` object is organized as follows:
 
 #### BLE
-- `nrf5x`: Connect to our [nRF52 microcontroller prototypes](https://github.com/brainsatplay/nRF52-Biosensing-Boards) over BLE.
+- `nrf5x`: Connect to our [nRF52 microcontroller prototypes] over BLE.
 - `hegduino`: Connect to the [HEGduino](https://github.com/joshbrew/HEG_ESP32) over BLE.
 - `cognixionONE`: Connect to the [Cognixion ONE](https://one.cognixion.com/) over BLE.
 - `statechanger`:  Connect to the Statechanger HEG over BLE.
@@ -63,7 +62,7 @@ The default `Devices` object is organized as follows:
 - `heart_rate`: Connect to the generic bluetooth heart rate characteristic (compatible with many devices)
 
 #### USB
-- `nrf5x`: Connect to our [nRF52 microcontroller prototypes](https://github.com/brainsatplay/nRF52-Biosensing-Boards) over USB.
+- `nrf5x`: Connect to our [nRF52 microcontroller prototypes] over USB.
 - `freeEEG32`: Connect to the [FreeEEG32](https://github.com/neuroidss/FreeEEG32-beta) over USB.
 - `freeEEG32_optical`: Connect to the [FreeEEG32](https://github.com/neuroidss/FreeEEG32-beta) over optical USB.
 - `freeEEG128`: Connect to the [FreeEEG128](https://github.com/neuroidss/FreeEEG128-alpha) over USB.
@@ -93,76 +92,18 @@ N/A (for now)
 ### Monitoring Multiple Characteristics
 For BLE devices with multiple notification or read characteristics, you can supply an object to the `ondecoded` property in `initDevice`. This allows you to specify callback functions for each characteristic. The routes will subscribe to the dedicating stream parsing worker (one per initDevice call) and will receive all outputs from there—so you will need to constrain the pipeline from there yourself. 
 
+```js
+let info = initDevice(
+    Devices['BLE']['nrf5x'],
 
-## Device Drivers
-We've whittled down the work required to support device streaming in the web down to a few definitions that you can use for settings in our framework.
-
-You can add your own device profiles easily with a custom name and and the workers will handle transferring custom profiles to threads.
-
-If your device profile is using imported utilities, it cannot simply be transferred unless you know what utilities are available on globalThis on the worker, so you need to create your own worker and make sure a modified Devices list is present. We demonstrated this a bit in our own workers, e.g. with our usage of ByteParser.
-
-You can see the expected settings for each type of device profile here:
-```ts
-
-
-type BLEDeviceSettings = {
-    deviceType:'BLE',
-    deviceName:string,
-    sps?:number, //samples per second
-    codec?:(data:any) => {[key:string]:any}, //transform data into a dictionary (preferred)
-    services?:{ 
-        [key:string]:{ // service uuid you want to set and all of the characteristic settings and responses, keys are UUIDs
-            [key:string]:{ // services can have an arbitrary number of characteristics, keys are UUIDs
-                codec?:(data:any) => {[key:string]:any},  //you can have specific codecs for specific notify characteristics
-                
-                read?:boolean, //should we read on connect
-                readOptions?:TimeoutOptions,
-                readCallback?:((result:DataView)=>void),
-                write?:string|number|ArrayBufferLike|DataView, //should we write on connect and what should we write?
-                writeOptions?:TimeoutOptions,
-                writeCallback?:(()=>void),
-                notify?:boolean, //can this characteristic notify?
-                notifyCallback?:((result:DataView)=>void)
-                [key:string]:any
-            }
-        }
+    {
+        ondecoded: {
+            'one': (data) => console.log(data),
+            'two': (data) => console.log(data)
+        },
     }
-} & BLEDeviceOptions
-
-type SerialDeviceSettings = {
-    deviceType:'USB',
-    deviceName:string,
-    sps?:number, //samples per second
-    buffering?:{
-        searchBytes:Uint8Array
-    },
-    codec:(data:any) => {[key:string]:any}, //transform raw data into a dictionary (preferred)
-} & SerialPortOptions
-
-type CustomDeviceSettings = {
-    deviceType:'CUSTOM'|'BLE_CUSTOM'|'USB_CUSTOM',
-    deviceName:string,
-    sps?:any, //samples per second
-    connect:(settings:any) => {
-        _id:string, //info object used in later callbacks
-        [key:string]:any
-    },
-    codec:(data:any) => { //transform data into a dictionary (preferred) //this runs on a thread so you can do more complex stuff at high speeds
-        [key:string]:any
-    },
-    disconnect:(info) => void,
-    //optional callbacks:
-    onconnect?:(info) => void,
-    beforedisconnect?:(info) => void,
-    ondisconnect?:(info) => void,
-    read?:(command:any) => any,
-    write?:(command:any) => any
-}
-
-
+)
 ```
-
-#### See [`src/devices/index.ts`](./src/devices/index.ts) for supported settings
 
 ## Contributing
 ### Repo Contents
@@ -174,67 +115,12 @@ This library, however, is composed of independent and minimal BLE and USB API mo
 > **Note:** To add your new driver the library's source, in [`./src/devices/index.ts`](./src/devices/index.ts), link the new settings to the Devices object. You can add chart and filter settings too which can be enabled following the streamWorkerRoutes calls, which right now are demonstrated in a couple examples.
 
 #### BLE
+To create a device profile for our [nRF52 microcontroller prototypes], you would create a new file in [`./src/devices`](./src/devices) called `nrf5x.ts` and add the following:
 
-Using `@capacitor-community/bluetooth-le` for an interoperable Web Bluetooth API + Native Android or IOS library,
-we have a nice set of controls for easily creating bluetooth LE drivers that are lightweight and interoperable. The Web Bluetooth APIs are either broken or locked on mobile so this is the best workaround, and does not require differentiating code based on platform.
+> **Note:** For a simpler example, you can look at the the [Blueberry](./src/devices/blueberry.ts) device profile.
 
-To add your own BLE drivers, you can model your drivers after this format then set the settings accordingly in `index.ts`
-
-Here is a very simple example from [`./src/devices/blueberry.ts`](./src/devices/blueberry.ts):
-
-```ts
-
-//turn incoming raw data into a readable object format
-export function blueberrycodec(value:DataView) {
-
-    let output = {
-        LED1: value.getInt32(2),
-        LED2: value.getInt32(6),
-        LED3: value.getInt32(10)
-    }
-
-    return output;
-}
-
-//write down the settings for your device
-export const blueberryBLESettings = {
-    deviceType:'BLE', //required
-    deviceName:'blueberry', //required
-    namePrefix:'blueberry',
-    services:{
-        '0f0e0d0c-0b0a-0908-0706-050403020100':{
-            '1f1e1d1c-1b1a-1918-1716-151413121110':{
-                write:undefined //e.g. new Uint8Array([0xA0],[redValue], [greenValue], [blueValue]); //for rgb controller
-            },
-            '3f3e3d3c-3b3a-3938-3736-353433323130':{
-                codec:blueberrycodec, //specific callback for this characteristic
-                notify:true, //subscribe for notifications
-            }
-        }
-    }
-} as BLEDeviceSettings
-```
-
-And to add specific chart settings in the debugger or if you want to use our webgl plot util in other apps:
-
-```ts
-
-//for supporting the output on the device_debugger app charts, use this to model for other apps if you want
-export const blueberryChartSettings:Partial<WebglLinePlotProps> = {
-    lines:{
-        LED1:{nSec:60, sps:40},
-        LED2:{nSec:60, sps:40},
-        LED3:{nSec:60, sps:40}
-    }
-}
-
-```
-
-More complicated BLE device profile for our nrf5x prototype:
-
-```ts
-
-export const nrf5xBLESettings = {
+```js
+export const bleSettings = {
     deviceType:'BLE',
     deviceName:'nrf5x',
     services:{
@@ -261,67 +147,92 @@ export const nrf5xBLESettings = {
         }// each notification is for a different sensor
     }
 }
-
 ```
 
 #### USB
+Adding USB support for our [nRF52 microcontroller prototypes] is pretty similar:
 
-Adding USB drivers is pretty similar, here is an example of cross USB and BLE support from [`./src/devices/nrf5x.ts`](./src/devices/nrf5x.ts) which is a custom device that has modular sensor support.
-
-```ts
-
-import { WebglLinePlotProps } from 'webgl-plot-utils';
-import { FilterSettings } from '../util/BiquadFilters';
+```js
 import { ads131m08codec } from './ads131m08';
 import { max3010xcodec } from './max30102';
 import { mpu6050codec } from './mpu6050';
 
-export function nrf5x_usbcodec(data:any) {
-    let arr:Uint8Array; 
-    if(!data.buffer) arr = new Uint8Array(data); 
+export function usbcodec(data) {
+    let arr; 
+    if (!data.buffer) arr = new Uint8Array(data); 
     else arr = data as Uint8Array;
-    //head of each byte packet is the search byte //240,240
-    //packetID: 2: ads131m08 1, 3: ads131m08 2, 4: MPU6050, 5: MAX30102
 
-    const output:any = {};
+    const output = {};
 
-    if(arr[0] === 2) {
-        Object.assign(output,ads131m08codec(arr.subarray(2)));
-    } else if (arr[0] === 3) {
+    if (arr[0] === 2) Object.assign(output,ads131m08codec(arr.subarray(2)));
+    else if (arr[0] === 3) {
         let result = ads131m08codec(arr.subarray(2));
         Object.keys(result).forEach((key,i) => {
             output[i+8] = result[key];
         })
-    } else if (arr[0] === 4) {
-        Object.assign(output,mpu6050codec(arr.subarray(2)));
-    } else if (arr[0] === 5) {
-        //Object.assign(output,max3010xcodec(arr.subarray(1)));
-        Object.assign(output,max3010xcodec(arr.subarray(2)));
-    } else {
-        Object.assign(output,ads131m08codec(arr));
-    }
+    } 
+    else if (arr[0] === 4) Object.assign(output,mpu6050codec(arr.subarray(2)));
+    else if (arr[0] === 5) Object.assign(output,max3010xcodec(arr.subarray(2)));
+    else Object.assign(output,ads131m08codec(arr));
 
     return output;
 }
 
-export const nrf5xSerialSettings = {
+export const serialSettings = {
     deviceType:'USB',
     deviceName:'nrf5x',
     baudRate:115200,
     buffering:{
         searchBytes:new Uint8Array([240,240])
     },
-    codec:nrf5x_usbcodec
+    codec: usbcodec
+}
+```
+
+#### Custom API
+If you have an existing API that acquires or generates data, you can wrap this in a `device-decoder` device profile to take advantage of the same charting and filtering features:
+
+```js
+
+export const customDevice = {
+    deviceType:'CUSTOM',
+    deviceName:'custom',
+    connect:(settings) => {
+
+        let info = Object.assign(Object.assign({},customDevice),settings); //e.g. create a copy of this settings object for this connection instance
+        
+        let device = Device()
+        
+        device.ondata = info.ondata;
+        
+        device.connect();
+
+        info.device = device;
+
+        info.onconnect(info);
+
+        return info;
+        
+    },
+    disconnect: (info) => {
+        info.device.disconnect();
+        info.ondisconnect(info);
+    },
+    onconnect: (info) => console.log('connected!', info),
+    ondata: (data:any) => customDevice.codec(data),
+    ondisconnect: (info) => console.log('disconnected!', info),
+    codec: (data:any) => JSON.stringify(data),
+    read: (command:any) => device.read(command).
+    write: (command:any) => device.write(command)
 }
 
 ```
 
+### Adding Chart and Filter Settings
+You may also add chart and filter settings to apply in the worker codecs automatically:
 
-You may also add filter settings to apply in the worker codecs automatically. There are additional controls to toggle them on the fly if you dig into the stream.worker's routes
-
-```ts
-
-export const nrf5x_usbChartSettings:Partial<WebglLinePlotProps> = {
+```js
+export const chartSettings = {
     lines:{
         '0':{nSec:10, sps:250},
         '1':{nSec:10, sps:250},
@@ -346,7 +257,7 @@ let defaultsetting = {
     scalar:1.2/(32*(Math.pow(2,24)-1))
 };
 
-export const nrf5x_usbFilterSettings:{[key:string]:FilterSettings} = {
+export const filterSettings = {
     '0':JSON.parse(JSON.stringify(defaultsetting)),
     '1':JSON.parse(JSON.stringify(defaultsetting)),
     '2':JSON.parse(JSON.stringify(defaultsetting)),
@@ -367,91 +278,26 @@ export const nrf5x_usbFilterSettings:{[key:string]:FilterSettings} = {
 
 ```
 
-#### Custom API
-
-Say we want to support a driver that does not give us the raw data but want to feed it into our multithreading pipeline and general application settings. See [`muse.ts`](./muse.ts) for an implementation with conditionally included dependencies.
-
-
-Create an object like:
-
-```ts
-
-export const customDevice = {
-    deviceType:'CUSTOM',
-    deviceName:'custom',
-    connect:(settings:{})=>{
-        //e.g.
-        let info = Object.assign(Object.assign({},customDevice),settings); //e.g. create a copy of this settings object for this connection instance
-        
-        let device = Device() //e.g. some driver
-        
-        device.ondata = info.ondata;
-        
-        device.connect();
-
-        info.device = device;
-
-        info.onconnect(info);
-
-        return info;
-        
-    }, //-> init device and scripts
-    disconnect:(info)=>{
-        info.device.disconnect();
-        info.ondisconnect(info);BLE_CUSTOM
-    }, //-> close device connection
-    onconnect:(info)=>{ console.log('connected!', info) }, //-> onconnect callback you can customize
-    ondata:(data:any)=>{ return customDevice.codec(data); }, //-> ondata callback you can customize
-    ondisconnect:(info)=>{ console.log('disconnected!', info) }, //-> disconnect callback you can customize
-    codec:(data:any)=>{ return JSON.stringify(data); } //-> optionally used to transform data e.g. on a separate thread, libraries like muse-js already do some of this for us so we can customize ondata to pass slightly modified outputs to threads, and use the codec to do some kind of special math on a thread
-    read?:(command:any)=>{ return device.read(command);}
-    write?:(command:any)=>{ return device.write(command); }
-}
-
-```
-
 ### Stream Worker Template
 This is the required base template for our web worker system. You can update the Devices list yourself with your own custom list this way. Otherwise, there is a worker service baked into the library.
 
 ```ts
-import { 
-    WorkerService, 
-    workerCanvasRoutes, 
-    //GPUService, 
-    subprocessRoutes,
-//    loadAlgorithms
-} from 'graphscript'//"../../GraphServiceRouter/index"//'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
-import { 
-    streamWorkerRoutes 
-} from 'device-decoder/src/stream.routes' //'./stream.routes'; //
+import {  WorkerService, workerCanvasRoutes, subprocessRoutes } from 'graphscript'
 
-import { Devices } from 'device-decoder/src/devices' //'./devices'; //or a custom device list
+import { streamWorkerRoutes } from 'device-decoder/src/stream.routes' 
 
-// import { 
-//     algorithms,
-//     //csvRoutes,
-//     //BFSRoutes
-//  } from 'graphscript-services'//"../../GraphServiceRouter/extras/index.services"//'graphscript-services'//"../../GraphServiceRouter/extras/index.services"
-//  //; //"../../GraphServiceRouter/index.services"
-
-// loadAlgorithms(algorithms);
+import { Devices } from 'device-decoder/src/devices'
 
 declare var WorkerGlobalScope;
 
 if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
 
-    globalThis.Devices = Devices; //you can customize this list yourself, else the streamWorkerRoutes uses the library defaults 
-    // so if you want more default drivers e.g. with complicated imports then make your own worker so you can update this list
+    globalThis.Devices = Devices;
 
     const worker = new WorkerService({
-        //props:{} //could set the props instead of globalThis but it really does not matter unless you want to bake in for more complex service modules
         roots:{
-            //GPUService as any,
             ...workerCanvasRoutes,
-            //unsafeRoutes, //allows dynamic route loading
-            ...subprocessRoutes, //includes unsafeRoutes
-            // BFSRoutes,
-            // csvRoutes,
+            ...subprocessRoutes,
             ...streamWorkerRoutes
         }
     });
@@ -462,7 +308,7 @@ export default self as any;
 ```
 
 ## Acknowledgments
-This repository is maintained by [Garrett Flynn](https://github.com/garrettmflynn) and [Joshua Brewster](https://github.com/joshbrew), who use contract work and community contributions through [Open Collective](https://opencollective.com/brainsatplay) to support themselves.
+This repository is maintained by [Joshua Brewster](https://github.com/joshbrew) and [Garrett Flynn](https://github.com/garrettmflynn), who use contract work and community contributions through [Open Collective](https://opencollective.com/brainsatplay) to support themselves.
 
 ### Backers
 [Support us with a monthly donation](https://opencollective.com/brainsatplay#backer) and help us continue our activities!
@@ -532,3 +378,6 @@ This repository is maintained by [Garrett Flynn](https://github.com/garrettmflyn
 <a href="https://opencollective.com/brainsatplay/sponsor/27/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/27/avatar.svg"></a>
 <a href="https://opencollective.com/brainsatplay/sponsor/28/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/28/avatar.svg"></a>
 <a href="https://opencollective.com/brainsatplay/sponsor/29/website" target="_blank"><img src="https://opencollective.com/brainsatplay/sponsor/29/avatar.svg"></a>
+
+
+[nRF52 microcontroller prototypes]: (https://github.com/brainsatplay/nRF52-Biosensing-Boards
