@@ -1,13 +1,17 @@
 # device-decoder
 `device-decoder` is a JavaScript library for uniformly and efficiently working with streaming devices on web pages and native apps.
 
-This supports Web Bluetooth API + Native Mobile (via [`@capacitor-community/bluetooth-le`](https://github.com/capacitor-community/bluetooth-le)) and Web Serial API using convenient wrappers. Android has severe limits with Web Bluetooth (e.g. 20 byte MTU limit, 512 byte limit elsewhere) so the native library is necessary for mobile builds.
+This supports Web Bluetooth API + Native Mobile (via [`@capacitor-community/bluetooth-le`](https://github.com/capacitor-community/bluetooth-le)) and Web Serial API using convenient wrappers. 
 
-API wrappers (usable independently): 
-- [`ble_client.ts`](./src/ble) wraps @capacitor-community/bluetooth-le with easier handles. `npm i ble-wrapper`
-- [`serialstream.ts`](./src/serial) wraps the Web Serial API with easy handles and buffering + transform stream support. `npm i webserial-wrapper`
+> **Note:** Android has severe limits with Web Bluetooth (e.g. 20 byte MTU limit, 512 byte limit elsewhere) so the native library is necessary for mobile builds.
 
-Examples:
+## Packages
+- `device-decoder` is the main package for decoding and rendering data from streaming devices ([source](./src/device.frontend.ts))
+- `ble-wrapper` wraps @capacitor-community/bluetooth-le with easier handles ([source](./src/ble))
+- `webserial-wrapper` wraps the Web Serial API with easy handles and buffering + transform stream support ([source](./src/serial))
+- `device-decoder.third_party` contains wrappers for third party libraries (e.g. `muse-js` and `ganglion-ble`) ([source](./src/devices/third_party/index.ts))
+
+## Examples
 - A general purpose debugger for BLE and USB streaming devices ([source](./debugger), [website](https://devicedebugger.netlify.app))
 - An EEG acquisition system with filters and coherence analysis ([source](https://github.com/brainsatplay/graphscript/examples/eegnfb))
 - An HEG-FNIRS acquisition system with auditory feedback ([source](https://github.com/brainsatplay/graphscript/examples/audiofeedback))
@@ -98,11 +102,13 @@ This allows you to specify callback functions for each characteristic.
 You will need to know which characteristics to specify from the device profile.
 ```js
 
-let service = Array.from(Object.keys(Devices['BLE']['nrf5x'].services))[0];
-let characteristics = Array.from(Object.keys(Devices['BLE']['nrf5x'].services[service]));
+const device =  Devices['BLE']['nrf5x']
+const services = device.services
+let service = Object.keys(services)[0];
+let characteristics = Object.keys(services[service]);
 
 let info = initDevice(
-    Devices['BLE']['nrf5x'],
+    device,
 
     {
         ondecoded: {
