@@ -83,12 +83,12 @@ export class BLEClient extends ByteParser {
                 if(options) {
 
                     let deviceRequest = {
-                        services:Array.from(Object.keys(options.services)),
-                        name:options.name,
-                        namePrefix:options.namePrefix
-                    }
-
-                    console.log(deviceRequest);
+                        services:Array.from(Object.keys(options.services))
+                    } as any;
+                    if(options.name) deviceRequest.name = options.name;
+                    if(options.namePrefix) deviceRequest.namePrefix = options.name;
+ 
+                    //console.log(deviceRequest);
                     
                     this.client.requestDevice(deviceRequest)
                         .then((device) => {
