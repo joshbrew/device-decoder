@@ -8,7 +8,7 @@ import {
     RequestBleDeviceOptions, 
     ScanResult, 
     TimeoutOptions
-} from '@capacitor-community/bluetooth-le';
+} from '@capacitor-community/bluetooth-le'///dist/esm/index';
 
 
 export type BLEDeviceOptions = {
@@ -82,16 +82,17 @@ export class BLEClient extends ByteParser {
             } else {
                 if(options) {
 
-                    let services = Array.from(Object.keys(options.services));
-
+                    let services = Array.from(Object.keys(options.services))//.map((v) => v.toUpperCase());
                     let deviceRequest = {
-                        services:services
+                        //services:services //this does not work on custom services so we'll just forget about it, use the name and namePrefix
                     } as any;
-                    if(!this.isMobile()) deviceRequest.optionalServices = services;
+                    
+                    if(!this.isMobile()) {
+                        deviceRequest.optionalServices = services;
+                    }
+                    
                     if(options.name) deviceRequest.name = options.name;
-                    if(options.namePrefix) deviceRequest.namePrefix = options.name;
- 
-                    //console.log(deviceRequest);
+                    if(options.namePrefix) deviceRequest.namePrefix = options.namePrefix;
                     
                     this.client.requestDevice(deviceRequest)
                         .then((device) => {
