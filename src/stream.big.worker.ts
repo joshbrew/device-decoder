@@ -1,9 +1,9 @@
 import { 
     WorkerService, 
+    remoteGraphRoutes, 
     workerCanvasRoutes, 
+    nodeTemplates
     //GPUService, 
-    subprocessRoutes,
-    loadAlgorithms
 } from 'graphscript'//'../../graphscript/index'//'graphscript'//
 
 import { streamWorkerRoutes } from './stream.routes';
@@ -25,13 +25,13 @@ import {
 } from 'graphscript-services.gpu'
  //'graphscript-services'; //
 
+Object.assign(nodeTemplates, algorithms);
+Object.assign(nodeTemplates, gpualgorithms);
 
 
 declare var WorkerGlobalScope;
 
 if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
-    loadAlgorithms(algorithms);
-    loadAlgorithms(gpualgorithms);
     
     globalThis.Devices = Devices; //access all devices incl third party (bloated)
 
@@ -41,7 +41,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
             //GPUService as any,
             ...workerCanvasRoutes,
             //unsafeRoutes, //allows dynamic route loading
-            ...subprocessRoutes, //includes unsafeRoutes
+            ...remoteGraphRoutes,
             ...BFSRoutes,
             ...csvRoutes,
             ...streamWorkerRoutes,

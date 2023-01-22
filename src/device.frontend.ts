@@ -1,10 +1,10 @@
 
 import { 
-    subprocessRoutes, 
     WorkerInfo, 
     WorkerService, 
     WorkerRoute, 
-    workerCanvasRoutes 
+    workerCanvasRoutes, 
+    remoteGraphRoutes
 } from 'graphscript';////"../../graphscript/index"
 
 import gsworker from './stream.worker'
@@ -13,7 +13,7 @@ import gsworker from './stream.worker'
 import { BLEClient, BLEDeviceOptions, BLEDeviceInfo } from './ble/ble_client';
 import { WebSerial } from './serial/serialstream';
 import { Devices } from './devices';
-import { TimeoutOptions } from '@capacitor-community/bluetooth-le';
+import { TimeoutOptions } from '@capacitor-community/bluetooth-le/dist/plugin';
 import { filterPresets, chartSettings, decoders } from './devices/index';
 import { FilterSettings } from './util/BiquadFilters';
 
@@ -27,7 +27,7 @@ export const BLE = new BLEClient();
 export const workers = new WorkerService({
     roots:{
         ...workerCanvasRoutes,
-        ...subprocessRoutes
+        ...remoteGraphRoutes, //allows dynamic route loading
     }
 }); 
 export { Devices, gsworker, filterPresets, chartSettings, decoders, FilterSettings }
@@ -164,7 +164,7 @@ export function initDevice(
                 if(typeof options.ondecoded === 'function') {
                     if((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.notify) {
                         if(!(settings as any).services[primaryUUID][characteristic].notifyCallback) (settings as any).services[primaryUUID][characteristic].notifyCallback = (data:DataView) => {
-                            (streamworker as WorkerInfo).run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],[data.buffer]).then(options.ondecoded as any);
+                            (streamworker as WorkerInfo).run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],undefined,[data.buffer]).then(options.ondecoded as any);
                         }
                         break; //only subscribe to first notification in our list if only one ondecoded function provided
                     }
@@ -172,12 +172,12 @@ export function initDevice(
                     if(options.ondecoded[characteristic]) {
                         if((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.notify) {
                             if(!(settings as any).services[primaryUUID][characteristic].notifyCallback) (settings as any).services[primaryUUID][characteristic].notifyCallback = (data:DataView) => {
-                                streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],[data.buffer]).then(options.ondecoded[characteristic]);
+                                streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],undefined,[data.buffer]).then(options.ondecoded[characteristic]);
                             }
                         } 
                         if ((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.read) {
                             if(!(settings as any).services[primaryUUID][characteristic].readCallback) (settings as any).services[characteristic].readCallback = (data:DataView) => {
-                                streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],[data.buffer]).then(options.ondecoded[characteristic]);
+                                streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],undefined,[data.buffer]).then(options.ondecoded[characteristic]);
                             }
                         }
                     }

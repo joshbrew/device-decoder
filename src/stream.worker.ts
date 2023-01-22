@@ -1,8 +1,8 @@
 import { 
     WorkerService, 
+    remoteGraphRoutes, 
     workerCanvasRoutes, 
     //GPUService, 
-    subprocessRoutes,
 //    loadAlgorithms
 } from 'graphscript'//"../../GraphServiceRouter/index"//'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
 import { 
@@ -32,8 +32,7 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
         roots:{
             //GPUService as any,
             ...workerCanvasRoutes,
-            //unsafeRoutes, //allows dynamic route loading
-            ...subprocessRoutes, //includes unsafeRoutes
+            ...remoteGraphRoutes, //allows dynamic route loading
             // BFSRoutes,
             // csvRoutes,
             ...streamWorkerRoutes
