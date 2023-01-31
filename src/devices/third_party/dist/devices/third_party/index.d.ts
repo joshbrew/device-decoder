@@ -75,5 +75,5 @@ export declare const Devices3rdParty: {
         };
     };
 };
-declare const Devices: {};
+declare const Devices: any;
 export { Devices };

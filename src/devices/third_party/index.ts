@@ -18,9 +18,10 @@ export const Devices3rdParty = {
 
 import { Devices as d } from '../index';
 
-const Devices = {};
+const Devices = {} as any;
 Object.assign(Devices,d);
-Object.assign(Devices,Devices3rdParty);
+Devices.CUSTOM_BLE = Devices3rdParty.CUSTOM_BLE;
+Object.assign(Devices.CUSTOM, Devices3rdParty.CUSTOM);//prevent overwrite
 
 
 export { Devices } 
