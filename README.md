@@ -9,7 +9,7 @@ This supports Web Bluetooth API + Native Mobile (via [`@capacitor-community/blue
 - `device-decoder` is the main package for decoding and rendering data from streaming devices ([source](./src/device.frontend.ts))
 - `ble-wrapper` wraps @capacitor-community/bluetooth-le with easier handles ([source](./src/ble))
 - `webserial-wrapper` wraps the Web Serial API with easy handles and buffering + transform stream support ([source](./src/serial))
-- `device-decoder.third_party` contains wrappers for third party libraries (e.g. `muse-js` and `ganglion-ble`) ([source](./src/devices/third_party/index.ts))
+- `device-decoder.third_party` contains wrappers for third party libraries. Includes Muse, Ganglion, and Webgazer (eye tracking) ([source](./src/devices/third_party/index.ts)). Import `Devices` from this to get a complete device list including these extra, much fatter drivers.
 
 ## Examples
 - A general purpose debugger for BLE and USB streaming devices ([source](./debugger), [website](https://devicedebugger.netlify.app))

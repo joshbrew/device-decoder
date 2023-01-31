@@ -11,7 +11,7 @@
 
 import { WebglLinePlotProps } from "webgl-plot-utils";
 import { FilterSettings } from "../../util/BiquadFilters";
-import {Ganglion} from './ganglion-browser'
+import {Ganglion} from './dependencies/ganglion-browser'
 
 const sps = 250;
 
@@ -93,7 +93,7 @@ export const ganglionSettings = { //include muse-js and import {MuseClient} from
         console.log('ganglion disconnected!', info);
     },
     ondata:(data:any)=>{
-        console.log(data); //direct from teh device output
+        console.log(data); //direct from the device output
     },
     //read:(info:any,command?:any)=>{},
     //write:(info:any,command?:any)=>{}

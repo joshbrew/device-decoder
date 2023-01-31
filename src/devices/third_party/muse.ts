@@ -13,7 +13,7 @@ import { WebglLinePlotProps } from "webgl-plot-utils";
 import { FilterSettings } from "../../util/BiquadFilters";
 import { ByteParser } from "../../util/ByteParser";
 
-import {MuseClient} from './muse.esm'
+import {MuseClient} from './dependencies/muse.esm'
 
 const sps = 250;
 
