@@ -35,6 +35,10 @@ export declare const cognixionONEBLESettings: {
     sps: number;
 };
 export declare const cognixionONESerialSettings: {
+    deviceType: string;
+    deviceName: string;
+    sps: number;
+} & {
     deviceType: "USB";
     deviceName: string;
     sps?: number;
@@ -44,11 +48,7 @@ export declare const cognixionONESerialSettings: {
     codec: (data: any) => {
         [key: string]: any;
     };
-} & import("../serial/serialstream").SerialPortOptions & {
-    deviceType: string;
-    deviceName: string;
-    sps: number;
-};
+} & import("../serial/serialstream").SerialPortOptions;
 export declare const cognixionONEChartSettings: Partial<WebglLinePlotProps>;
 export declare const cognixionONEFilterSettings: {
     [key: string]: FilterSettings;

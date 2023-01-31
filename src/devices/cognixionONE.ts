@@ -72,12 +72,12 @@ export const cognixionONEBLESettings = {
 }
 
 export const cognixionONESerialSettings = Object.assign(
-    cytonSerialSettings,
     {
         deviceType:'BLE',
         deviceName:'cognixionONE',
         sps
-    }
+    },
+    cytonSerialSettings
 );
 
 const defaultChartSetting = {nSec:10, sps, units:'mV'};
