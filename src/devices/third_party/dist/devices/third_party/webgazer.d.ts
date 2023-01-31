@@ -1,4 +1,6 @@
 import { WebglLinePlotProps } from "webgl-plot-utils";
+import { webgazer } from "./dependencies/webgazer.esm";
+export { webgazer };
 export declare const webgazerSettings: {
     sps: number;
     deviceType: string;

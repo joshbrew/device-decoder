@@ -13,6 +13,8 @@ import { WebglLinePlotProps } from "webgl-plot-utils";
 import { FilterSettings } from "../../util/BiquadFilters";
 import {webgazer} from "./dependencies/webgazer.esm" //imports "webgazer"
 
+export {webgazer}
+
 const sps = 30; //?? variable
 
 export const webgazerSettings = { //include muse-js and import {MuseClient} from 'muse-js' for this to work
