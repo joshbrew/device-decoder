@@ -13,8 +13,8 @@ This supports Web Bluetooth API + Native Mobile (via [`@capacitor-community/blue
 
 ## Examples
 - A general purpose debugger for BLE and USB streaming devices ([source](./debugger), [website](https://devicedebugger.netlify.app))
-- An EEG acquisition system with filters and coherence analysis ([source](https://github.com/brainsatplay/graphscript/examples/eegnfb))
-- An HEG-FNIRS acquisition system with auditory feedback ([source](https://github.com/brainsatplay/graphscript/examples/audiofeedback))
+- An EEG acquisition system with filters and coherence analysis ([source](https://github.com/brainsatplay/graphscript/tree/master/examples/eegnfb))
+- An HEG-FNIRS acquisition system with auditory feedback ([source](https://github.com/brainsatplay/graphscript/tree/master/examples/audiofeedback))
 - A multimodal data acquisition system with alerts for specific sensors ([source](https://github.com/brainsatplay/js-biosensor-modules), [website](https://modules.brainsatplay.com/))
 
 ## Installation
