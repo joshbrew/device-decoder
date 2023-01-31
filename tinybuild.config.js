@@ -15,7 +15,7 @@ const config = {
         minifyWhitespace:true,
         sourcemap: false,
         //globalThis:null //'mymodule'
-        globals:{'device.frontend.ts':['initDevice','Devices']} //installed to window specifically
+        globals:{'src/device.frontend.ts':['initDevice','Devices']} //installed to window specifically
         //init:{'index.js':function(bundle) { console.log('prepackaged bundle script!', bundle); }}      
         
     },
