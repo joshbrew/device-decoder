@@ -13,6 +13,8 @@ import gsworker from './stream.worker'
 import { BLEClient, BLEDeviceOptions, BLEDeviceInfo } from './ble/ble_client';
 import { WebSerial } from './serial/serialstream';
 import { Devices } from './devices';
+
+
 import { TimeoutOptions } from '@capacitor-community/bluetooth-le/dist/plugin';
 import { filterPresets, chartSettings, decoders } from './devices/index';
 import { FilterSettings } from './util/BiquadFilters';

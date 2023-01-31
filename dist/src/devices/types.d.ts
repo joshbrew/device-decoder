@@ -1,4 +1,4 @@
-import { TimeoutOptions } from '@capacitor-community/bluetooth-le';
+import { TimeoutOptions } from '@capacitor-community/bluetooth-le/dist/plugin';
 import { BLEDeviceOptions } from '../ble/ble_client';
 import { SerialPortOptions } from '../serial/serialstream';
 export declare type BLEDeviceSettings = {
