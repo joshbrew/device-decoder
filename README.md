@@ -28,7 +28,7 @@ npm install device-decoder
 
 Otherwise, it may be more convenient to use a **CDN link** to import the library directly into your project:
 ```html
-<script src="https://cdn.jsdelivr.net/npm/device-decoder@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/device-decoder@latest/dist/device.frontend.esm.js"></script>
 ```
 
 Regardless of your import source, you may find it useful to use **ES Modules** to explicitly include variables from the library in your code:
@@ -295,7 +295,7 @@ export const filterSettings = {
 This is the required base template for our web worker system. You can update the Devices list yourself with your own custom list this way. Otherwise, there is a worker service baked into the library.
 
 ```ts
-import {  WorkerService, workerCanvasRoutes, subprocessRoutes } from 'graphscript'
+import {  WorkerService, workerCanvasRoutes } from 'graphscript'
 
 import { streamWorkerRoutes } from 'device-decoder/src/stream.routes' 
 
@@ -310,7 +310,6 @@ if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope
     const worker = new WorkerService({
         roots:{
             ...workerCanvasRoutes,
-            ...subprocessRoutes,
             ...streamWorkerRoutes
         }
     });
