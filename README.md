@@ -84,6 +84,7 @@ The default `Devices` object is organized as follows:
 #### CUSTOM
 
 - `simulator`: generates sine waves. You can easily modify this protocol.
+- `webgazer`: (via device-decoder.third_party), webcam-based eye tracking via [Webgazer.js](https://webgazer.cs.brown.edu/)!
 
 #### BLE_CUSTOM (under `device-decoder.third_party`)
 - `muse`: Integrates with the [muse-js](https://github.com/urish/muse-js) library.
