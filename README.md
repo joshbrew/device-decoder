@@ -28,7 +28,7 @@ npm install device-decoder
 
 Otherwise, it may be more convenient to use a **CDN link** to import the library directly into your project:
 ```html
-<script src="https://cdn.jsdelivr.net/npm/device-decoder@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/device-decoder@latest/dist/device.frontend.esm.js"></script>
 ```
 
 Regardless of your import source, you may find it useful to use **ES Modules** to explicitly include variables from the library in your code:
