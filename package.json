@@ -1,6 +1,6 @@
 {
   "name": "device-decoder",
-  "version": "0.4.20",
+  "version": "0.4.21",
   "description": "Customizable multithreaded BLE and USB (or other) device connecting, sensor decoding, and (threaded) output rendering",
   "main": "dist/device.frontend.js",
   "module": "dist/device.frontend.esm.js",

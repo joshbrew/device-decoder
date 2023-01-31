@@ -72,13 +72,12 @@ export const cognixionONEBLESettings = {
 }
 
 export const cognixionONESerialSettings = Object.assign(
-    {
-        deviceType:'BLE',
-        deviceName:'cognixionONE',
-        sps
-    },
+    {},
     cytonSerialSettings
 );
+
+cognixionONESerialSettings.sps = sps;
+cognixionONESerialSettings.deviceName = 'cognixionONE';
 
 const defaultChartSetting = {nSec:10, sps, units:'mV'};
 export const cognixionONEChartSettings:Partial<WebglLinePlotProps> = {

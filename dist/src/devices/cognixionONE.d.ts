@@ -35,10 +35,6 @@ export declare const cognixionONEBLESettings: {
     sps: number;
 };
 export declare const cognixionONESerialSettings: {
-    deviceType: string;
-    deviceName: string;
-    sps: number;
-} & {
     deviceType: "USB";
     deviceName: string;
     sps?: number;
