@@ -37,7 +37,7 @@ import { Devices, initDevice } from 'device-decoder'
 ```
 
 ```js
-import { Devices, initDevice } from 'https://cdn.jsdelivr.net/npm/device-decoder@latest/dist/device.frontend.js'
+import { Devices, initDevice } from 'https://cdn.jsdelivr.net/npm/device-decoder@latest'
 ```
 
 ## Getting Started
