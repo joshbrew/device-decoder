@@ -44,10 +44,14 @@ export function initDevice(
                 [key:string]:any
             }
         },
+        
+        //this function is required
         ondecoded:((data:any) => void)|{[key:string]:(data:any)=>void}, //a single ondata function or an object with keys corresponding to BLE characteristics
+        
         onconnect?:((device:any) => void),
         beforedisconnect?:((device:any) => void),
         ondisconnect?:((device:any) => void),
+        reconnect?:boolean, //this is for the USB codec but you MUST provide the usbProductId and usbVendorId in settings. For BLE it will attempt to reconnect if you provide a deviceId in settings
         roots?:{ //use secondary workers to run processes and report results back to the main thread or other
             [key:string]:WorkerRoute
         },
@@ -56,6 +60,10 @@ export function initDevice(
     }
 ) {
     if(!settings) return undefined;
+
+    if(!options) options = { 
+        ondecoded:(data) => { console.log(data); } 
+    };
 
     let deviceType = settings.deviceType;
     let deviceName = settings.deviceName;
@@ -262,8 +270,26 @@ export function initDevice(
         const WS = new WebSerial();
 
         return new Promise((res,rej) => {
-            WS.requestPort(settings.usbVendorId, settings.usbProductId).then((port)=>{
-                let info = port.getInfo();
+
+
+            let onerror = (er) => {
+                console.error(er);
+                options.service.terminate(serialworker._id as string);
+                options.service.terminate(streamworker._id);
+                if(options.roots) {
+                    for(const key in options.roots) {
+                        options.service.remove(key);
+                        //console.log('removing route', options.roots[key])
+                    }
+                }
+                rej(er);
+            }
+
+            let withPort = (port?) => {
+                let info;
+                if(port) info = port.getInfo();
+                else info = { usbVendorId:settings.usbVendorId, usbProductId:settings.usbProductId };
+
                 (serialworker.run('openPort', {
                     baudRate:settings.baudRate,
                     usbVendorId:info.usbVendorId,
@@ -301,19 +327,17 @@ export function initDevice(
                     };
                     if(options.onconnect) options.onconnect(info);
                     res(info);
-                });
-            }).catch((er)=>{
-                console.error(er);
-                options.service.terminate(serialworker._id as string);
-                options.service.terminate(streamworker._id);
-                if(options.roots) {
-                    for(const key in options.roots) {
-                        options.service.remove(key);
-                        //console.log('removing route', options.roots[key])
-                    }
-                }
-                rej(er);
-            });
+                }).catch(onerror);
+            }
+
+            if(options.reconnect) { //requires settings.usbVendorId and settings.usbProductId and a previous permission check on connection
+                withPort();
+            } else {
+                WS.requestPort(settings.usbVendorId, settings.usbProductId).then((port) => {
+                    withPort(port);
+                }).catch(onerror);
+            }
+            
         }) as Promise<{
             workers:{
                 serialworker:WorkerInfo,

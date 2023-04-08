@@ -1,6 +1,6 @@
 /// <reference types="dom-serial" />
 import { ByteParser } from '../util/ByteParser';
-export declare type SerialPortOptions = {
+export type SerialPortOptions = {
     baudRate?: number;
     stopBits?: 1 | 2 | number;
     parity?: 'none' | 'even' | 'odd' | ParityType;
@@ -10,7 +10,7 @@ export declare type SerialPortOptions = {
     beforedisconnect?: (client: WebSerial, port: SerialPort) => void;
     ondisconnect?: (ev: any) => void;
 };
-export declare type SerialStreamProps = {
+export type SerialStreamProps = {
     _id?: string;
     port: SerialPort;
     settings: SerialPortOptions;
@@ -33,7 +33,7 @@ export declare type SerialStreamProps = {
         lockIdx?: number;
     } | boolean;
 };
-export declare type SerialStreamInfo = {
+export type SerialStreamInfo = {
     _id: string;
     port: SerialPort;
     settings: SerialPortOptions;
@@ -67,7 +67,7 @@ export declare class WebSerial extends ByteParser {
     getPorts(): Promise<SerialPort[]>;
     requestPort(usbVendorId?: number, usbProductId?: number): Promise<SerialPort>;
     openPort(port: SerialPort, options?: SerialPortOptions): Promise<void>;
-    readWithTimeout(port: SerialPort, timeout: number): Promise<ReadableStreamDefaultReadResult<any>>;
+    readWithTimeout(port: SerialPort, timeout: number): Promise<ReadableStreamReadResult<any>>;
     writePort(port: SerialPort, message: any): Promise<boolean>;
     getSignals(port: SerialPort): any;
     setSignals(port: SerialPort, signals: any): any;

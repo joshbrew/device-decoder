@@ -92,8 +92,8 @@ hegduinoV1BLESettings.sps = 19;
 export const hegduinoChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
         red:{nSec:60, sps},
-        ir:{nSec:60, sps},
-        heg:{nSec:60, sps},
+        infrared:{nSec:60, sps},
+        heg:{nSec:60, ymin:0, sps},
         ambient:{nSec:60, sps},
         temperature:{nSec:60, sps, units:'C'},
     }
@@ -102,13 +102,13 @@ export const hegduinoChartSettings:Partial<WebglLinePlotProps> = {
 let v1sps = 19;
 export const hegduinoV1FilterSettings:{[key:string]:FilterSettings} = {
     red:{sps:v1sps, lowpassHz:2, useLowpass:true},
-    ir:{sps:v1sps, lowpassHz:2, useLowpass:true},
+    infrared:{sps:v1sps, lowpassHz:2, useLowpass:true},
     heg:{sps:v1sps, lowpassHz:2, useLowpass:true},
 }
 
 export const hegduinoV2FilterSettings:{[key:string]:FilterSettings} = {
     red:{sps, lowpassHz:4, useLowpass:true},
-    ir:{sps, lowpassHz:4, useLowpass:true},
+    infrared:{sps, lowpassHz:4, useLowpass:true},
     heg:{sps, lowpassHz:4, useLowpass:true},
 }
 

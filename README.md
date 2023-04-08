@@ -51,6 +51,7 @@ let info = initDevice(
     {
         //devices: Devices // A custom device list
         //workerUrl: './stream.worker.js' // Specify a custom worker (using the template at the bottom of this documentation file)
+        //reconnect?:true //for USB connections, if usbVendorId and usbProductId are provided and a previous connection was permitted. For BLE provide the deviceId from info.device.deviceId saved from a previous connection. For USB ports use info.device.port.getInfo();
         ondecoded: (data) => console.log(data),
         onconnect: (deviceInfo) => console.log(deviceInfo),
         ondisconnect: (deviceInfo) => console.log(deviceInfo) 

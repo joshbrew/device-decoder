@@ -1,6 +1,6 @@
 import { ByteParser } from '../util/ByteParser';
 import { BleClientInterface, BleDevice, InitializeOptions, RequestBleDeviceOptions, ScanResult, TimeoutOptions } from '@capacitor-community/bluetooth-le';
-export declare type BLEDeviceOptions = {
+export type BLEDeviceOptions = {
     namePrefix?: string;
     name?: string;
     deviceId?: string;
@@ -24,7 +24,7 @@ export declare type BLEDeviceOptions = {
         };
     };
 };
-export declare type BLEDeviceInfo = {
+export type BLEDeviceInfo = {
     device: BleDevice;
 } & BLEDeviceOptions;
 export declare class BLEClient extends ByteParser {

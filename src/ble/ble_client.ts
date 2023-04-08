@@ -172,24 +172,24 @@ export class BLEClient extends ByteParser {
 
     reconnect(deviceId:string, options?:BLEDeviceOptions):Promise<BLEDeviceInfo> {
         return new Promise((res,rej) => {
-            let android = this.isAndroid();
-            let mobile = this.isMobile();
-            console.log(deviceId);
+            // let android = this.isAndroid();
+            // let mobile = this.isMobile();
+            //console.log("Reconnecting to: ", deviceId);
             let opts = options;
             if(this.devices[deviceId]) opts = Object.assign(Object.assign({},this.devices[deviceId]),opts);
             if(opts?.deviceId) delete opts.deviceId; 
-            if(!mobile && !navigator.bluetooth?.getDevices) {
-                this.setup(opts).then((device) => {
+            // if(!mobile && !navigator.bluetooth?.getDevices) {
+            //     this.setup(opts).then((device) => {
+            //         res(device);
+            //     });
+            // }
+            //if(android) {
+            this.client.getDevices([deviceId]).then(devices => {
+                this.setupDevice(devices[0],opts).then((device) => {
                     res(device);
                 });
-            }
-            if(android) {
-                this.client.getDevices([deviceId]).then(devices => {
-                    this.setupDevice(devices[0],opts).then((device) => {
-                        res(device);
-                    });
-                }).catch(rej)
-            }
+            }).catch(rej)
+            //}
         });
     }
 
