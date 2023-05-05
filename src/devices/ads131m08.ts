@@ -39,6 +39,10 @@ export function ads131m08codec(data:any) {
         output[6][i] = ByteParser.bytesToInt24(arr[j+18],arr[j+19],arr[j+20]);
         output[7][i] = ByteParser.bytesToInt24(arr[j+21],arr[j+22],arr[j+23]);
     }
+
+    if(arr.length > 225) {
+        (output as any).leds = arr.slice(225);
+    }
     
     return output;
 }

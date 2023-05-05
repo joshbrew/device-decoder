@@ -23,7 +23,7 @@
     "author": "Joshua Brewster",
     "license": "AGPL-3.0-or-later",
     "dependencies": {
-        "@capacitor-community/bluetooth-le": "~2.2.0"
+        "@capacitor-community/bluetooth-le": "~2.2.3"
     },
     "devDependencies": {
         "@types/node": "^18.0.5"
