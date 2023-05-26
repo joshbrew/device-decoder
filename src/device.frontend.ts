@@ -35,6 +35,53 @@ export const workers = new WorkerService({
 export { Devices, gsworker, filterPresets, chartSettings, decoders, FilterSettings }
 
 
+export type CustomDeviceStream = {
+    workers:{
+        streamworker:WorkerInfo
+    },
+    device:any,
+    options:any,
+    disconnect:()=>void,
+    read:(command?:any)=>any,
+    write:(command?:any)=>any,
+    roots:{[key:string]:WorkerRoute}
+};
+
+export type SerialDeviceStream = {
+    workers:{
+        serialworker:WorkerInfo,
+        streamworker:WorkerInfo
+    },
+    options:any,
+    device:{
+        _id:string,
+        settings:any,
+        info:Partial<SerialPortInfo>
+    },
+    subscribeStream:(ondata:(data:any) => void) => Promise<any>,
+    unsubscribeStream:(sub:number|undefined) => Promise<any>,
+    disconnect:()=>void,
+    read:()=>Promise<any>,
+    write:(command:any)=>Promise<boolean>,
+    roots:{[key:string]:WorkerRoute}
+};
+    
+
+export type BLEDeviceStream = {
+    workers:{
+        streamworker:WorkerInfo
+    },
+    options:any,
+    device:BLEDeviceInfo,
+    subscribe:(service, notifyCharacteristic, ondata?, bypassWorker?) => Promise<void>,
+    unsubscribe:(service, notifyCharacteristic) => Promise<void>,
+    disconnect:()=>void,
+    read:(command:{ service:string, characteristic:string, ondata?:(data:DataView)=>void, timeout?:TimeoutOptions }) => Promise<DataView>,
+    write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions})=>Promise<void>,
+    roots:{[key:string]:WorkerRoute}
+};
+
+
 //create streaming threads
 export function initDevice(
     settings:any,
@@ -153,17 +200,7 @@ export function initDevice(
                     options.service.remove(key);
                 }
             }
-        }) as Promise<{
-            workers:{
-                streamworker:WorkerInfo
-            },
-            device:any,
-            options:any,
-            disconnect:()=>void,
-            read:(command?:any)=>any,
-            write:(command?:any)=>any,
-            roots:{[key:string]:WorkerRoute}
-        }>;
+        }) as Promise<CustomDeviceStream>;
 
     } else if(deviceType === 'BLE') {
         //ble
@@ -203,6 +240,25 @@ export function initDevice(
                     },
                     options,
                     device:result,
+                    subscribe:(service, notifyCharacteristic, ondata?, bypassWorker?) => {
+                        return BLE.subscribe(result.device, service, notifyCharacteristic, 
+                            (data:DataView) => {
+                                if(bypassWorker) {
+                                    if(ondata) ondata(data);
+                                    else if (options.ondecoded?.[notifyCharacteristic]) options.ondecoded[notifyCharacteristic](data);
+                                    else if(typeof options.ondecoded === 'function') options.ondecoded(data);
+                                }
+                                else {
+                                    (streamworker as WorkerInfo).run('decodeAndParseDevice',[data,deviceType,deviceName,service,notifyCharacteristic],undefined,[data.buffer]).then(
+                                        ondata ? ondata : options.ondecoded?.[notifyCharacteristic] ? options.ondecoded[notifyCharacteristic] : options.ondecoded
+                                    );
+                                }
+                            }
+                        );
+                    },
+                    unsubscribe:(service, notifyCharacteristic) => {
+                        return BLE.unsubscribe(result.device, service, notifyCharacteristic);
+                    },
                     disconnect:async () => { 
                         await BLE.disconnect(result.deviceId as string);  
                         if(options.ondisconnect) options.ondisconnect(info); 
@@ -231,17 +287,7 @@ export function initDevice(
                 }
                 rej(er);
             });
-        }) as Promise<{
-            workers:{
-                streamworker:WorkerInfo
-            },
-            options:any,
-            device:BLEDeviceInfo,
-            disconnect:()=>void,
-            read:(command:{ service:string, characteristic:string, ondata?:(data:DataView)=>void, timeout?:TimeoutOptions }) => Promise<DataView>,
-            write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions})=>Promise<void>,
-            roots:{[key:string]:WorkerRoute}
-        }>)
+        }) as Promise<BLEDeviceStream>)
         
     } else if (deviceType === 'USB') {
         //serial
@@ -309,7 +355,8 @@ export function initDevice(
                 }>).then((result) => {
                     if(settings.write) serialworker.post('writeStream', [result._id,settings.write]);
 
-                    if(typeof options.ondecoded === 'function') streamworker.subscribe('decodeAndParseDevice', options.ondecoded as any);
+                    if(typeof options.ondecoded === 'function') streamworker.subscribe('decodeAndParseDevice', (data:any) => { if(options.ondecoded) (options.ondecoded as Function)(data); });
+
                     let info = {
                         workers:{
                             streamworker,
@@ -317,6 +364,12 @@ export function initDevice(
                         },
                         device:result,
                         options,
+                        subscribeStream:(ondata:(data:any) => void) => {
+                            return streamworker.subscribe('decodeAndParseDevice', ondata);
+                        },
+                        unsubscribeStream:(sub:number|undefined) => {
+                            return streamworker.unsubscribe('decodeAndParseDevice', sub);
+                        },
                         disconnect:() => {
                             serialworker.post('closeStream',result._id); 
                             if(options.ondisconnect) options.ondisconnect(info); 
@@ -338,22 +391,7 @@ export function initDevice(
                 }).catch(onerror);
             }
             
-        }) as Promise<{
-            workers:{
-                serialworker:WorkerInfo,
-                streamworker:WorkerInfo
-            },
-            options:any,
-            device:{
-                _id:string,
-                settings:any,
-                info:Partial<SerialPortInfo>
-            },
-            disconnect:()=>void,
-            read:()=>Promise<any>,
-            write:(command:any)=>Promise<boolean>,
-            roots:{[key:string]:WorkerRoute}
-        }>
+        }) as Promise<SerialDeviceStream>
         
     }
     else return undefined;

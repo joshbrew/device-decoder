@@ -10,11 +10,22 @@ import { WebglLinePlotProps } from "webgl-plot-utils";
 import { FilterSettings } from "../util/BiquadFilters";
 import { ByteParser } from "../util/ByteParser";
 
+const sps = 250;
+// const tIncr = 9*1000/250; //millisecond increment, 9 samples per packet so 9/250 incr (* milliseconds)
+// const tMaxLag = tIncr + 200; //ms to reset the timestamp (e.g. dropped packet)
+// let tNow;
+// let tPrev; 
+
+
 export function ads131m08codec(data:any) {
     let arr; 
     if((data as DataView).getInt8) arr = new Uint8Array(data.buffer);
     else if(!data.buffer) arr = new Uint8Array(data);
     else arr = data;
+
+    // tPrev = tNow; 
+    // if(!tNow || tNow - tPrev > tMaxLag) tNow = Date.now();
+    // else tNow += tIncr;
 
     let output = {
         0:new Array(9),
@@ -25,7 +36,7 @@ export function ads131m08codec(data:any) {
         5:new Array(9),
         6:new Array(9),
         7:new Array(9),
-        timestamp:Date.now()
+        timestamp:Date.now()//tNow
     };
 
     for(let i = 0; i < 9; i++) { //hard coded packet iteration, 9 sample sets x 8 channels per packet 
@@ -57,6 +68,10 @@ export function ads131m08_arduinocodec(data:any) {
     else if(split.includes(',')) split = parsed.split(',');
     else split = parsed.split('\t');
 
+    // tPrev = tNow; 
+    // if(!tNow || tNow - tPrev > tMaxLag) tNow = Date.now();
+    // else tNow += tIncr;
+
     return {
         '0':parseInt(split[0]),
         '1':parseInt(split[1]),
@@ -66,12 +81,11 @@ export function ads131m08_arduinocodec(data:any) {
         '5':parseInt(split[5]),
         '6':parseInt(split[6]),
         '7':parseInt(split[7]),
-        timestamp: Date.now()
+        timestamp: Date.now()//tNow
     }
 
 }
 
-const sps = 250;
 
 const defaultChartSetting = {nSec:10, sps, units:'mV'};
 
