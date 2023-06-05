@@ -1,5 +1,6 @@
 /// <reference types="dom-serial" />
 import { ByteParser } from '../util/ByteParser';
+import '../hacktimer/HackTimer.min';
 export type SerialPortOptions = {
     baudRate?: number;
     stopBits?: 1 | 2 | number;

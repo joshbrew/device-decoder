@@ -3,6 +3,7 @@ import { FilterSettings } from '../util/BiquadFilters';
 import { ads131m08codec } from './ads131m08';
 import { freeeeg128codec } from './freeeeg128';
 import { freeeeg32codec } from './freeeeg32';
+import { freeeeg16codec } from './freeeeg16';
 import { hegduinocodec } from './hegduino';
 import { max3010xcodec } from './max30102';
 import { mpu6050codec } from './mpu6050';
@@ -104,6 +105,23 @@ export declare const Devices: {
                 };
             };
         };
+        freeEEG16: {
+            deviceType: string;
+            deviceName: string;
+            services: {
+                [x: string]: {
+                    '6e400002-b5a3-f393-e0a9-e50e24dcca9e': {
+                        write: any;
+                    };
+                    '6e400003-b5a3-f393-e0a9-e50e24dcca9e': {
+                        notify: boolean;
+                        notifyCallback: any;
+                        codec: typeof import("./freeeeg16").freeeeg16BLEcodec;
+                        sps: number;
+                    };
+                };
+            };
+        };
     };
     USB: {
         nrf5x: {
@@ -115,6 +133,18 @@ export declare const Devices: {
             };
             codec: typeof nrf5x_usbcodec;
             sps: number;
+        };
+        freeEEG16: {
+            deviceType: string;
+            deviceName: string;
+            baudRate: number;
+            bufferSize: number;
+            frequency: number;
+            codec: typeof freeeeg16codec;
+            sps: number;
+            buffering: {
+                searchBytes: Uint8Array;
+            };
         };
         freeEEG32: {
             deviceType: string;

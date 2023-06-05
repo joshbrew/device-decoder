@@ -9,6 +9,8 @@
     codec -> optionally used to transform streams e.g. on a separate thread, libraries like muse-js already do it for us so we can just customize ondata to handle output, or use the codec to do some kind of special math on a thread
 */
 
+import '../hacktimer/HackTimer.min' //prevents timeout loop throttling on tab context loss
+
 
 export const simulatorSettings = { 
     sps:250, 

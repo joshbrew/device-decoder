@@ -98,6 +98,7 @@ export function initDevice(
         onconnect?:((device:any) => void),
         beforedisconnect?:((device:any) => void),
         ondisconnect?:((device:any) => void),
+        ondata?:((data:DataView) => void), //get direct results, bypass workers (except for serial which is thread-native)
         reconnect?:boolean, //this is for the USB codec but you MUST provide the usbProductId and usbVendorId in settings. For BLE it will attempt to reconnect if you provide a deviceId in settings
         roots?:{ //use secondary workers to run processes and report results back to the main thread or other
             [key:string]:WorkerRoute
@@ -146,8 +147,9 @@ export function initDevice(
 
             settings.ondata = (data:any) => {
                 //console.log(data);
-                streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName]).then((result)=>{
-                    if(typeof options.ondecoded === 'function') options.ondecoded(result);
+                if(options.ondata) options.ondata(data);
+                if(typeof options.ondecoded === 'function') streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName]).then((result)=>{
+                    (options as any).ondecoded(result);
                 });
             };
 
@@ -211,6 +213,7 @@ export function initDevice(
                 if(typeof options.ondecoded === 'function') {
                     if((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.notify) {
                         if(!(settings as any).services[primaryUUID][characteristic].notifyCallback) (settings as any).services[primaryUUID][characteristic].notifyCallback = (data:DataView) => {
+                            if(options.ondata) options.ondata(data);
                             (streamworker as WorkerInfo).run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],undefined,[data.buffer]).then(options.ondecoded as any);
                         }
                         break; //only subscribe to first notification in our list if only one ondecoded function provided
@@ -219,15 +222,21 @@ export function initDevice(
                     if(options.ondecoded[characteristic]) {
                         if((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.notify) {
                             if(!(settings as any).services[primaryUUID][characteristic].notifyCallback) (settings as any).services[primaryUUID][characteristic].notifyCallback = (data:DataView) => {
+                                if(options.ondata) options.ondata(data);
                                 streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],undefined,[data.buffer]).then(options.ondecoded[characteristic]);
                             }
                         } 
                         if ((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.read) {
                             if(!(settings as any).services[primaryUUID][characteristic].readCallback) (settings as any).services[characteristic].readCallback = (data:DataView) => {
+                                if(options.ondata) options.ondata(data);
                                 streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],undefined,[data.buffer]).then(options.ondecoded[characteristic]);
                             }
                         }
                     }
+                } 
+                else if (options.ondata) {
+                    if ((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.notify) (settings as any).services[primaryUUID][characteristic].notifyCallback = options.ondata;
+                    if ((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.read) (settings as any).services[characteristic].readCallback = options.ondata;
                 }
             }
         }

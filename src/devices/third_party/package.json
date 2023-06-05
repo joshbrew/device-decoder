@@ -24,9 +24,8 @@
   "author": "Joshua Brewster and Garrett Flynn",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
-    "webgl-plot-utils":"~0.3.17"
+    "webgl-plot-utils": "~0.3.17"
   },
-  "devDependencies": {},
   "nodemonConfig": {
     "env": {
       "NODEMON": true

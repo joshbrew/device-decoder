@@ -81,6 +81,7 @@ export declare function initDevice(settings: any, options: {
     onconnect?: ((device: any) => void);
     beforedisconnect?: ((device: any) => void);
     ondisconnect?: ((device: any) => void);
+    ondata?: ((data: DataView) => void);
     reconnect?: boolean;
     roots?: {
         [key: string]: WorkerRoute;

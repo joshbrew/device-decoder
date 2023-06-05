@@ -4,6 +4,7 @@ import {ads131m08codec, ads131m08ChartSettings, ads131m08FilterSettings, ads131m
 import {cytoncodec, cytonChartSettings, cytonFilterSettings, cytonSerialSettings, daisycytonSerialSettings} from './cyton';
 import {freeeeg128codec, freeeeg128ChartSettings, freeeeg128FilterSettings, freeeeg128SerialSettings} from './freeeeg128';
 import {freeeeg32codec, freeeeg32ChartSettings, freeeeg32FilterSettings, freeeeg32SerialSettings, freeeeg32_optical_SerialSettings} from './freeeeg32';
+import {freeeeg16codec, freeeeg16ChartSettings, freeeeg16FilterSettings, freeeeg16SerialSettings, freeeeg16BLESettings} from './freeeeg16';
 import {hegduinocodec, hegduinoChartSettings, hegduinoBLESettings, hegduinoSerialSettings, hegduinoV2FilterSettings, hegduinoV1FilterSettings, hegduinoV1SerialSettings, hegduinoV1BLESettings} from './hegduino';
 import { max3010xcodec, max3010xChartSettings } from './max30102';
 import { mpu6050codec, mpu6050ChartSettings } from './mpu6050';
@@ -34,17 +35,19 @@ export * from './types'
 //containe unique (non-default) BLE and Serial device connection settings + codecs to parse key:value pairs from streamed data channels
 export const Devices = {
     BLE:{
-        'nrf5x':nrf5xBLESettings,
-        'hegduino':hegduinoBLESettings,
-        'hegduinoV1':hegduinoV1BLESettings,
-        'cognixionONE':cognixionONEBLESettings,
-        'statechanger':statechangerBLESettings,
-        'blueberry':blueberryBLESettings,
-        'blueberry2':blueberry2BLESettings,
-        'heart_rate':heartRateBLESettings
+        'nrf5x': nrf5xBLESettings,
+        'hegduino': hegduinoBLESettings,
+        'hegduinoV1': hegduinoV1BLESettings,
+        'cognixionONE': cognixionONEBLESettings,
+        'statechanger': statechangerBLESettings,
+        'blueberry': blueberryBLESettings,
+        'blueberry2': blueberry2BLESettings,
+        'heart_rate': heartRateBLESettings,
+        'freeEEG16': freeeeg16BLESettings
     },
     USB:{
         'nrf5x':nrf5xSerialSettings,
+        'freeEEG16':freeeeg16SerialSettings,
         'freeEEG32':freeeeg32SerialSettings,
         'freeEEG32_optical':freeeeg32_optical_SerialSettings,
         'freeEEG128':freeeeg128SerialSettings,
@@ -83,6 +86,7 @@ export const filterPresets:{[key:string]:{[key:string]:FilterSettings}} = {
     'ads131m08':ads131m08FilterSettings,
     'max3010x':undefined,
     'mpu6050':undefined,
+    'freeeeg16':freeeeg16FilterSettings, //https://github.com/joshbrew/freeeeg32.js
     'freeeeg32':freeeeg32FilterSettings, //https://github.com/joshbrew/freeeeg32.js
     'freeeeg128':freeeeg128FilterSettings,
     'cyton':cytonFilterSettings, //https://github.com/joshbrew/cyton.js

@@ -69,6 +69,7 @@ The default `Devices` object is organized as follows:
 - `blueberry`:  Connect to the [Blueberry](https://blueberryx.com/) over USB.
 - `blueberry2`: Connect to the [Blueberry](https://blueberryx.com/) (v2) over USB.
 - `heart_rate`: Connect to the generic bluetooth heart rate characteristic (compatible with many devices)
+- `freeEEG16` : Connect to Dmitry Sukhoruchkin's FreeEEG16 module (ESP32 based) over BLE
 
 #### USB
 - `nrf5x`: Connect to our [nRF52 microcontroller prototypes] over USB.
@@ -81,6 +82,7 @@ The default `Devices` object is organized as follows:
 - `peanut`: Connect to the Peanut HEG over USB.
 - `statechanger`: Connect to the Statechanger HEG over USB.
 - `cognixionONE`: Connect to the [Cognixion ONE](https://one.cognixion.com/) over USB.
+- `freeEEG16` : Connect to Dmitry Sukhoruchkin's FreeEEG16 module (ESP32 based) over USB
 
 #### CUSTOM
 

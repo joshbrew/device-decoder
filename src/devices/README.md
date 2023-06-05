@@ -308,32 +308,38 @@ In [`index.ts`](./index.ts), link the new settings to the relevant objects
 //containe unique (non-default) BLE and Serial device connection settings + codecs to parse key:value pairs from streamed data channels
 export const Devices = {
     BLE:{
-        'nrf5x':nrf5xBLESettings,
-        'hegduino':hegduinoBLESettings,
-        'cognixionONE':cognixionONEBLESettings,
-        'statechanger':statechangerBLESettings,
-        'blueberry':blueberryBLESettings,
-        'blueberry2':blueberry2BLESettings,
-        'heart_rate':heartRateBLESettings //generic bluetooth heart rate characteristic (compatible with many devices)
+        'nrf5x': nrf5xBLESettings,
+        'hegduino': hegduinoBLESettings,
+        'hegduinoV1': hegduinoV1BLESettings,
+        'cognixionONE': cognixionONEBLESettings,
+        'statechanger': statechangerBLESettings,
+        'blueberry': blueberryBLESettings,
+        'blueberry2': blueberry2BLESettings,
+        'heart_rate': heartRateBLESettings,
+        'freeEEG16': freeeeg16BLESettings
     },
     USB:{
         'nrf5x':nrf5xSerialSettings,
+        'freeEEG16':freeeeg16SerialSettings,
         'freeEEG32':freeeeg32SerialSettings,
         'freeEEG32_optical':freeeeg32_optical_SerialSettings,
         'freeEEG128':freeeeg128SerialSettings,
         'hegduino':hegduinoSerialSettings,
+        'hegduinoV1':hegduinoV1SerialSettings,
         'cyton':cytonSerialSettings,
-        'cyton_daisy':cytonSerialSettings,
+        'cyton_daisy':daisycytonSerialSettings,
         'peanut':peanutSerialSettings,
         'statechanger':statechangerSerialSettings,
         'cognixionONE':cytonSerialSettings
     },
-    BLE_OTHER:{ //OTHER indicates drivers not written by us that do not fit into our format readily, but we can generalize easily to get the multithreading benefits
+    CUSTOM_BLE:{ //OTHER indicates drivers not written by us that do not fit into our format readily, but we can generalize easily to get the multithreading benefits
         'muse':museSettings,
         'ganglion':ganglionSettings
     },
-    USB_OTHER : {},
-    OTHER : {}
+    CUSTOM_USB : {},
+    CUSTOM : {
+        'webgazer':webgazerSettings
+    }
 };
 
 // For device debugger:

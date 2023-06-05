@@ -1,5 +1,6 @@
 import { ByteParser } from '../util/ByteParser';
 //Joshua Brewster. AGPL v3.0
+import '../hacktimer/HackTimer.min' //prevents timer lock on tab content loss
 
 //Wrapper for
 //https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API
