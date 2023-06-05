@@ -30,6 +30,7 @@ export declare const streamWorkerRoutes: {
             _id: string;
             extraArgs: any[];
         };
+        pipeMain?: boolean;
         frequency?: number;
         buffering?: {
             searchBytes: Uint8Array;

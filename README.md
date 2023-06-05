@@ -1,5 +1,5 @@
 # device-decoder
-`device-decoder` is a JavaScript library for uniformly and efficiently working with streaming devices on web pages and native apps.
+`device-decoder` is a JavaScript library for uniformly and efficiently working with streaming devices on web pages and native apps. It is multithreaded by default with dedicated codec threads, serial threads, and can be used with custom codecs you write following our conventions.
 
 This supports Web Bluetooth API + Native Mobile (via [`@capacitor-community/bluetooth-le`](https://github.com/capacitor-community/bluetooth-le)) and Web Serial API using convenient wrappers. 
 
@@ -52,7 +52,8 @@ let info = initDevice(
         //devices: Devices // A custom device list
         //workerUrl: './stream.worker.js' // Specify a custom worker (using the template at the bottom of this documentation file)
         //reconnect?:true //for USB connections, if usbVendorId and usbProductId are provided and a previous connection was permitted. For BLE provide the deviceId from info.device.deviceId saved from a previous connection. For USB ports use info.device.port.getInfo();
-        ondecoded: (data) => console.log(data),
+        ondecoded: (data) => console.log(data), //results supplied through codec
+        ondata?:(data) => console.log(data), //results direct from device, e.g. bypass codec threads (or use both)
         onconnect: (deviceInfo) => console.log(deviceInfo),
         ondisconnect: (deviceInfo) => console.log(deviceInfo) 
     }

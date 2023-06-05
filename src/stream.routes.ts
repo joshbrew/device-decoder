@@ -242,9 +242,10 @@ export const streamWorkerRoutes = { //serial API routes
         settings:SerialOptions & { 
             usbVendorId:number, 
             usbProductId:number, 
-            pipeTo?:string|{route:string, _id:string, extraArgs:any[]}, 
-            frequency?:number, 
-            buffering?:{searchBytes:Uint8Array} 
+            pipeTo?:string|{route:string, _id:string, extraArgs:any[]},  //pipe to function on other thread? first argument is the data plus constants you can specify
+            pipeMain?:boolean, //pipe back to main thread if also piping to other thread
+            frequency?:number, //update frequency of serial loop, make sure it's faster than your serial device's transmit rate
+            buffering?:{searchBytes:Uint8Array} //boyer moore buffer for data that is not transmitted in complete chunks like basic serial streams
         }) {
 
         const WorkerService = this.__node.graph as WorkerService;
@@ -274,6 +275,9 @@ export const streamWorkerRoutes = { //serial API routes
                                 //if(globalThis.decoder) value = WorkerService.run(globalThis.decoder, value); //run the decoder if set on this thread, else return the array buffer result raw or pipe to another thread
                                 //console.log(value);
                                 if((stream.settings as any).pipeTo) {
+                                    if((stream.settings as any).pipeMain) {
+                                        WorkerService.transmit(value, undefined, [value.buffer] as any); //return to main thread too
+                                    }
                                     if(typeof (stream.settings as any).pipeTo === 'string')
                                         WorkerService.transmit(value, (stream.settings as any).pipeTo, [value.buffer] as any);
                                     //we can subscribe on the other end to this worker output by id

@@ -315,7 +315,7 @@ export function initDevice(
                         }
                     }
                 }
-            }
+            } else if(typeof options.ondata === 'function') options.ondata(ev.data);
         });
 
         serialworker.post('setupSerial');
@@ -356,7 +356,8 @@ export function initDevice(
                         route:'decodeAndParseDevice',
                         _id:portId, //direct message port access to skip the main thread
                         extraArgs:[deviceType,deviceName]
-                    }
+                    },
+                    pipeMain:options.ondata !== undefined
                 }) as Promise<{
                     _id:string,
                     settings:any,
@@ -364,8 +365,10 @@ export function initDevice(
                 }>).then((result) => {
                     if(settings.write) serialworker.post('writeStream', [result._id,settings.write]);
 
-                    if(typeof options.ondecoded === 'function') streamworker.subscribe('decodeAndParseDevice', (data:any) => { if(options.ondecoded) (options.ondecoded as Function)(data); });
+                    if(typeof options.ondecoded === 'function') 
+                        streamworker.subscribe('decodeAndParseDevice', (data:any) => { if(options.ondecoded) (options.ondecoded as Function)(data); });
 
+                    
                     let info = {
                         workers:{
                             streamworker,

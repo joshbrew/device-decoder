@@ -156,7 +156,7 @@ const nbits = 24;
 const vref = 1.2;
 
 for(let i = 0; i < 16; i++) {
-    freeeeg16FilterSettings.lines[i] = {sps, nSec:10, units:'mV'};
+    freeeeg16ChartSettings.lines[i] = {sps, nSec:10, units:'mV'};
     freeeeg16FilterSettings[i] = {
         sps, 
         useDCBlock:true, 
