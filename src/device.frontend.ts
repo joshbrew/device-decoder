@@ -34,13 +34,34 @@ export const workers = new WorkerService({
 }); 
 export { Devices, gsworker, filterPresets, chartSettings, decoders, FilterSettings }
 
+export type InitDeviceOptions = { //you can update ondecoded and ondisconnect at any time
+    devices?:{
+        [key:string]:{
+            [key:string]:any
+        }
+    },
+    
+    //this function is required
+    ondecoded:((data:any) => void)|{[key:string]:(data:any)=>void}, //a single ondata function or an object with keys corresponding to BLE characteristics
+    
+    onconnect?:((device:any) => void),
+    beforedisconnect?:((device:any) => void),
+    ondisconnect?:((device:any) => void),
+    ondata?:((data:DataView) => void), //get direct results, bypass workers (except for serial which is thread-native)
+    reconnect?:boolean, //this is for the USB codec but you MUST provide the usbProductId and usbVendorId in settings. For BLE it will attempt to reconnect if you provide a deviceId in settings
+    roots?:{ //use secondary workers to run processes and report results back to the main thread or other
+        [key:string]:WorkerRoute
+    },
+    workerUrl?:any,
+    service?:WorkerService //can load up our own worker service, the library provides a default service
+}
 
 export type CustomDeviceStream = {
     workers:{
         streamworker:WorkerInfo
     },
     device:any,
-    options:any,
+    options:InitDeviceOptions,
     disconnect:()=>void,
     read:(command?:any)=>any,
     write:(command?:any)=>any,
@@ -52,7 +73,7 @@ export type SerialDeviceStream = {
         serialworker:WorkerInfo,
         streamworker:WorkerInfo
     },
-    options:any,
+    options:InitDeviceOptions,
     device:{
         _id:string,
         settings:any,
@@ -71,7 +92,7 @@ export type BLEDeviceStream = {
     workers:{
         streamworker:WorkerInfo
     },
-    options:any,
+    options:InitDeviceOptions,
     device:BLEDeviceInfo,
     subscribe:(service, notifyCharacteristic, ondata?, bypassWorker?) => Promise<void>,
     unsubscribe:(service, notifyCharacteristic) => Promise<void>,
