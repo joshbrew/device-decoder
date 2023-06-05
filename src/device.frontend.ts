@@ -106,7 +106,7 @@ export function initDevice(
         workerUrl?:any,
         service?:WorkerService //can load up our own worker service, the library provides a default service
     }
-) {
+):Promise<BLEDeviceStream|SerialDeviceStream|CustomDeviceStream> {
     if(!settings) return undefined;
 
     if(!options) options = { 

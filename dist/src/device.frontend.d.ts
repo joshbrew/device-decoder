@@ -88,7 +88,7 @@ export declare function initDevice(settings: any, options: {
     };
     workerUrl?: any;
     service?: WorkerService;
-}): Promise<CustomDeviceStream>;
+}): Promise<BLEDeviceStream | SerialDeviceStream | CustomDeviceStream>;
 export declare function createStreamPipeline(dedicatedSerialWorker?: boolean, dedicatedRenderWorker?: boolean, renderer?: {
     canvas: HTMLCanvasElement;
     context: string;
