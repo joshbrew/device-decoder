@@ -16,7 +16,6 @@ const sps = 250;
 // let tNow;
 // let tPrev; 
 
-
 export function ads131m08codec(data:any) {
     let arr; 
     if((data as DataView).getInt8) arr = new Uint8Array(data.buffer);
@@ -49,6 +48,48 @@ export function ads131m08codec(data:any) {
         output[5][i] = ByteParser.bytesToInt24(arr[j+15],arr[j+16],arr[j+17]);
         output[6][i] = ByteParser.bytesToInt24(arr[j+18],arr[j+19],arr[j+20]);
         output[7][i] = ByteParser.bytesToInt24(arr[j+21],arr[j+22],arr[j+23]);
+    }
+
+    if(arr.length > 225) {
+        (output as any).leds = arr.slice(225);
+    }
+    
+    return output;
+}
+
+//single ended is unsigned int
+export function ads131m08codec_singleended(data:any) {
+    let arr; 
+    if((data as DataView).getInt8) arr = new Uint8Array(data.buffer);
+    else if(!data.buffer) arr = new Uint8Array(data);
+    else arr = data;
+
+    // tPrev = tNow; 
+    // if(!tNow || tNow - tPrev > tMaxLag) tNow = Date.now();
+    // else tNow += tIncr;
+
+    let output = {
+        0:new Array(9),
+        1:new Array(9),
+        2:new Array(9),
+        3:new Array(9),
+        4:new Array(9),
+        5:new Array(9),
+        6:new Array(9),
+        7:new Array(9),
+        timestamp:Date.now()//tNow
+    };
+
+    for(let i = 0; i < 9; i++) { //hard coded packet iteration, 9 sample sets x 8 channels per packet 
+        let j = i * 25; //every 25th byte is a counter so skip those
+        output[0][i] = ByteParser.bytesToUInt24(arr[j],arr[j+1],arr[j+2]); 
+        output[1][i] = ByteParser.bytesToUInt24(arr[j+3],arr[j+4],arr[j+5]);
+        output[2][i] = ByteParser.bytesToUInt24(arr[j+6],arr[j+7],arr[j+8]);
+        output[3][i] = ByteParser.bytesToUInt24(arr[j+9],arr[j+10],arr[j+11]);
+        output[4][i] = ByteParser.bytesToUInt24(arr[j+12],arr[j+13],arr[j+14]);
+        output[5][i] = ByteParser.bytesToUInt24(arr[j+15],arr[j+16],arr[j+17]);
+        output[6][i] = ByteParser.bytesToUInt24(arr[j+18],arr[j+19],arr[j+20]);
+        output[7][i] = ByteParser.bytesToUInt24(arr[j+21],arr[j+22],arr[j+23]);
     }
 
     if(arr.length > 225) {

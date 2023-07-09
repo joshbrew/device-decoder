@@ -1,6 +1,5 @@
 import { WebglLinePlotProps } from 'webgl-plot-utils';
 import { FilterSettings } from '../util/BiquadFilters';
-import { ads131m08codec } from './ads131m08';
 import { freeeeg128codec } from './freeeeg128';
 import { freeeeg32codec } from './freeeeg32';
 import { freeeeg16codec } from './freeeeg16';
@@ -9,9 +8,27 @@ import { max3010xcodec } from './max30102';
 import { mpu6050codec } from './mpu6050';
 import { cognixionONE_EEG_codec } from './cognixionONE';
 import { peanutcodec } from './peanut';
-import { nrf5x_usbcodec } from './nrf5x_usb';
+import { nrf5x_usbcodec } from './nrf5x_driver';
 import { statechangercodec } from './statechanger';
 import { hrcodec } from './genericBLE';
+export * from '../util/BiquadFilters';
+export * from './ads131m08';
+export * from './cyton';
+export * from './freeeeg128';
+export * from './freeeeg32';
+export * from './freeeeg16';
+export * from './hegduino';
+export * from './max30102';
+export * from './mpu6050';
+export * from './cognixionONE';
+export * from './peanut';
+export * from './nrf5x_driver';
+export * from './statechanger';
+export * from './blueberry';
+export * from './blueberry2';
+export * from './genericBLE';
+export * from './bme280';
+export * from './simulator';
 export * from './types';
 export declare const Devices: {
     BLE: {
@@ -27,7 +44,7 @@ export declare const Devices: {
                     '0002cafe-b0ba-8bad-f00d-deadbeef0000': {
                         notify: boolean;
                         notifyCallback: any;
-                        codec: typeof ads131m08codec;
+                        codec: typeof import("./ads131m08").ads131m08codec_singleended;
                         sps: number;
                     };
                     '0003cafe-b0ba-8bad-f00d-deadbeef0000': {
@@ -45,7 +62,7 @@ export declare const Devices: {
                     '0005cafe-b0ba-8bad-f00d-deadbeef0000': {
                         notify: boolean;
                         notifyCallback: any;
-                        codec: typeof ads131m08codec;
+                        codec: typeof import("./ads131m08").ads131m08codec_singleended;
                         sps: number;
                     };
                     '0006cafe-b0ba-8bad-f00d-deadbeef0000': {

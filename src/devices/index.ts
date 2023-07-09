@@ -10,11 +10,35 @@ import { max3010xcodec, max3010xChartSettings } from './max30102';
 import { mpu6050codec, mpu6050ChartSettings } from './mpu6050';
 import { cognixionONE_EEG_codec, cognixionONEChartSettings, cognixionONEFilterSettings, cognixionONEBLESettings } from './cognixionONE';
 import { peanutcodec, peanutChartSettings, peanutSerialSettings } from './peanut';
-import { nrf5x_usbcodec, nrf5x_usbChartSettings, nrf5x_usbFilterSettings, nrf5xBLESettings, nrf5xSerialSettings } from './nrf5x_usb';
+import { nrf5x_usbcodec, nrf5x_usbChartSettings, nrf5x_usbFilterSettings, nrf5xBLESettings, nrf5xSerialSettings } from './nrf5x_driver';
 import { statechangerBLESettings, statechangerChartSettings, statechangercodec, statechangerSerialSettings } from './statechanger';
 //import { museSettings, museChartSettings } from './third_party/muse';
 import { blueberryBLESettings, blueberryChartSettings, blueberrycodec } from './blueberry';
 import { blueberry2BLESettings, blueberry2ChartSettings } from './blueberry2';
+import { heartRateBLESettings, hrcodec } from './genericBLE';
+import { bme280codec } from './bme280';
+import { simulatorSettings } from './simulator';
+
+export * from '../util/BiquadFilters';
+export * from './ads131m08';
+export * from './cyton';
+export * from './freeeeg128';
+export * from './freeeeg32';
+export * from './freeeeg16';
+export * from './hegduino';
+export * from './max30102';
+export * from './mpu6050';
+export * from './cognixionONE';
+export * from './peanut';
+export * from './nrf5x_driver';
+export *from  './statechanger';
+//import { museSettings, museChartSettings } from './third_party/muse';
+export * from './blueberry';
+export * from './blueberry2';
+export * from './genericBLE';
+export * from './bme280';
+export * from './simulator';
+
 
 
 import { 
@@ -26,9 +50,6 @@ import {
 } from './third_party/device_settings';
 
 
-import { heartRateBLESettings, hrcodec } from './genericBLE';
-import { bme280codec } from './bme280';
-import { simulatorSettings } from './simulator';
 
 export * from './types'
 
@@ -110,6 +131,7 @@ export const chartSettings:{[key:string]:Partial<WebglLinePlotProps>} = {
     'ads131m08':ads131m08ChartSettings,
     'max3010x':max3010xChartSettings,
     'mpu6050':mpu6050ChartSettings,
+    'freeeeg16':freeeeg16ChartSettings,
     'freeeeg32':freeeeg32ChartSettings, //https://github.com/joshbrew/freeeeg32.js
     'freeeeg128':freeeeg128ChartSettings,
     'cyton':cytonChartSettings, //https://github.com/joshbrew/cyton.js
@@ -143,6 +165,7 @@ export const decoders:any = {
     'max3010x':max3010xcodec,
     'mpu6050':mpu6050codec,
     'bme280':bme280codec,
+    'freeeeg16':freeeeg16codec,
     'freeeeg32':freeeeg32codec, ///old code: https://github.com/joshbrew/freeeeg32.js
     'freeeeg128':freeeeg128codec,
     'cyton':cytoncodec, ///old code: https://github.com/joshbrew/cyton.js

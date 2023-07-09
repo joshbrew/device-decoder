@@ -1,9 +1,14 @@
 import { WebglLinePlotProps } from 'webgl-plot-utils';
 import { FilterSettings } from '../util/BiquadFilters';
-import { ads131m08codec } from './ads131m08';
+import { ads131m08codec, ads131m08codec_singleended } from './ads131m08';
 import { max3010xcodec } from './max30102';
 import { mpu6050codec } from './mpu6050';
 import { bme280codec } from './bme280';
+
+let singleEnded = false;
+export function toggleNRF5xSingleEnded(bool?:boolean) {
+    singleEnded = bool !== undefined ? bool : !singleEnded;
+}
 
 export function nrf5x_usbcodec(data:any) {
     let arr:Uint8Array; 
@@ -16,9 +21,9 @@ export function nrf5x_usbcodec(data:any) {
     const output:any = {};
 
     if(arr[0] === 2) {
-        Object.assign(output,ads131m08codec(arr.subarray(2)));
+        singleEnded ? Object.assign(output,ads131m08codec_singleended(arr.subarray(2))) : Object.assign(output,ads131m08codec(arr.subarray(2)));
     } else if (arr[0] === 3) {
-        let result = ads131m08codec(arr.subarray(2));
+        let result = singleEnded ? Object.assign(output,ads131m08codec_singleended(arr.subarray(2))) : Object.assign(output,ads131m08codec(arr.subarray(2)));
         Object.keys(result).forEach((key,i) => {
             output[i+8] = result[key];
         })
@@ -30,7 +35,7 @@ export function nrf5x_usbcodec(data:any) {
     } else if (arr[0] === 6) {
         Object.assign(output,bme280codec(arr.subarray(2)));
     } else {
-        Object.assign(output,ads131m08codec(arr));
+        Object.assign(output, singleEnded ? Object.assign(output,ads131m08codec_singleended(arr.subarray(2))) : Object.assign(output,ads131m08codec(arr.subarray(2))));
     }
 
     return output;
@@ -59,7 +64,7 @@ export const nrf5xBLESettings = {
             '0002cafe-b0ba-8bad-f00d-deadbeef0000':{ //ads131m08
                 notify:true,
                 notifyCallback:undefined,
-                codec:ads131m08codec,
+                codec:singleEnded ? ads131m08codec_singleended : ads131m08codec,
                 sps:250
             },
             '0003cafe-b0ba-8bad-f00d-deadbeef0000':{ //max30102
@@ -77,7 +82,7 @@ export const nrf5xBLESettings = {
             '0005cafe-b0ba-8bad-f00d-deadbeef0000':{ //ads131m08-2
                 notify:true,
                 notifyCallback:undefined,
-                codec:ads131m08codec,
+                codec:singleEnded ? ads131m08codec_singleended : ads131m08codec,
                 sps:250
             },
             '0006cafe-b0ba-8bad-f00d-deadbeef0000':{ //bme280
