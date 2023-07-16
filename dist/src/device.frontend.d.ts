@@ -6,6 +6,7 @@ import { Devices } from './devices';
 import { TimeoutOptions } from '@capacitor-community/bluetooth-le/dist/plugin';
 import { filterPresets, chartSettings, decoders } from './devices/index';
 import { FilterSettings } from './util/BiquadFilters';
+export * from './devices/index';
 export declare function isMobile(): boolean;
 export declare const BLE: BLEClient;
 export declare const workers: WorkerService;
@@ -23,6 +24,9 @@ export type InitDeviceOptions = {
     beforedisconnect?: ((device: any) => void);
     ondisconnect?: ((device: any) => void);
     ondata?: ((data: DataView) => void);
+    filterSettings?: {
+        [key: string]: FilterSettings;
+    };
     reconnect?: boolean;
     roots?: {
         [key: string]: WorkerRoute;
@@ -39,6 +43,9 @@ export type CustomDeviceStream = {
     disconnect: () => void;
     read: (command?: any) => any;
     write: (command?: any) => any;
+    setFilters: (filterSettings: {
+        [key: string]: FilterSettings;
+    }, clearFilters?: boolean) => Promise<true>;
     roots: {
         [key: string]: WorkerRoute;
     };
@@ -56,6 +63,9 @@ export type SerialDeviceStream = {
     };
     subscribeStream: (ondata: (data: any) => void) => Promise<any>;
     unsubscribeStream: (sub: number | undefined) => Promise<any>;
+    setFilters: (filterSettings: {
+        [key: string]: FilterSettings;
+    }, clearFilters?: boolean) => Promise<true>;
     disconnect: () => void;
     read: () => Promise<any>;
     write: (command: any) => Promise<boolean>;
@@ -71,6 +81,9 @@ export type BLEDeviceStream = {
     device: BLEDeviceInfo;
     subscribe: (service: any, notifyCharacteristic: any, ondata?: any, bypassWorker?: any) => Promise<void>;
     unsubscribe: (service: any, notifyCharacteristic: any) => Promise<void>;
+    setFilters: (filterSettings: {
+        [key: string]: FilterSettings;
+    }, clearFilters?: boolean) => Promise<true>;
     disconnect: () => void;
     read: (command: {
         service: string;
@@ -102,6 +115,9 @@ export declare function initDevice(settings: any, options: {
     beforedisconnect?: ((device: any) => void);
     ondisconnect?: ((device: any) => void);
     ondata?: ((data: DataView) => void);
+    filterSettings?: {
+        [key: string]: FilterSettings;
+    };
     reconnect?: boolean;
     roots?: {
         [key: string]: WorkerRoute;

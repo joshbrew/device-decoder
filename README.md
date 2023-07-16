@@ -55,7 +55,8 @@ let info = initDevice(
         ondecoded: (data) => console.log(data), //results supplied through codec
         ondata?:(data) => console.log(data), //results direct from device, e.g. bypass codec threads (or use both)
         onconnect: (deviceInfo) => console.log(deviceInfo),
-        ondisconnect: (deviceInfo) => console.log(deviceInfo) 
+        ondisconnect: (deviceInfo) => console.log(deviceInfo),
+        filterSettings: {red:{ useLowPass:true, lowpassHz:50 }, infrared:{ useLowpass:true, lowpassHz:50 }} //IIR Filter settings per output key based on the codec results. See FilterSettings type. sample rate is preprogrammed or can be set in each channel setting
     }
 )
 ```

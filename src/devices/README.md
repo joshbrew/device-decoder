@@ -147,60 +147,81 @@ export const nrf5xBLESettings = {
 You can see the expected settings for each type of device here:
 ```ts
 
-
-type BLEDeviceSettings = {
-    deviceType:'BLE',
-    deviceName:string,
-    sps?:number, //samples per second
-    codec?:(data:any) => {[key:string]:any}, //transform data into a dictionary (preferred)
-    services?:{ 
-        [key:string]:{ // service uuid you want to set and all of the characteristic settings and responses, keys are UUIDs
-            [key:string]:{ // services can have an arbitrary number of characteristics, keys are UUIDs
-                codec?:(data:any) => {[key:string]:any},  //this is an additional setting for BLE characteristic specifications
-                
-                read?:boolean, //should we read on connect
-                readOptions?:TimeoutOptions,
-                readCallback?:((result:DataView)=>void),
-                write?:string|number|ArrayBufferLike|DataView, //should we write on connect and what should we write?
-                writeOptions?:TimeoutOptions,
-                writeCallback?:(()=>void),
-                notify?:boolean, //can this characteristic notify?
-                notifyCallback?:((result:DataView)=>void)
-                [key:string]:any
-            }
+//this goes into initDFevice
+type InitDeviceOptions = { //you can update ondecoded and ondisconnect at any time
+    devices?:{
+        [key:string]:{
+            [key:string]:any
         }
-    }
-} & BLEDeviceOptions
-
-type SerialDeviceSettings = {
-    deviceType:'USB',
-    deviceName:string,
-    sps?:number, //samples per second
-    buffering?:{
-        searchBytes:Uint8Array
     },
-    codec:(data:any) => {[key:string]:any}, //transform data into a dictionary (preferred)
-} & SerialPortOptions
-
-type CustomDeviceSettings = {
-    deviceType:'CUSTOM'|'BLE_CUSTOM'|'USB_CUSTOM',
-    deviceName:string,
-    sps?:any, //samples per second
-    connect:(settings:any) => {
-        _id:string, //info object used in later callbacks
-        [key:string]:any
+    
+    //this function is required
+    ondecoded:((data:any) => void)|{[key:string]:(data:any)=>void}, //a single ondata function or an object with keys corresponding to BLE characteristics
+    onconnect?:((device:any) => void),
+    beforedisconnect?:((device:any) => void),
+    ondisconnect?:((device:any) => void),
+    ondata?:((data:DataView) => void), //get direct results, bypass workers (except for serial which is thread-native)
+    filterSettings?:{[key:string]:FilterSettings},
+    reconnect?:boolean, //this is for the USB codec but you MUST provide the usbProductId and usbVendorId in settings. For BLE it will attempt to reconnect if you provide a deviceId in settings
+    roots?:{ //use secondary workers to run processes and report results back to the main thread or other
+        [key:string]:WorkerRoute
     },
-    codec:(data:any) => { //transform data into a dictionary (preferred) //this runs on a thread so you can do more complex stuff at high speeds
-        [key:string]:any
-    },
-    disconnect:(info) => void,
-    //optional callbacks:
-    onconnect?:(info) => void,
-    beforedisconnect?:(info) => void,
-    ondisconnect?:(info) => void,
-    read?:(command:any) => any,
-    write?:(command:any) => any
+    workerUrl?:any,
+    service?:WorkerService //can load up our own worker service, the library provides a default service
 }
+
+type CustomDeviceStream = {
+    workers:{
+        streamworker:WorkerInfo
+    },
+    device:any,
+    options:InitDeviceOptions,
+    disconnect:()=>void,
+    read:(command?:any)=>any,
+    write:(command?:any)=>any,
+    //FYI only works on time series data and on devices with a set sample rate:
+    setFilters:(filterSettings:FilterSettings, clearFilters?:boolean) => Promise<true>,
+    roots:{[key:string]:WorkerRoute}
+};
+
+type SerialDeviceStream = {
+    workers:{
+        serialworker:WorkerInfo,
+        streamworker:WorkerInfo
+    },
+    options:InitDeviceOptions,
+    device:{
+        _id:string,
+        settings:any,
+        info:Partial<SerialPortInfo>
+    },
+    subscribeStream:(ondata:(data:any) => void) => Promise<any>,
+    unsubscribeStream:(sub:number|undefined) => Promise<any>,
+    //FYI only works on time series data and on devices with a set sample rate:
+    setFilters:(filterSettings:{[key:string]:FilterSettings}, clearFilters?:boolean) => Promise<true>,
+    disconnect:()=>void,
+    read:()=>Promise<any>,
+    write:(command:any)=>Promise<boolean>,
+    roots:{[key:string]:WorkerRoute}
+};
+    
+
+type BLEDeviceStream = {
+    workers:{
+        streamworker:WorkerInfo
+    },
+    options:InitDeviceOptions,
+    device:BLEDeviceInfo,
+    subscribe:(service, notifyCharacteristic, ondata?, bypassWorker?) => Promise<void>,
+    unsubscribe:(service, notifyCharacteristic) => Promise<void>,
+    //FYI only works on time series data and on devices with a set sample rate:
+    setFilters:(filterSettings:{[key:string]:FilterSettings}, clearFilters?:boolean) => Promise<true>,
+    disconnect:()=>void,
+    read:(command:{ service:string, characteristic:string, ondata?:(data:DataView)=>void, timeout?:TimeoutOptions }) => Promise<DataView>,
+    write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions})=>Promise<void>,
+    roots:{[key:string]:WorkerRoute}
+};
+
 
 
 ```

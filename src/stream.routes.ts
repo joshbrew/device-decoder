@@ -23,7 +23,7 @@ export function loadStreamWorkerGlobals() {
     globalThis.decoders = decoders;
     globalThis.decoder = 'raw';
     globalThis.ByteParser = ByteParser;
-    globalThis.filtering = true;
+    globalThis.filtering = false; //setFilters will toggle this true when filters are provided
     globalThis.filters = {};
     globalThis.BiquadChannelFilterer = BiquadChannelFilterer;
     globalThis.ArrayManip = ArrayManip; //static array manipulation methods
@@ -201,9 +201,15 @@ export const streamWorkerRoutes = { //serial API routes
             },
             clearFilters=false //clear any other filters not being overwritten
         ) {
-            if(!globalThis.filters || clearFilters) globalThis.filters = {};
-            for(const key in filters) {
-                globalThis.filters[key] = new BiquadChannelFilterer(filters[key]); 
+            if(!globalThis.filters || clearFilters) {
+                globalThis.filters = {};
+                if(clearFilters) globalThis.filtering = false;
+            }
+            if(filters) {
+                for(const key in filters) {
+                    globalThis.filters[key] = new BiquadChannelFilterer(filters[key]); 
+                }
+                globalThis.filtering = true;
             }
             return true;
     },
