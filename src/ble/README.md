@@ -19,8 +19,10 @@ type DeviceOptions = {
     onDisconnect?: () => void;
     connectOptions?: TimeoutOptions;
     services: {
-        [key: string]: { //service
-            [key: string]: { //characteristic
+        [key: string]: { //service UUID
+            UUID?:string, //define UUID here if not in object key (e.g. for easier reference keys e.g. 'heartrate')
+            [key: string]: { //characteristic or a tagname
+                characteristic?: string, //define characteristic here if not in object key
                 read?: boolean;
                 readOptions?: TimeoutOptions;
                 readCallback?: ((result: DataView) => void);

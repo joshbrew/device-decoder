@@ -10,7 +10,9 @@ export type BLEDeviceOptions = {
     connectOptions?: TimeoutOptions;
     services?: {
         [key: string]: {
+            UUID?: any;
             [key: string]: {
+                characteristic?: string;
                 read?: boolean;
                 readOptions?: TimeoutOptions;
                 readCallback?: ((result: DataView) => void);

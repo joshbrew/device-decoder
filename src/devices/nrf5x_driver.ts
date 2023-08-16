@@ -5,11 +5,6 @@ import { max3010xcodec } from './max30102';
 import { mpu6050codec } from './mpu6050';
 import { bme280codec } from './bme280';
 
-let singleEnded = false;
-export function toggleNRF5xSingleEnded(bool?:boolean) {
-    singleEnded = bool !== undefined ? bool : !singleEnded;
-}
-
 export function nrf5x_usbcodec(data:any) {
     let arr:Uint8Array; 
     if((data as DataView).getInt8) arr = new Uint8Array(data.buffer);
@@ -21,9 +16,9 @@ export function nrf5x_usbcodec(data:any) {
     const output:any = {};
 
     if(arr[0] === 2) {
-        singleEnded ? Object.assign(output,ads131m08codec_singleended(arr.subarray(2))) : Object.assign(output,ads131m08codec(arr.subarray(2)));
+        Object.assign(output,ads131m08codec(arr.subarray(2)));
     } else if (arr[0] === 3) {
-        let result = singleEnded ? Object.assign(output,ads131m08codec_singleended(arr.subarray(2))) : Object.assign(output,ads131m08codec(arr.subarray(2)));
+        let result = Object.assign(output,ads131m08codec(arr.subarray(2)));
         Object.keys(result).forEach((key,i) => {
             output[i+8] = result[key];
         })
@@ -35,7 +30,38 @@ export function nrf5x_usbcodec(data:any) {
     } else if (arr[0] === 6) {
         Object.assign(output,bme280codec(arr.subarray(2)));
     } else {
-        Object.assign(output, singleEnded ? Object.assign(output,ads131m08codec_singleended(arr.subarray(2))) : Object.assign(output,ads131m08codec(arr.subarray(2))));
+        Object.assign(output, Object.assign(output,ads131m08codec(arr.subarray(2))));
+    }
+
+    return output;
+}
+
+export function nrf5x_usbcodec_singleended(data:any) {
+    let arr:Uint8Array; 
+    if((data as DataView).getInt8) arr = new Uint8Array(data.buffer);
+    else if(!data.buffer) arr = new Uint8Array(data);
+    else arr = data as Uint8Array;
+    //head of each byte packet is the search byte //240,240
+    //packetID: 2: ads131m08 1, 3: ads131m08 2, 4: MPU6050, 5: MAX30102
+
+    const output:any = {};
+
+    if(arr[0] === 2) {
+        Object.assign(output,ads131m08codec_singleended(arr.subarray(2)));
+    } else if (arr[0] === 3) {
+        let result = Object.assign(output,ads131m08codec(arr.subarray(2)));
+        Object.keys(result).forEach((key,i) => {
+            output[i+8] = result[key];
+        })
+    } else if (arr[0] === 4) {
+        Object.assign(output,mpu6050codec(arr.subarray(2)));
+    } else if (arr[0] === 5) {
+        //Object.assign(output,max3010xcodec(arr.subarray(1)));
+        Object.assign(output,max3010xcodec(arr.subarray(2)));
+    } else if (arr[0] === 6) {
+        Object.assign(output,bme280codec(arr.subarray(2)));
+    } else {
+        Object.assign(output, Object.assign(output, ads131m08codec_singleended(arr.subarray(2))));
     }
 
     return output;
@@ -52,6 +78,17 @@ export const nrf5xSerialSettings = {
     sps:250 //base eeg/emg sps, peripheral sensors are different
 }
 
+export const nrf5xSerialSettings_singleended = {
+    deviceType:'USB',
+    deviceName:'nrf5x',
+    baudRate:115200,
+    buffering:{
+        searchBytes:new Uint8Array([240,240])
+    },
+    codec:nrf5x_usbcodec_singleended,
+    sps:250 //base eeg/emg sps, peripheral sensors are different
+}
+
 export const nrf5xBLESettings = {
     deviceType:'BLE',
     deviceName:'nrf5x',
@@ -64,7 +101,7 @@ export const nrf5xBLESettings = {
             '0002cafe-b0ba-8bad-f00d-deadbeef0000':{ //ads131m08
                 notify:true,
                 notifyCallback:undefined,
-                codec:singleEnded ? ads131m08codec_singleended : ads131m08codec,
+                codec:ads131m08codec,
                 sps:250
             },
             '0003cafe-b0ba-8bad-f00d-deadbeef0000':{ //max30102
@@ -82,7 +119,7 @@ export const nrf5xBLESettings = {
             '0005cafe-b0ba-8bad-f00d-deadbeef0000':{ //ads131m08-2
                 notify:true,
                 notifyCallback:undefined,
-                codec:singleEnded ? ads131m08codec_singleended : ads131m08codec,
+                codec:ads131m08codec,
                 sps:250
             },
             '0006cafe-b0ba-8bad-f00d-deadbeef0000':{ //bme280
@@ -95,6 +132,48 @@ export const nrf5xBLESettings = {
     }
 }
 
+export const nrf5xBLESettings_singleended = {
+    deviceType:'BLE',
+    deviceName:'nrf5x_singleended',
+    sps:250, //base eeg/emg sps, peripheral sensors are different
+    services:{
+        '0000cafe-b0ba-8bad-f00d-deadbeef0000':{
+            '0001cafe-b0ba-8bad-f00d-deadbeef0000':{
+                write:undefined
+            },
+            '0002cafe-b0ba-8bad-f00d-deadbeef0000':{ //ads131m08
+                notify:true,
+                notifyCallback:undefined,
+                codec:ads131m08codec_singleended,
+                sps:250
+            },
+            '0003cafe-b0ba-8bad-f00d-deadbeef0000':{ //max30102
+                notify:true,
+                notifyCallback:undefined,
+                codec:max3010xcodec,
+                sps:100
+            },
+            '0004cafe-b0ba-8bad-f00d-deadbeef0000':{ //mpu6050
+                notify:true,
+                notifyCallback:undefined,
+                codec:mpu6050codec,
+                sps:100
+            },
+            '0005cafe-b0ba-8bad-f00d-deadbeef0000':{ //ads131m08-2
+                notify:true,
+                notifyCallback:undefined,
+                codec:ads131m08codec_singleended,
+                sps:250
+            },
+            '0006cafe-b0ba-8bad-f00d-deadbeef0000':{ //bme280
+                notify:true,
+                notifyCallback:undefined,
+                codec:bme280codec,
+                sps:3.33
+            }
+        }// each notification is for a different sensor
+    }
+}
 const defaultChartSetting = {nSec:10, sps:250, units:'mV'}
 export const nrf5x_usbChartSettings:Partial<WebglLinePlotProps> = {
     lines:{

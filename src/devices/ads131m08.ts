@@ -11,6 +11,13 @@ import { FilterSettings } from "../util/BiquadFilters";
 import { ByteParser } from "../util/ByteParser";
 
 const sps = 250;
+
+const gain = 32;
+const nbits = 24;
+const vref = 1.2;
+
+const half24bit = Math.pow(2,24)/2;
+
 // const tIncr = 9*1000/250; //millisecond increment, 9 samples per packet so 9/250 incr (* milliseconds)
 // const tMaxLag = tIncr + 200; //ms to reset the timestamp (e.g. dropped packet)
 // let tNow;
@@ -57,7 +64,7 @@ export function ads131m08codec(data:any) {
     return output;
 }
 
-//single ended is unsigned int
+//single ended is unsigned int. temp codec
 export function ads131m08codec_singleended(data:any) {
     let arr; 
     if((data as DataView).getInt8) arr = new Uint8Array(data.buffer);
@@ -82,15 +89,17 @@ export function ads131m08codec_singleended(data:any) {
 
     for(let i = 0; i < 9; i++) { //hard coded packet iteration, 9 sample sets x 8 channels per packet 
         let j = i * 25; //every 25th byte is a counter so skip those
-        output[0][i] = ByteParser.bytesToUInt24(arr[j],arr[j+1],arr[j+2]); 
-        output[1][i] = ByteParser.bytesToUInt24(arr[j+3],arr[j+4],arr[j+5]);
-        output[2][i] = ByteParser.bytesToUInt24(arr[j+6],arr[j+7],arr[j+8]);
-        output[3][i] = ByteParser.bytesToUInt24(arr[j+9],arr[j+10],arr[j+11]);
-        output[4][i] = ByteParser.bytesToUInt24(arr[j+12],arr[j+13],arr[j+14]);
-        output[5][i] = ByteParser.bytesToUInt24(arr[j+15],arr[j+16],arr[j+17]);
-        output[6][i] = ByteParser.bytesToUInt24(arr[j+18],arr[j+19],arr[j+20]);
-        output[7][i] = ByteParser.bytesToUInt24(arr[j+21],arr[j+22],arr[j+23]);
+        output[0][i] = ByteParser.bytesToInt24(arr[j],arr[j+1],arr[j+2])      + half24bit; //offset by half 24bit readings for grounded (single ended) readings
+        output[1][i] = ByteParser.bytesToInt24(arr[j+3],arr[j+4],arr[j+5])    + half24bit;
+        output[2][i] = ByteParser.bytesToInt24(arr[j+6],arr[j+7],arr[j+8])    + half24bit;
+        output[3][i] = ByteParser.bytesToInt24(arr[j+9],arr[j+10],arr[j+11])  + half24bit;
+        output[4][i] = ByteParser.bytesToInt24(arr[j+12],arr[j+13],arr[j+14]) + half24bit;
+        output[5][i] = ByteParser.bytesToInt24(arr[j+15],arr[j+16],arr[j+17]) + half24bit;
+        output[6][i] = ByteParser.bytesToInt24(arr[j+18],arr[j+19],arr[j+20]) + half24bit;
+        output[7][i] = ByteParser.bytesToInt24(arr[j+21],arr[j+22],arr[j+23]) + half24bit;
     }
+
+    //console.log(output[0]);
 
     if(arr.length > 225) {
         (output as any).leds = arr.slice(225);
@@ -142,11 +151,6 @@ export const ads131m08ChartSettings:Partial<WebglLinePlotProps> = {
         '7':JSON.parse(JSON.stringify(defaultChartSetting))
     }
 }
-
-const gain = 32;
-const nbits = 24;
-const vref = 1.2;
-
 let defaultsetting = {
     sps, 
     useDCBlock:false, 
@@ -154,10 +158,12 @@ let defaultsetting = {
     bandpassLower:3, 
     bandpassUpper:45, 
     useScaling:true, 
-    scalar:0.96 * 1000*vref/(gain*(Math.pow(2,nbits)-1)),
+    scalar:0.96 * 1000*vref/(gain*(Math.pow(2,nbits)-1)), //millivolts per step
     //trimOutliers:true,
     //outlierTolerance:0.3
 } as FilterSettings;
+
+let halfOffset = 0.96 * 1000*vref/(gain*(Math.pow(2,nbits)-1)) * (Math.pow(2,nbits)-1) * 0.5; 
 
 export const ads131m08FilterSettings:{[key:string]:FilterSettings} = {
     '0':JSON.parse(JSON.stringify(defaultsetting)),

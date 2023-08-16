@@ -18,6 +18,17 @@ export declare function ads131m08codec(data: any): {
     7: any[];
     timestamp: number;
 };
+export declare function ads131m08codec_singleended(data: any): {
+    0: any[];
+    1: any[];
+    2: any[];
+    3: any[];
+    4: any[];
+    5: any[];
+    6: any[];
+    7: any[];
+    timestamp: number;
+};
 export declare function ads131m08_arduinocodec(data: any): {
     '0': number;
     '1': number;

@@ -3,14 +3,33 @@ import { FilterSettings } from '../util/BiquadFilters';
 import { ads131m08codec } from './ads131m08';
 import { freeeeg128codec } from './freeeeg128';
 import { freeeeg32codec } from './freeeeg32';
+import { freeeeg16codec } from './freeeeg16';
 import { hegduinocodec } from './hegduino';
 import { max3010xcodec } from './max30102';
 import { mpu6050codec } from './mpu6050';
 import { cognixionONE_EEG_codec } from './cognixionONE';
 import { peanutcodec } from './peanut';
-import { nrf5x_usbcodec } from './nrf5x_usb';
+import { nrf5x_usbcodec } from './nrf5x_driver';
 import { statechangercodec } from './statechanger';
 import { hrcodec } from './genericBLE';
+export * from '../util/BiquadFilters';
+export * from './ads131m08';
+export * from './cyton';
+export * from './freeeeg128';
+export * from './freeeeg32';
+export * from './freeeeg16';
+export * from './hegduino';
+export * from './max30102';
+export * from './mpu6050';
+export * from './cognixionONE';
+export * from './peanut';
+export * from './nrf5x_driver';
+export * from './statechanger';
+export * from './blueberry';
+export * from './blueberry2';
+export * from './genericBLE';
+export * from './bme280';
+export * from './simulator';
 export * from './types';
 export declare const Devices: {
     BLE: {
@@ -45,6 +64,48 @@ export declare const Devices: {
                         notify: boolean;
                         notifyCallback: any;
                         codec: typeof ads131m08codec;
+                        sps: number;
+                    };
+                    '0006cafe-b0ba-8bad-f00d-deadbeef0000': {
+                        notify: boolean;
+                        notifyCallback: any;
+                        codec: (data: any) => any;
+                        sps: number;
+                    };
+                };
+            };
+        };
+        nrf5x_singleended: {
+            deviceType: string;
+            deviceName: string;
+            sps: number;
+            services: {
+                '0000cafe-b0ba-8bad-f00d-deadbeef0000': {
+                    '0001cafe-b0ba-8bad-f00d-deadbeef0000': {
+                        write: any;
+                    };
+                    '0002cafe-b0ba-8bad-f00d-deadbeef0000': {
+                        notify: boolean;
+                        notifyCallback: any;
+                        codec: typeof import("./ads131m08").ads131m08codec_singleended;
+                        sps: number;
+                    };
+                    '0003cafe-b0ba-8bad-f00d-deadbeef0000': {
+                        notify: boolean;
+                        notifyCallback: any;
+                        codec: typeof max3010xcodec;
+                        sps: number;
+                    };
+                    '0004cafe-b0ba-8bad-f00d-deadbeef0000': {
+                        notify: boolean;
+                        notifyCallback: any;
+                        codec: typeof mpu6050codec;
+                        sps: number;
+                    };
+                    '0005cafe-b0ba-8bad-f00d-deadbeef0000': {
+                        notify: boolean;
+                        notifyCallback: any;
+                        codec: typeof import("./ads131m08").ads131m08codec_singleended;
                         sps: number;
                     };
                     '0006cafe-b0ba-8bad-f00d-deadbeef0000': {
@@ -104,6 +165,23 @@ export declare const Devices: {
                 };
             };
         };
+        freeEEG16: {
+            deviceType: string;
+            deviceName: string;
+            services: {
+                [x: string]: {
+                    '6e400002-b5a3-f393-e0a9-e50e24dcca9e': {
+                        write: any;
+                    };
+                    '6e400003-b5a3-f393-e0a9-e50e24dcca9e': {
+                        notify: boolean;
+                        notifyCallback: any;
+                        codec: typeof import("./freeeeg16").freeeeg16BLEcodec;
+                        sps: number;
+                    };
+                };
+            };
+        };
     };
     USB: {
         nrf5x: {
@@ -115,6 +193,28 @@ export declare const Devices: {
             };
             codec: typeof nrf5x_usbcodec;
             sps: number;
+        };
+        nrf5x_singleended: {
+            deviceType: string;
+            deviceName: string;
+            baudRate: number;
+            buffering: {
+                searchBytes: Uint8Array;
+            };
+            codec: typeof import("./nrf5x_driver").nrf5x_usbcodec_singleended;
+            sps: number;
+        };
+        freeEEG16: {
+            deviceType: string;
+            deviceName: string;
+            baudRate: number;
+            bufferSize: number;
+            frequency: number;
+            codec: typeof freeeeg16codec;
+            sps: number;
+            buffering: {
+                searchBytes: Uint8Array;
+            };
         };
         freeEEG32: {
             deviceType: string;

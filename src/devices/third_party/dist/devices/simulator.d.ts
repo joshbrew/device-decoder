@@ -1,3 +1,4 @@
+import '../hacktimer/HackTimer.min';
 export declare const simulatorSettings: {
     sps: number;
     deviceType: string;

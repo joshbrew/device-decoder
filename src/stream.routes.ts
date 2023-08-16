@@ -125,7 +125,7 @@ export const streamWorkerRoutes = { //serial API routes
         //console.log(decoded, this.__node.graph)
         return decoded;
     },
-    'setActiveDecoder':function setActiveDecoder(deviceType:'BLE'|'USB'|'BLE_CUSTOM'|'USB_CUSTOM'|'CUSTOM',device:string,service?:string,characteristic?:string) {
+    'setActiveDecoder':function setActiveDecoder(deviceType:'BLE'|'USB'|'BLE_CUSTOM'|'USB_CUSTOM'|'CUSTOM', device:string, service?:string, characteristic?:string) {
         //console.log('received decoder:',decoderName)
         if(globalThis.Devices[deviceType][device]?.codec) 
             globalThis.decoder = globalThis.Devices[deviceType][device]?.codec;
@@ -157,7 +157,11 @@ export const streamWorkerRoutes = { //serial API routes
 
         let decoded;
 
-        if (deviceType === 'BLE' && service && characteristic && globalThis.Devices[deviceType][deviceName]?.services[service as string]?.[characteristic as string]?.codec)
+        if (deviceType === 'BLE' && 
+            service && 
+            characteristic && 
+            globalThis.Devices[deviceType][deviceName]?.services[service as string]?.[characteristic as string]?.codec
+        )
             decoded = globalThis.Devices[deviceType][deviceName].services[service][characteristic].codec(data);
         else if(globalThis.Devices[deviceType][deviceName]?.codec) 
             decoded = globalThis.Devices[deviceType][deviceName].codec(data);

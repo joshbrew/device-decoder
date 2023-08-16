@@ -1,5 +1,6 @@
 import { WebglLinePlotProps } from 'webgl-plot-utils';
 import { FilterSettings } from '../util/BiquadFilters';
+import { ads131m08codec } from './ads131m08';
 import { freeeeg128codec } from './freeeeg128';
 import { freeeeg32codec } from './freeeeg32';
 import { freeeeg16codec } from './freeeeg16';
@@ -33,6 +34,48 @@ export * from './types';
 export declare const Devices: {
     BLE: {
         nrf5x: {
+            deviceType: string;
+            deviceName: string;
+            sps: number;
+            services: {
+                '0000cafe-b0ba-8bad-f00d-deadbeef0000': {
+                    '0001cafe-b0ba-8bad-f00d-deadbeef0000': {
+                        write: any;
+                    };
+                    '0002cafe-b0ba-8bad-f00d-deadbeef0000': {
+                        notify: boolean;
+                        notifyCallback: any;
+                        codec: typeof ads131m08codec;
+                        sps: number;
+                    };
+                    '0003cafe-b0ba-8bad-f00d-deadbeef0000': {
+                        notify: boolean;
+                        notifyCallback: any;
+                        codec: typeof max3010xcodec;
+                        sps: number;
+                    };
+                    '0004cafe-b0ba-8bad-f00d-deadbeef0000': {
+                        notify: boolean;
+                        notifyCallback: any;
+                        codec: typeof mpu6050codec;
+                        sps: number;
+                    };
+                    '0005cafe-b0ba-8bad-f00d-deadbeef0000': {
+                        notify: boolean;
+                        notifyCallback: any;
+                        codec: typeof ads131m08codec;
+                        sps: number;
+                    };
+                    '0006cafe-b0ba-8bad-f00d-deadbeef0000': {
+                        notify: boolean;
+                        notifyCallback: any;
+                        codec: (data: any) => any;
+                        sps: number;
+                    };
+                };
+            };
+        };
+        nrf5x_singleended: {
             deviceType: string;
             deviceName: string;
             sps: number;
@@ -149,6 +192,16 @@ export declare const Devices: {
                 searchBytes: Uint8Array;
             };
             codec: typeof nrf5x_usbcodec;
+            sps: number;
+        };
+        nrf5x_singleended: {
+            deviceType: string;
+            deviceName: string;
+            baudRate: number;
+            buffering: {
+                searchBytes: Uint8Array;
+            };
+            codec: typeof import("./nrf5x_driver").nrf5x_usbcodec_singleended;
             sps: number;
         };
         freeEEG16: {

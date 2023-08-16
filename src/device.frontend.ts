@@ -20,6 +20,7 @@ import { filterPresets, chartSettings, decoders } from './devices/index';
 import { FilterSettings } from './util/BiquadFilters';
 
 export * from './devices/index'
+export * from './stream.routes'
 
 export function isMobile() {
     let check = false;
@@ -243,36 +244,42 @@ export function initDevice(
     } else if(deviceType === 'BLE') {
         //ble
         //if single ondecoded function provided, apply to the first characteristic with notify:true else specified
-        for(const primaryUUID in (settings as BLEDeviceOptions).services) {
+        for(let primaryUUID in (settings as BLEDeviceOptions).services) {
+            if((settings as BLEDeviceOptions).services[primaryUUID].UUID) primaryUUID = (settings as BLEDeviceOptions).services[primaryUUID].UUID as any;
             //console.log(primaryUUID)
-            for(const characteristic in (settings as any).services[primaryUUID]) {
+            for(let characteristic in (settings as any).services[primaryUUID]) {
+                let tag = characteristic;
+                if((settings as any).services[primaryUUID][characteristic].characteristic) characteristic = (settings as any).services[primaryUUID][characteristic].characteristic;
                 if(typeof options.ondecoded === 'function') {
-                    if((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.notify) {
-                        if(!(settings as any).services[primaryUUID][characteristic].notifyCallback) (settings as any).services[primaryUUID][characteristic].notifyCallback = (data:DataView) => {
+                    if((settings as BLEDeviceOptions).services?.[primaryUUID]?.[tag]?.notify) {
+                        if(!(settings as any).services[primaryUUID][tag].notifyCallback) (settings as any).services[primaryUUID][tag].notifyCallback = (data:DataView) => {
                             if(options.ondata) options.ondata(data);
-                            (streamworker as WorkerInfo).run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],undefined,[data.buffer]).then(options.ondecoded as any);
+                            (streamworker as WorkerInfo).run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,tag],undefined,[data.buffer]).then(options.ondecoded as any);
                         }
                         break; //only subscribe to first notification in our list if only one ondecoded function provided
                     }
                 } else if(typeof options.ondecoded === 'object') {
-                    if(options.ondecoded[characteristic]) {
-                        if((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.notify) {
-                            if(!(settings as any).services[primaryUUID][characteristic].notifyCallback) (settings as any).services[primaryUUID][characteristic].notifyCallback = (data:DataView) => {
-                                if(options.ondata) options.ondata(data);
-                                streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],undefined,[data.buffer]).then(options.ondecoded[characteristic]);
-                            }
-                        } 
-                        if ((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.read) {
-                            if(!(settings as any).services[primaryUUID][characteristic].readCallback) (settings as any).services[characteristic].readCallback = (data:DataView) => {
-                                if(options.ondata) options.ondata(data);
-                                streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,characteristic],undefined,[data.buffer]).then(options.ondecoded[characteristic]);
+                    let ref = options.ondecoded[characteristic] ? options.ondecoded[characteristic] : options.ondecoded[tag] ? options.ondecoded[tag] : null;
+                    if(ref) {
+                        if(options.ondecoded[characteristic]) {
+                            if((settings as BLEDeviceOptions).services?.[primaryUUID]?.[tag]?.notify) {
+                                if(!(settings as any).services[primaryUUID][tag].notifyCallback) (settings as any).services[primaryUUID][tag].notifyCallback = (data:DataView) => {
+                                    if(options.ondata) options.ondata(data);
+                                    streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,tag],undefined,[data.buffer]).then(ref);
+                                }
+                            } 
+                            if ((settings as BLEDeviceOptions).services?.[primaryUUID]?.[tag]?.read) {
+                                if(!(settings as any).services[primaryUUID][tag].readCallback) (settings as any).services[tag].readCallback = (data:DataView) => {
+                                    if(options.ondata) options.ondata(data);
+                                    streamworker.run('decodeAndParseDevice',[data,deviceType,deviceName,primaryUUID,tag],undefined,[data.buffer]).then(ref);
+                                }
                             }
                         }
                     }
                 } 
                 else if (options.ondata) {
-                    if ((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.notify) (settings as any).services[primaryUUID][characteristic].notifyCallback = options.ondata;
-                    if ((settings as BLEDeviceOptions).services?.[primaryUUID]?.[characteristic]?.read) (settings as any).services[characteristic].readCallback = options.ondata;
+                    if ((settings as BLEDeviceOptions).services?.[primaryUUID]?.[tag]?.notify) (settings as any).services[primaryUUID][tag].notifyCallback = options.ondata;
+                    if ((settings as BLEDeviceOptions).services?.[primaryUUID]?.[tag]?.read) (settings as any).services[tag].readCallback = options.ondata;
                 }
             }
         }

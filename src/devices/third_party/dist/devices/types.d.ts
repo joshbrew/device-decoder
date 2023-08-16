@@ -1,7 +1,7 @@
 import { TimeoutOptions } from '@capacitor-community/bluetooth-le/dist/plugin';
 import { BLEDeviceOptions } from '../ble/ble_client';
 import { SerialPortOptions } from '../serial/serialstream';
-export declare type BLEDeviceSettings = {
+export type BLEDeviceSettings = {
     deviceType: 'BLE';
     deviceName: string;
     sps?: number;
@@ -27,7 +27,7 @@ export declare type BLEDeviceSettings = {
         };
     };
 } & BLEDeviceOptions;
-export declare type SerialDeviceSettings = {
+export type SerialDeviceSettings = {
     deviceType: 'USB';
     deviceName: string;
     sps?: number;
@@ -38,7 +38,7 @@ export declare type SerialDeviceSettings = {
         [key: string]: any;
     };
 } & SerialPortOptions;
-export declare type CustomDeviceSettings = {
+export type CustomDeviceSettings = {
     deviceType: 'CUSTOM' | 'CUSTOM_BLE' | 'CUSTOM_USB';
     deviceName: string;
     sps?: any;

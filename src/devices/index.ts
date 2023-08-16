@@ -10,7 +10,7 @@ import { max3010xcodec, max3010xChartSettings } from './max30102';
 import { mpu6050codec, mpu6050ChartSettings } from './mpu6050';
 import { cognixionONE_EEG_codec, cognixionONEChartSettings, cognixionONEFilterSettings, cognixionONEBLESettings } from './cognixionONE';
 import { peanutcodec, peanutChartSettings, peanutSerialSettings } from './peanut';
-import { nrf5x_usbcodec, nrf5x_usbChartSettings, nrf5x_usbFilterSettings, nrf5xBLESettings, nrf5xSerialSettings } from './nrf5x_driver';
+import { nrf5x_usbcodec, nrf5x_usbChartSettings, nrf5x_usbFilterSettings, nrf5xBLESettings, nrf5xSerialSettings, nrf5xBLESettings_singleended, nrf5xSerialSettings_singleended } from './nrf5x_driver';
 import { statechangerBLESettings, statechangerChartSettings, statechangercodec, statechangerSerialSettings } from './statechanger';
 //import { museSettings, museChartSettings } from './third_party/muse';
 import { blueberryBLESettings, blueberryChartSettings, blueberrycodec } from './blueberry';
@@ -57,6 +57,7 @@ export * from './types'
 export const Devices = {
     BLE:{
         'nrf5x': nrf5xBLESettings,
+        'nrf5x_singleended':nrf5xBLESettings_singleended,
         'hegduino': hegduinoBLESettings,
         'hegduinoV1': hegduinoV1BLESettings,
         'cognixionONE': cognixionONEBLESettings,
@@ -68,6 +69,7 @@ export const Devices = {
     },
     USB:{
         'nrf5x':nrf5xSerialSettings,
+        'nrf5x_singleended':nrf5xSerialSettings_singleended,
         'freeEEG16':freeeeg16SerialSettings,
         'freeEEG32':freeeeg32SerialSettings,
         'freeEEG32_optical':freeeeg32_optical_SerialSettings,

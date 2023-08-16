@@ -7,6 +7,7 @@ import { TimeoutOptions } from '@capacitor-community/bluetooth-le/dist/plugin';
 import { filterPresets, chartSettings, decoders } from './devices/index';
 import { FilterSettings } from './util/BiquadFilters';
 export * from './devices/index';
+export * from './stream.routes';
 export declare function isMobile(): boolean;
 export declare const BLE: BLEClient;
 export declare const workers: WorkerService;

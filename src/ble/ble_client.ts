@@ -21,7 +21,9 @@ export type BLEDeviceOptions = {
     connectOptions?:TimeoutOptions,
     services?:{ 
         [key:string]:{ // service uuid you want to set and all of the characteristic settings and responses, keys are UUIDs
+            UUID?:any, //define the UUID here if you want to reserve the key for a clearer name
             [key:string]:{ // services can have an arbitrary number of characteristics, keys are UUIDs
+                characteristic?:string, //define characteristic here instead if you want to label your service keys more clearly
                 read?:boolean, //should we read on connect
                 readOptions?:TimeoutOptions,
                 readCallback?:((result:DataView)=>void),
@@ -63,7 +65,8 @@ export class BLEClient extends ByteParser {
         let services:any[] = [];
 
         if(options) {
-            for(const serviceuuid in options.services) {
+            for(let serviceuuid in options.services) {
+                if(options.services[serviceuuid].UUID) serviceuuid = options.services[serviceuuid].UUID
                 services.push(serviceuuid);
             }
         }
@@ -139,10 +142,12 @@ export class BLEClient extends ByteParser {
             this.client.connect(device.deviceId,(deviceId:string)=>{ if(this.devices[device.deviceId]?.ondisconnect) this.devices[device.deviceId].ondisconnect(deviceId); },options?.connectOptions).then(async () => {
                 let services = await this.getServices(device.deviceId);
                 //console.log(services);
-                for(const service in options?.services) {
+                for(let service in options?.services) {
+                    if(options?.services[service].UUID) service = options?.services[service].UUID;
                     let svc = services.find((o) => {if(o.uuid === service) return true;});
                     if(svc)
-                        for(const characteristic in options.services[service]) {
+                        for(let characteristic in options.services[service]) {
+                            if(options.services[service][characteristic].characteristic) characteristic = options.services[service][characteristic].characteristic;
                             if(!svc.characteristics.find((o) => {if(o.uuid === characteristic) return true;})) continue;
                             let opt = options.services[service][characteristic];
                             if(opt.write) {
