@@ -1,6 +1,6 @@
 {
   "name": "webserial-wrapper",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Convenience features for the Web Serial API.",
   "main": "dist/serialstream.js",
   "module":"dist/serialstream.esm.js",
@@ -22,9 +22,9 @@
     "esbuild"
   ],
   "author": "Joshua Brewster and Garrett Flynn",
-  "license": "AGPL-3.0-or-later",
+  "license": "LGPL-3.0-or-later",
   "dependencies": {
-    "@types/dom-serial": "~1.0.3"
+    "@types/dom-serial": "~1.0.4"
   },
   "nodemonConfig": {
     "env": {

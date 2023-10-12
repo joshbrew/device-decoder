@@ -1,6 +1,6 @@
 {
   "name": "device-decoder",
-  "version": "0.6.5",
+  "version": "0.7.0",
   "description": "Customizable multithreaded BLE and USB (or other) device connecting, sensor decoding, and (threaded) output rendering",
   "main": "dist/device.frontend.js",
   "module": "dist/device.frontend.esm.js",
@@ -21,21 +21,21 @@
     "esbuild"
   ],
   "author": "Joshua Brewster and Garrett Flynn",
-  "license": "AGPL-3.0-or-later",
+  "license": "LGPL-3.0-or-later",
   "dependencies": {
-    "@capacitor-community/bluetooth-le": "~3.0.0",
-    "brainsatplay-math": "~0.0.25",
-    "graphscript": "~0.2.135",
-    "graphscript-services": "~0.2.164",
-    "graphscript-services.gpu": "~0.2.127",
-    "graphscript-services.storage": "~0.2.139",
-    "webgl-plot-utils": "~0.4.1"
+    "@capacitor-community/bluetooth-le": "*",
+    "brainsatplay-math": "~0.1.0",
+    "graphscript": "~0.3.0",
+    "graphscript-services": "~0.3.0",
+    "graphscript-services.gpu": "~0.3.0",
+    "graphscript-services.storage": "~0.3.0",
+    "webgl-plot-utils": "~0.4.2"
   },
   "devDependencies": {
-    "@capacitor/android": "~5.0.4",
-    "@capacitor/cli": "~5.0.4",
-    "@capacitor/core": "~5.0.4",
-    "@capacitor/ios": "~5.0.4",
+    "@capacitor/android": "*",
+    "@capacitor/cli": "*",
+    "@capacitor/core": "*",
+    "@capacitor/ios": "*",
     "@types/dom-serial": "~1.0.3",
     "@types/node": "~20.2.4"
   },

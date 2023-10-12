@@ -1,5 +1,5 @@
 import { ByteParser } from '../util/ByteParser';
-//Joshua Brewster. AGPL v3.0
+//Joshua Brewster. LGPL v3.0
 import '../hacktimer/HackTimer.min' //prevents timer lock on tab content loss
 
 //Wrapper for

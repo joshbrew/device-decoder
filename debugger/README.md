@@ -46,6 +46,6 @@ Features [graphscript](https://github.com/brainsatplay/graphscript) to script th
 ![d](./debugger.png)
 
 
-License: AGPL v3.0
+License: LGPL v3.0
 
 Joshua Brewster

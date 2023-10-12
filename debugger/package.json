@@ -20,7 +20,7 @@
     "esbuild"
   ],
   "author": "Joshua Brewster",
-  "license": "AGPL-3.0-or-later",
+  "license": "LGPL-3.0-or-later",
   "dependencies": {
     "@capacitor-community/bluetooth-le": "~2.0.1",
     "brainsatplay-math": "~0.0.25",
