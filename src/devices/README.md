@@ -366,3 +366,33 @@ export const Devices = {
 //...decoders //decoders to transform any raw outputs not specified to a device
 
 ```
+
+
+### Stream Worker Template
+This is the required base template for our web worker system. You can update the Devices list yourself with your own custom list this way. Otherwise, there is a worker service baked into the library. You can copy that file and our dependencies and work from there, or use the following. Note this is required if you want to customize the device list to take advantage of the multithreaded codec and IIR filters.
+```ts
+import {  WorkerService, workerCanvasRoutes, subprocessRoutes } from 'graphscript'
+
+import { streamWorkerRoutes } from 'device-decoder/src/stream.routes' 
+
+import { Devices } from 'device-decoder/src/devices'
+
+declare var WorkerGlobalScope;
+
+if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
+
+    globalThis.Devices = Devices;
+
+    const worker = new WorkerService({
+        roots:{
+            ...workerCanvasRoutes,
+            ...subprocessRoutes,
+            ...streamWorkerRoutes
+        }
+    });
+}
+
+export default self as any; //you can import this as a global in tinybuild to trigger bundling or just add it as an entrypoint to esbuild. 
+
+```
+
