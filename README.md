@@ -61,6 +61,30 @@ let info = initDevice(
 )
 ```
 
+Init options:
+```ts
+type InitDeviceOptions = { //you can update ondecoded and ondisconnect at any time
+    devices?:{ //defaults to the library internal Device list, which you can add to, but make sure you set a custom worker that loads the list
+        [key:string]:{
+            [key:string]:any
+        }
+    },
+    
+    //this function is required
+    ondecoded:((data:any) => void)|{[key:string]:(data:any)=>void}, //a single ondata function or an object with keys corresponding to BLE characteristics
+    onconnect?:((device:any) => void),
+    beforedisconnect?:((device:any) => void),
+    ondisconnect?:((device:any) => void),
+    ondata?:((data:DataView) => void), //get direct results, bypass workers (except for serial which is thread-native)
+    filterSettings?:{[key:string]:FilterSettings},
+    reconnect?:boolean, //this is for the USB codec but you MUST provide the usbProductId and usbVendorId in settings. For BLE it will attempt to reconnect if you provide a deviceId in settings
+    roots?:{ //use secondary workers to run processes and report results back to the main thread or other
+        [key:string]:WorkerRoute
+    },
+    workerUrl?:any,
+    service?:WorkerService //can load up our own worker service, the library provides a default service
+}
+```
 The default `Devices` object is organized as follows:
 
 #### BLE
@@ -100,6 +124,7 @@ Other ideas would be creating media stream drivers to run processes on threads e
 These drivers are formatted with simple objects to generalize easily and get the multithreading benefits of `device-decoder`.
 
 You can create these simple objects to pipe anything through our threading system!
+
 
 ### Monitoring Multiple Characteristics
 For BLE devices with multiple notification or read characteristics, you can supply an object to the `ondecoded` property in `initDevice`. 
