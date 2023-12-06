@@ -177,6 +177,33 @@ let info = initDevice(
 
 You may also specify `roots` in the config object which will subscribe to all outputs from the stream worker thread to be used with [`graphscript`](https://github.com/brainsatplay/graphscript) formatting. In the [`eegnfb`](https://github.com/brainsatplay/graphscript/examples/eegnfb) example in the GS repo we demonstrated piping multiple workers this way e.g. to run algorithms or build CSV files in IndexedDB.
 
+Stream Worker Template
+This is the required base template for our web worker system. You can update the Devices list yourself with your own custom list this way. Otherwise, there is a worker service baked into the library.
+
+import {  WorkerService, workerCanvasRoutes, subprocessRoutes } from 'graphscript'
+
+import { streamWorkerRoutes } from 'device-decoder/src/stream.routes' 
+
+import { Devices } from 'device-decoder/src/devices'
+
+declare var WorkerGlobalScope;
+
+if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
+
+    globalThis.Devices = Devices;
+
+    const worker = new WorkerService({
+        roots:{
+            ...workerCanvasRoutes,
+            ...subprocessRoutes,
+            ...streamWorkerRoutes
+        }
+    });
+}
+
+export default self as any; //you can import this as a global in tinybuild to trigger bundling or just add it as an entrypoint to esbuild. 
+
+
 ## Contributing
 
 ### Add your Own Drivers
