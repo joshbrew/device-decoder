@@ -85,6 +85,31 @@ type InitDeviceOptions = { //you can update ondecoded and ondisconnect at any ti
     service?:WorkerService //can load up our own worker service, the library provides a default service
 }
 ```
+
+Filter settings options (this runs on the thread):
+
+Select a combination of filters, which are preconfigured butterworth IIR filters and a few others:
+``` ts
+type FilterSettings = {
+  sps:number, //required
+  useSMA4?:boolean,
+  useNotch50?:boolean,
+  useNotch60?:boolean,
+  useLowpass?: boolean,
+  lowpassHz?:number,
+  useBandpass?: boolean,
+  bandpassLower?:number,
+  bandpassUpper?:number,
+  useDCBlock?: boolean,
+  DCBresonance?: number,
+  useScaling?: boolean,
+  scalar?:number,
+  trimOutliers?:boolean,
+  outlierTolerance?:number
+}
+```
+I think we can also use the IIR filters in the official Audio API but I have not actually tried, so these are handmade filters ported from an RF tutorial.
+
 The default `Devices` object is organized as follows:
 
 #### BLE
