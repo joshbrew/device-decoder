@@ -147,8 +147,7 @@ export const nrf5xBLESettings = {
 You can see the expected settings for each type of device here:
 ```ts
 
-//this goes into initDFevice
-type InitDeviceOptions = { //you can update ondecoded and ondisconnect at any time
+export type InitDeviceOptions = { //you can update ondecoded and ondisconnect at any time
     devices?:{
         [key:string]:{
             [key:string]:any
@@ -170,7 +169,7 @@ type InitDeviceOptions = { //you can update ondecoded and ondisconnect at any ti
     service?:WorkerService //can load up our own worker service, the library provides a default service
 }
 
-type CustomDeviceStream = {
+export type CustomDeviceStream = {
     workers:{
         streamworker:WorkerInfo
     },
@@ -180,11 +179,11 @@ type CustomDeviceStream = {
     read:(command?:any)=>any,
     write:(command?:any)=>any,
     //FYI only works on time series data and on devices with a set sample rate:
-    setFilters:(filterSettings:FilterSettings, clearFilters?:boolean) => Promise<true>,
+    setFilters:(filterSettings:{[key:string]:FilterSettings}, clearFilters?:boolean) => Promise<true>,
     roots:{[key:string]:WorkerRoute}
 };
 
-type SerialDeviceStream = {
+export type SerialDeviceStream = {
     workers:{
         serialworker:WorkerInfo,
         streamworker:WorkerInfo
@@ -206,7 +205,7 @@ type SerialDeviceStream = {
 };
     
 
-type BLEDeviceStream = {
+export type BLEDeviceStream = {
     workers:{
         streamworker:WorkerInfo
     },
@@ -221,8 +220,6 @@ type BLEDeviceStream = {
     write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions})=>Promise<void>,
     roots:{[key:string]:WorkerRoute}
 };
-
-
 
 ```
 
