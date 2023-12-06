@@ -142,7 +142,7 @@ The default `Devices` object is organized as follows:
 
 #### BLE_CUSTOM (under `device-decoder.third_party`)
 - `muse`: Integrates with the [muse-js](https://github.com/urish/muse-js) library.
-- `ganglion`: Modifies the [ganglion-ble](https://github.com/neurosity/ganglion-ble/tree/master/src) library.
+- `ganglion`: Modifies the [ganglion-ble](https://github.com/neurosity/ganglion-ble/tree/master/src) library. Note, this was broken last time it was tried, but I don't own a ganglion.
 
 Other ideas would be creating media stream drivers to run processes on threads e.g. for audio and video.
 
@@ -150,6 +150,62 @@ These drivers are formatted with simple objects to generalize easily and get the
 
 You can create these simple objects to pipe anything through our threading system!
 
+The stream objects returned by initDevice call are structured like the following depending on what type of stream is defined:
+```ts
+
+type SerialDeviceStream = {
+    workers:{
+        serialworker:WorkerInfo,
+        streamworker:WorkerInfo
+    },
+    options:InitDeviceOptions,
+    device:{
+        _id:string,
+        settings:any,
+        info:Partial<SerialPortInfo>
+    },
+    subscribeStream:(ondata:(data:any) => void) => Promise<any>,
+    unsubscribeStream:(sub:number|undefined) => Promise<any>,
+    //FYI only works on time series data and on devices with a set sample rate:
+    setFilters:(filterSettings:{[key:string]:FilterSettings}, clearFilters?:boolean) => Promise<true>,
+    disconnect:()=>void,
+    read:()=>Promise<any>,
+    write:(command:any)=>Promise<boolean>,
+    roots:{[key:string]:WorkerRoute}
+};
+    
+
+type BLEDeviceStream = {
+    workers:{
+        streamworker:WorkerInfo
+    },
+    options:InitDeviceOptions,
+    device:BLEDeviceInfo,
+    subscribe:(service, notifyCharacteristic, ondata?, bypassWorker?) => Promise<void>,
+    unsubscribe:(service, notifyCharacteristic) => Promise<void>,
+    //FYI only works on time series data and on devices with a set sample rate:
+    setFilters:(filterSettings:{[key:string]:FilterSettings}, clearFilters?:boolean) => Promise<true>,
+    disconnect:()=>void,
+    read:(command:{ service:string, characteristic:string, ondata?:(data:DataView)=>void, timeout?:TimeoutOptions }) => Promise<DataView>,
+    write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions})=>Promise<void>,
+    roots:{[key:string]:WorkerRoute}
+};
+
+type CustomDeviceStream = {
+    workers:{
+        streamworker:WorkerInfo
+    },
+    device:any,
+    options:InitDeviceOptions,
+    disconnect:()=>void,
+    read:(command?:any)=>any,
+    write:(command?:any)=>any,
+    //FYI only works on time series data and on devices with a set sample rate:
+    setFilters:(filterSettings:{[key:string]:FilterSettings}, clearFilters?:boolean) => Promise<true>,
+    roots:{[key:string]:WorkerRoute}
+};
+
+```
 
 ### Monitoring Multiple Characteristics
 For BLE devices with multiple notification or read characteristics, you can supply an object to the `ondecoded` property in `initDevice`. 
@@ -176,6 +232,7 @@ let info = initDevice(
 ```
 
 You may also specify `roots` in the config object which will subscribe to all outputs from the stream worker thread to be used with [`graphscript`](https://github.com/brainsatplay/graphscript) formatting. In the [`eegnfb`](https://github.com/brainsatplay/graphscript/examples/eegnfb) example in the GS repo we demonstrated piping multiple workers this way e.g. to run algorithms or build CSV files in IndexedDB.
+
 
 ### Stream Worker Template
 This is the required base template for our web worker system. You can update the Devices list yourself with your own custom list this way. Otherwise, there is a worker service baked into the library. You can copy that file and our dependencies and work from there, or use the following. Note this is required if you want to customize the device list to take advantage of the multithreaded codec and IIR filters.
