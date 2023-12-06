@@ -150,7 +150,7 @@ These drivers are formatted with simple objects to generalize easily and get the
 
 You can create these simple objects to pipe anything through our threading system!
 
-The stream objects returned by initDevice call are structured like the following depending on what type of stream is defined:
+The stream objects returned by initDevice call are structured like the following depending on what type of stream is defined. This gives you full control over your devices on their respective protocols. Note custom defined ones may have arbitrary behaviors.
 ```ts
 
 type SerialDeviceStream = {
