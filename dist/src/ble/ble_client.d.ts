@@ -1,6 +1,8 @@
+/// <reference types="web-bluetooth" />
 import { ByteParser } from '../util/ByteParser';
 import { BleClientInterface, BleDevice, InitializeOptions, RequestBleDeviceOptions, ScanResult, TimeoutOptions } from '@capacitor-community/bluetooth-le';
 export type BLEDeviceOptions = {
+    filters?: BluetoothLEScanFilter[];
     namePrefix?: string;
     name?: string;
     deviceId?: string;
@@ -21,6 +23,7 @@ export type BLEDeviceOptions = {
                 writeCallback?: (() => void);
                 notify?: boolean;
                 notifyCallback?: ((result: DataView) => void);
+                chunkSize?: number;
                 [key: string]: any;
             };
         };
@@ -45,7 +48,7 @@ export declare class BLEClient extends ByteParser {
     connect(device: BleDevice, options?: BLEDeviceOptions): Promise<BleDevice>;
     reconnect(deviceId: string, options?: BLEDeviceOptions): Promise<BLEDeviceInfo>;
     disconnect(device: BleDevice | string): Promise<void>;
-    write(device: BleDevice | string, service: string, characteristic: string, value: string | number | ArrayBufferLike | DataView | number[], callback?: () => void, options?: TimeoutOptions): Promise<void>;
+    write(device: BleDevice | string, service: string, characteristic: string, value: string | number | ArrayBufferLike | DataView | number[], callback?: () => void, chunkSize?: number, options?: TimeoutOptions): Promise<unknown>;
     read(device: BleDevice | string, service: string, characteristic: string, ondata?: (result: DataView) => void, options?: TimeoutOptions): Promise<void> | Promise<DataView>;
     subscribe(device: BleDevice | string, service: string, characteristic: string, ondata: (result: DataView) => void): Promise<void>;
     unsubscribe(device: BleDevice | string, service: string, characteristic: string): Promise<void>;

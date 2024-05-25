@@ -12,6 +12,7 @@ import {
 
 
 export type BLEDeviceOptions = {
+    filters?:BluetoothLEScanFilter[],
     namePrefix?:string,
     name?:string,
     deviceId?:string,
@@ -31,7 +32,8 @@ export type BLEDeviceOptions = {
                 writeOptions?:TimeoutOptions,
                 writeCallback?:(()=>void),
                 notify?:boolean, //can this characteristic notify?
-                notifyCallback?:((result:DataView)=>void)
+                notifyCallback?:((result:DataView)=>void),
+                chunkSize?:number, //rate limit for writes?
                 [key:string]:any
             }
         }
@@ -96,6 +98,7 @@ export class BLEClient extends ByteParser {
                     
                     if(options.name) deviceRequest.name = options.name;
                     if(options.namePrefix) deviceRequest.namePrefix = options.namePrefix;
+                    if(options.filters) deviceRequest.filters = options.filters;
                     
                     this.client.requestDevice(deviceRequest)
                         .then((device) => {
@@ -139,8 +142,11 @@ export class BLEClient extends ByteParser {
     setupDevice = (device:BleDevice,options?:BLEDeviceOptions):Promise<BLEDeviceInfo> => {
         return new Promise(async (res,rej) => {
             this.devices[device.deviceId] = {device, deviceId:device.deviceId,...options};
-            this.client.connect(device.deviceId,(deviceId:string)=>{ if(this.devices[device.deviceId]?.ondisconnect) this.devices[device.deviceId].ondisconnect(deviceId); },options?.connectOptions).then(async () => {
+            await this.client.connect(device.deviceId,(deviceId:string)=>{ if(this.devices[device.deviceId]?.ondisconnect) this.devices[device.deviceId].ondisconnect(deviceId); },options?.connectOptions).then(async () => {
                 let services = await this.getServices(device.deviceId);
+
+                
+                //this.devices[device.deviceId].mtu = this.client.getMtu(device.deviceId);
                 //console.log(services);
                 for(let service in options?.services) {
                     if(options?.services[service].UUID) service = options?.services[service].UUID;
@@ -150,8 +156,10 @@ export class BLEClient extends ByteParser {
                             if(options.services[service][characteristic].characteristic) characteristic = options.services[service][characteristic].characteristic;
                             if(!svc.characteristics.find((o) => {if(o.uuid === characteristic) return true;})) continue;
                             let opt = options.services[service][characteristic];
+
+                            //default commands
                             if(opt.write) {
-                                await this.write(device,service,characteristic,opt.write,opt.writeCallback,opt.writeOptions);
+                                await this.write(device,service,characteristic,opt.write,opt.writeCallback,opt.chunkSize,opt.writeOptions);
                             }
                             if(opt.read) {
                                 await this.read(device,service,characteristic,opt.readCallback,opt.readOptions)
@@ -218,9 +226,30 @@ export class BLEClient extends ByteParser {
         characteristic: string, 
         value: string|number|ArrayBufferLike|DataView|number[], 
         callback?:()=>void,
+        chunkSize?:number,
         options?: TimeoutOptions
     ) {  
         if(typeof device === 'object') device = device.deviceId;
+        
+        if(chunkSize) {
+            //break message into write chunks 
+
+            return new Promise(async (res,rej) => {
+                const view = BLEClient.toDataView(value);
+                let len = view.buffer.byteLength;
+
+                for(let i = 0; i < len; i+=chunkSize) {
+                    let endIdx = i+chunkSize; if (endIdx > len) endIdx = len;
+                    const slice = new DataView(view.buffer.slice(i,endIdx));
+                    if(callback) {
+                        await this.client.write(device,service,characteristic,slice).then(callback);
+                    } else await this.client.writeWithoutResponse(device,service,characteristic,slice,options);
+                }
+
+                res(undefined); //finished, return void
+            })
+        }
+        
         if(callback) {
             return this.client.write(device,service,characteristic,BLEClient.toDataView(value)).then(callback);
         } else return this.client.writeWithoutResponse(device,service,characteristic,BLEClient.toDataView(value),options);

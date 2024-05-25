@@ -30,6 +30,7 @@ export * from './blueberry2';
 export * from './genericBLE';
 export * from './bme280';
 export * from './simulator';
+export * from './espruino';
 export * from './types';
 export declare const Devices: {
     BLE: {
@@ -182,6 +183,7 @@ export declare const Devices: {
                 };
             };
         };
+        espruino: import("./types").BLEDeviceSettings;
     };
     USB: {
         nrf5x: {

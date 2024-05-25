@@ -1,6 +1,6 @@
 {
   "name": "device-decoder",
-  "version": "0.7.0",
+  "version": "0.8.1",
   "description": "Customizable multithreaded BLE and USB (or other) device connecting, sensor decoding, and (threaded) output rendering",
   "main": "dist/device.frontend.js",
   "module": "dist/device.frontend.esm.js",
@@ -29,6 +29,7 @@
     "graphscript-services": "~0.3.0",
     "graphscript-services.gpu": "~0.3.0",
     "graphscript-services.storage": "~0.3.0",
+    "graphscript-workers": "^0.3.17",
     "webgl-plot-utils": "~0.4.2"
   },
   "devDependencies": {

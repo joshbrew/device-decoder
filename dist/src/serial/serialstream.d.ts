@@ -69,12 +69,12 @@ export declare class WebSerial extends ByteParser {
     requestPort(usbVendorId?: number, usbProductId?: number): Promise<SerialPort>;
     openPort(port: SerialPort, options?: SerialPortOptions): Promise<void>;
     readWithTimeout(port: SerialPort, timeout: number): Promise<ReadableStreamReadResult<any>>;
-    writePort(port: SerialPort, message: any): Promise<boolean>;
+    writePort(port: SerialPort, message: any, chunkSize?: number): Promise<boolean>;
     getSignals(port: SerialPort): any;
     setSignals(port: SerialPort, signals: any): any;
     createStream: (options: SerialStreamProps) => SerialStreamInfo;
     readStream(stream: SerialStreamInfo): SerialStreamInfo;
-    writeStream(stream: SerialStreamInfo | string, message: any): boolean;
+    writeStream(stream: SerialStreamInfo | string, message: string | number | DataView | ArrayBufferLike, chunkSize?: number): Promise<boolean>;
     closeStream(stream: SerialStreamInfo | string, onclose?: (info: SerialStreamInfo) => void): Promise<boolean>;
     reconnect(stream: SerialStreamInfo | string, options?: SerialStreamProps): Promise<SerialStreamInfo>;
     static setStreamTransforms(stream: ReadableStream, transforms: {

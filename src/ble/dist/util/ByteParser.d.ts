@@ -23,7 +23,10 @@ export declare class ByteParser extends ArrayManip {
     static get2sCompliment(val: number, nbits: number): number;
     static getSignedInt(...args: number[]): number;
     static asUint8Array(input: any): Uint8Array;
-    static boyerMoore(patternBuffer: any): any;
+    static boyerMoore(patternBuffer: any): {
+        (txtBuffer: any, start?: number, end?: any): number;
+        byteLength: number;
+    };
     static struct(format: string): Readonly<{
         unpack: (arrb: any) => any[];
         pack: (...values: any[]) => ArrayBuffer;

@@ -4,7 +4,7 @@ import {
     workerCanvasRoutes, 
     //GPUService, 
 //    loadAlgorithms
-} from 'graphscript'//"../../GraphServiceRouter/index"//'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
+} from 'graphscript-workers'//"../../GraphServiceRouter/index"//'graphscript'/////"../../GraphServiceRouter/index";//from 'graphscript'
 import { 
     streamWorkerRoutes 
 } from './stream.routes';

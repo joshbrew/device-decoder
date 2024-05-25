@@ -1,5 +1,5 @@
 /// <reference types="dom-serial" />
-import { WorkerInfo, WorkerService, WorkerRoute } from 'graphscript';
+import { WorkerInfo, WorkerService, WorkerRoute } from 'graphscript-workers';
 import gsworker from './stream.worker';
 import { BLEClient, BLEDeviceInfo } from './ble/ble_client';
 import { Devices } from './devices';
@@ -69,7 +69,7 @@ export type SerialDeviceStream = {
     }, clearFilters?: boolean) => Promise<true>;
     disconnect: () => void;
     read: () => Promise<any>;
-    write: (command: any) => Promise<boolean>;
+    write: (command: string | number | DataView | ArrayBufferLike | number[], chunkSize?: number) => Promise<boolean>;
     roots: {
         [key: string]: WorkerRoute;
     };
@@ -97,6 +97,7 @@ export type BLEDeviceStream = {
         characteristic: string;
         data?: string | number | ArrayBufferLike | DataView | number[];
         callback?: () => void;
+        chunkSize?: number;
         timeout?: TimeoutOptions;
     }) => Promise<void>;
     roots: {

@@ -18,6 +18,7 @@ import { blueberry2BLESettings, blueberry2ChartSettings } from './blueberry2';
 import { heartRateBLESettings, hrcodec } from './genericBLE';
 import { bme280codec } from './bme280';
 import { simulatorSettings } from './simulator';
+import { espruinoBLESettings, espruinocodec } from './espruino';
 
 export * from '../util/BiquadFilters';
 export * from './ads131m08';
@@ -38,7 +39,7 @@ export * from './blueberry2';
 export * from './genericBLE';
 export * from './bme280';
 export * from './simulator';
-
+export * from './espruino'
 
 
 import { 
@@ -65,7 +66,8 @@ export const Devices = {
         'blueberry': blueberryBLESettings,
         'blueberry2': blueberry2BLESettings,
         'heart_rate': heartRateBLESettings,
-        'freeEEG16': freeeeg16BLESettings
+        'freeEEG16': freeeeg16BLESettings,
+        'espruino': espruinoBLESettings
     },
     USB:{
         'nrf5x':nrf5xSerialSettings,
@@ -158,8 +160,8 @@ const textdecoder = new TextDecoder();
 
 //decoders to transform any raw outputs not specified to a device
 export const decoders:any = {
-    'raw':(data:any) => { if(data?.buffer) return Array.from(new Uint8Array(data)); else return data; },
-    'utf8':(data:any) => { return textdecoder.decode(data); },
+    'raw':(data:any) => { if((data as DataView)?.getInt8) return Array.from(new Uint8Array(data)); else return data; },
+    'utf8':(data:any) => { if((data as DataView)?.getInt8) return textdecoder.decode(new Uint8Array(data.buffer)); else return textdecoder.decode(data); },
     'console-f12':(data:any) => { if(data?.buffer) data = Array.from(new Uint8Array(data)); console.log(data); return data; },
     'debug':(data:any,debugmessage:string) => { if(data?.buffer) data = Array.from(new Uint8Array(data)); console.log(debugmessage,data); return data; },
     'ads131m08':ads131m08codec,
@@ -177,7 +179,8 @@ export const decoders:any = {
     'peanut':peanutcodec, //old code: https://github.com/joshbrew/peanutjs/blob/main/peanut.js
     'statechanger':statechangercodec,
     'blueberry':blueberrycodec,
-    'heart_rate':hrcodec
+    'heart_rate':hrcodec,
+    'espruino':espruinocodec
     //...custom?
 }
 

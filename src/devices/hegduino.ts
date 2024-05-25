@@ -16,6 +16,9 @@ export function hegduinocodec(value:any) {
         temperature: 0 //temp on v2, nonsense on v1
     }
 
+    if((value as DataView).getInt8) value = new Uint8Array(value.buffer);
+    else if(!value.buffer) value = new Uint8Array(value);
+
     let txt = textdecoder.decode(value);
     let line = txt.split('|'); //serial will stream in as utf8 lines, we use | separators
     if(line.length === 3) { //android web ble mode (20 byte packet lim)

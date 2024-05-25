@@ -127,9 +127,19 @@ export class WebSerial extends ByteParser {
     }
 
     //write a port with a one-off writer.
-    async writePort(port:SerialPort,message:any) {
+    async writePort(port:SerialPort,message:any, chunkSize?:number) {
         const writer = port.writable.getWriter();
-        await writer.write(WebSerial.toDataView(message));
+        if(chunkSize) {
+            const view = WebSerial.toDataView(message);
+            const len = view.buffer.byteLength;
+            for(let i = 0; i < len; i += chunkSize) {
+                let endIdx = i+chunkSize; if(endIdx > len) endIdx = len;
+                const slice = new DataView(view.buffer.slice(i,endIdx));
+                await writer.write(slice);
+            }
+        } else {
+            await writer.write(WebSerial.toDataView(message));
+        }
         writer.releaseLock();
         return true;
     }
@@ -258,11 +268,23 @@ export class WebSerial extends ByteParser {
     }
 
     //use this on an active stream instead of writePort
-    writeStream(stream:SerialStreamInfo|string, message:any) {
+    async writeStream(stream:SerialStreamInfo|string, message:string | number | DataView | ArrayBufferLike, chunkSize?:number) {
         if(typeof stream === 'string') stream = this.streams[stream];
         if(stream.port.writable) {
             let writer = stream.port.writable.getWriter();
-            writer.write(WebSerial.toDataView(message));
+
+            if(chunkSize) {
+                const view = WebSerial.toDataView(message);
+                const len = view.buffer.byteLength;
+                for(let i = 0; i < len; i += chunkSize) {
+                    let endIdx = i+chunkSize; if(endIdx > len) endIdx = len;
+                    const slice = new DataView(view.buffer.slice(i,endIdx));
+                    await writer.write(slice);
+                }
+
+            } else {
+                await writer.write(WebSerial.toDataView(message));
+            }
             writer.releaseLock();
             return true;
         } return undefined;

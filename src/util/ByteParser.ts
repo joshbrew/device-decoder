@@ -235,68 +235,44 @@ export class ByteParser extends ArrayManip {
 		}
 	}
 
-	static boyerMoore(patternBuffer):any {
-		// Implementation of Boyer-Moore substring search ported from page 772 of
-		// Algorithms Fourth Edition (Sedgewick, Wayne)
-		// http://algs4.cs.princeton.edu/53substring/BoyerMoore.java.html
-		/*
-		USAGE:
-			// needle should be ASCII string, ArrayBuffer, or Uint8Array
-			// haystack should be an ArrayBuffer or Uint8Array
-			var search = boyerMoore(needle);
-			var skip = search.byteLength;
-			var indices = [];
-			for (var i = search(haystack); i !== -1; i = search(haystack, i + skip)) {
-				indices.push(i);
-			}
-		*/
-		var pattern = ByteParser.asUint8Array(patternBuffer);
-		var M = pattern.length;
-		if (M === 0) {
-			throw new TypeError("patternBuffer must be at least 1 byte long");
-		}
-		// radix
-		var R = 256;
-		var rightmost_positions = new Int32Array(R);
-		// position of the rightmost occurrence of the byte c in the pattern
-		for (var c = 0; c < R; c++) {
-			// -1 for bytes not in pattern
-			rightmost_positions[c] = -1;
-		}
-		for (var j = 0; j < M; j++) {
-			// rightmost position for bytes in pattern
-			rightmost_positions[pattern[j]] = j;
-		}
-		var boyerMooreSearch = (txtBuffer, start?, end?) => {
-			// Return offset of first match, -1 if no match.
-			var txt = ByteParser.asUint8Array(txtBuffer);
-			if (start === undefined) start = 0;
-			if (end === undefined) end = txt.length;
-			var pat = pattern;
-			var right = rightmost_positions;
-			var lastIndex = end - pat.length;
-			var lastPatIndex = pat.length - 1;
-			var skip;
-			for (var i = start; i <= lastIndex; i += skip) {
-				skip = 0;
-				for (var j = lastPatIndex; j >= 0; j--) {
-				var c = txt[i + j];
-				if (pat[j] !== c) {
-					skip = Math.max(1, j - right[c]);
-					break;
-				}
-				}
-				if (skip === 0) {
-				    return i;
-				}
-			}
-			return -1;
-		};
+    //optimized boyer moore search
+	static boyerMoore(patternBuffer) {
+        const pattern = new Uint8Array(patternBuffer);
+        const M = pattern.length;
+        if (M === 0) {
+            throw new TypeError("patternBuffer must be at least 1 byte long");
+        }
 
-        (boyerMooreSearch as any).byteLength = pattern.byteLength
-		return boyerMooreSearch;
-	}
-	//---------------------end copy/pasted solution------------------------
+        const R = 256;
+        const rightmost_positions = new Int32Array(R).fill(-1);
+        for (let j = 0; j < M; j++) {
+            rightmost_positions[pattern[j]] = j;
+        }
+
+        const boyerMooreSearch = (txtBuffer, start = 0, end = txtBuffer.byteLength) => {
+            const txt = txtBuffer instanceof Uint8Array ? txtBuffer : new Uint8Array(txtBuffer);
+            const lastIndex = end - M;
+            const lastPatIndex = M - 1;
+
+            for (let i = start; i <= lastIndex;) {
+                let skip = 0;
+                for (let j = lastPatIndex; j >= 0; j--) {
+                    if (pattern[j] !== txt[i + j]) {
+                        skip = Math.max(1, j - rightmost_positions[txt[i + j]]);
+                        break;
+                    }
+                }
+                if (skip === 0) {
+                    return i;
+                }
+                i += skip;
+            }
+            return -1;
+        };
+
+        boyerMooreSearch.byteLength = M;
+        return boyerMooreSearch;
+    }
 
 
     //eg struct(format).unpack(Uint8Array[]) //to parse a struct with a specified format into an unpacked array

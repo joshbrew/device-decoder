@@ -3,9 +3,9 @@ import {
     WorkerInfo, 
     WorkerService, 
     WorkerRoute, 
-    workerCanvasRoutes, 
-    remoteGraphRoutes
-} from 'graphscript';////"../../graphscript/index"
+    remoteGraphRoutes,
+    workerCanvasRoutes
+} from 'graphscript-workers';////"../../graphscript/index"
 
 import gsworker from './stream.worker'
 
@@ -90,7 +90,7 @@ export type SerialDeviceStream = {
     setFilters:(filterSettings:{[key:string]:FilterSettings}, clearFilters?:boolean) => Promise<true>,
     disconnect:()=>void,
     read:()=>Promise<any>,
-    write:(command:any)=>Promise<boolean>,
+    write:(command:string | number | DataView | ArrayBufferLike | number[],chunkSize?:number)=>Promise<boolean>,
     roots:{[key:string]:WorkerRoute}
 };
     
@@ -107,7 +107,7 @@ export type BLEDeviceStream = {
     setFilters:(filterSettings:{[key:string]:FilterSettings}, clearFilters?:boolean) => Promise<true>,
     disconnect:()=>void,
     read:(command:{ service:string, characteristic:string, ondata?:(data:DataView)=>void, timeout?:TimeoutOptions }) => Promise<DataView>,
-    write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions})=>Promise<void>,
+    write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, chunkSize?:number, timeout?:TimeoutOptions})=>Promise<void>,
     roots:{[key:string]:WorkerRoute}
 };
 
@@ -322,7 +322,7 @@ export function initDevice(
                         }
                     },
                     read:(command:{ service:string, characteristic:string, ondata?:(data:DataView)=>void, timeout?:TimeoutOptions }) => { return BLE.read(result.device, command.service, command.characteristic, command.ondata, command.timeout) },
-                    write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions}) => { return BLE.write(result.device, command.service, command.characteristic, command.data, command.callback, command.timeout) },
+                    write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, chunkSize?:number, timeout?:TimeoutOptions}) => { return BLE.write(result.device, command.service, command.characteristic, command.data, command.callback, command.chunkSize, command.timeout) },
                     setFilters:(filterSettings:{[key:string]:FilterSettings}, clearFilters?:boolean) => {
                         return streamworker.run('setFilters', [filterSettings, clearFilters]);
                     },
@@ -433,7 +433,7 @@ export function initDevice(
                             if(options.ondisconnect) options.ondisconnect(info); 
                         },
                         read:() => { return new Promise((res,rej) => { let sub; sub = streamworker.subscribe('decodeAndParseDevice',(result)=>{ serialworker.unsubscribe('decodeAndParseDevice',sub); res(result); });}); }, //we are already reading, just return the latest result from decodeAndParseDevice
-                        write:(command:any) => {return serialworker.run('writeStream', [result._id,command])},
+                        write:(message:string | number | DataView | ArrayBufferLike | number[],chunkSize?:number) => {return serialworker.run('writeStream', [result._id,message,chunkSize])},
                         setFilters:(filterSettings:{[key:string]:FilterSettings}, clearFilters?:boolean) => {
                             return streamworker.run('setFilters', [filterSettings, clearFilters]);
                         },
