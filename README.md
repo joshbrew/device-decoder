@@ -61,6 +61,55 @@ let info = initDevice(
 )
 ```
 
+Init options:
+```ts
+type InitDeviceOptions = { //you can update ondecoded and ondisconnect at any time
+    devices?:{ //defaults to the library internal Device list, which you can add to, but make sure you set a custom worker that loads the list
+        [key:string]:{
+            [key:string]:any
+        }
+    },
+    
+    //this function is required
+    ondecoded:((data:any) => void)|{[key:string]:(data:any)=>void}, //a single ondata function or an object with keys corresponding to BLE characteristics
+    onconnect?:((device:any) => void),
+    beforedisconnect?:((device:any) => void),
+    ondisconnect?:((device:any) => void),
+    ondata?:((data:DataView) => void), //get direct results, bypass workers (except for serial which is thread-native)
+    filterSettings?:{[key:string]:FilterSettings},
+    reconnect?:boolean, //this is for the USB codec but you MUST provide the usbProductId and usbVendorId in settings. For BLE it will attempt to reconnect if you provide a deviceId in settings
+    roots?:{ //use secondary workers to run processes and report results back to the main thread or other
+        [key:string]:WorkerRoute
+    },
+    workerUrl?:any,
+    service?:WorkerService //can load up our own worker service, the library provides a default service
+}
+```
+
+Filter settings options (this runs on the thread):
+
+Select a combination of filters, which are preconfigured butterworth IIR filters and a few others:
+``` ts
+type FilterSettings = {
+  sps:number, //required
+  useSMA4?:boolean,
+  useNotch50?:boolean,
+  useNotch60?:boolean,
+  useLowpass?: boolean,
+  lowpassHz?:number,
+  useBandpass?: boolean,
+  bandpassLower?:number,
+  bandpassUpper?:number,
+  useDCBlock?: boolean,
+  DCBresonance?: number,
+  useScaling?: boolean,
+  scalar?:number,
+  trimOutliers?:boolean,
+  outlierTolerance?:number
+}
+```
+I think we can also use the IIR filters in the official Audio API but I have not actually tried, so these are handmade filters ported from an RF tutorial.
+
 The default `Devices` object is organized as follows:
 
 #### BLE
@@ -93,13 +142,70 @@ The default `Devices` object is organized as follows:
 
 #### BLE_CUSTOM (under `device-decoder.third_party`)
 - `muse`: Integrates with the [muse-js](https://github.com/urish/muse-js) library.
-- `ganglion`: Modifies the [ganglion-ble](https://github.com/neurosity/ganglion-ble/tree/master/src) library.
+- `ganglion`: Modifies the [ganglion-ble](https://github.com/neurosity/ganglion-ble/tree/master/src) library. Note, this was broken last time it was tried, but I don't own a ganglion.
 
 Other ideas would be creating media stream drivers to run processes on threads e.g. for audio and video.
 
 These drivers are formatted with simple objects to generalize easily and get the multithreading benefits of `device-decoder`.
 
 You can create these simple objects to pipe anything through our threading system!
+
+The stream objects returned by initDevice call are structured like the following depending on what type of stream is defined. This gives you full control over your devices on their respective protocols. Note custom defined ones may have arbitrary behaviors.
+```ts
+
+type SerialDeviceStream = {
+    workers:{
+        serialworker:WorkerInfo,
+        streamworker:WorkerInfo
+    },
+    options:InitDeviceOptions,
+    device:{
+        _id:string,
+        settings:any,
+        info:Partial<SerialPortInfo>
+    },
+    subscribeStream:(ondata:(data:any) => void) => Promise<any>,
+    unsubscribeStream:(sub:number|undefined) => Promise<any>,
+    //FYI only works on time series data and on devices with a set sample rate:
+    setFilters:(filterSettings:{[key:string]:FilterSettings}, clearFilters?:boolean) => Promise<true>,
+    disconnect:()=>void,
+    read:()=>Promise<any>,
+    write:(command:any)=>Promise<boolean>,
+    roots:{[key:string]:WorkerRoute}
+};
+    
+
+type BLEDeviceStream = {
+    workers:{
+        streamworker:WorkerInfo
+    },
+    options:InitDeviceOptions,
+    device:BLEDeviceInfo,
+    subscribe:(service, notifyCharacteristic, ondata?, bypassWorker?) => Promise<void>,
+    unsubscribe:(service, notifyCharacteristic) => Promise<void>,
+    //FYI only works on time series data and on devices with a set sample rate:
+    setFilters:(filterSettings:{[key:string]:FilterSettings}, clearFilters?:boolean) => Promise<true>,
+    disconnect:()=>void,
+    read:(command:{ service:string, characteristic:string, ondata?:(data:DataView)=>void, timeout?:TimeoutOptions }) => Promise<DataView>,
+    write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, timeout?:TimeoutOptions})=>Promise<void>,
+    roots:{[key:string]:WorkerRoute}
+};
+
+type CustomDeviceStream = {
+    workers:{
+        streamworker:WorkerInfo
+    },
+    device:any,
+    options:InitDeviceOptions,
+    disconnect:()=>void,
+    read:(command?:any)=>any,
+    write:(command?:any)=>any,
+    //FYI only works on time series data and on devices with a set sample rate:
+    setFilters:(filterSettings:{[key:string]:FilterSettings}, clearFilters?:boolean) => Promise<true>,
+    roots:{[key:string]:WorkerRoute}
+};
+
+```
 
 ### Monitoring Multiple Characteristics
 For BLE devices with multiple notification or read characteristics, you can supply an object to the `ondecoded` property in `initDevice`. 
@@ -127,6 +233,34 @@ let info = initDevice(
 
 You may also specify `roots` in the config object which will subscribe to all outputs from the stream worker thread to be used with [`graphscript`](https://github.com/brainsatplay/graphscript) formatting. In the [`eegnfb`](https://github.com/brainsatplay/graphscript/examples/eegnfb) example in the GS repo we demonstrated piping multiple workers this way e.g. to run algorithms or build CSV files in IndexedDB.
 
+
+### Stream Worker Template
+This is the required base template for our web worker system. You can update the Devices list yourself with your own custom list this way. Otherwise, there is a worker service baked into the library. You can copy that file and our dependencies and work from there, or use the following. Note this is required if you want to customize the device list to take advantage of the multithreaded codec and IIR filters.
+```ts
+import {  WorkerService, workerCanvasRoutes, subprocessRoutes } from 'graphscript'
+
+import { streamWorkerRoutes } from 'device-decoder/src/stream.routes' 
+
+import { Devices } from 'device-decoder/src/devices'
+
+declare var WorkerGlobalScope;
+
+if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
+
+    globalThis.Devices = Devices;
+
+    const worker = new WorkerService({
+        roots:{
+            ...workerCanvasRoutes,
+            ...subprocessRoutes,
+            ...streamWorkerRoutes
+        }
+    });
+}
+
+export default self as any; //you can import this as a global in tinybuild to trigger bundling or just add it as an entrypoint to esbuild. 
+
+```
 ## Contributing
 
 ### Add your Own Drivers

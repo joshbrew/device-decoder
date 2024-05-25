@@ -30,6 +30,8 @@ export function blueberrycodec(value:DataView) {
 //write down the settings for your device
 export const blueberryBLESettings = {
     namePrefix:'blueberry',
+    deviceType:'BLE',
+    deviceName:'blueberry',
     services:{
         '0f0e0d0c-0b0a-0908-0706-050403020100':{
             '1f1e1d1c-1b1a-1918-1716-151413121110':{
@@ -103,6 +105,8 @@ export function nrf5x_usbcodec(data:any) {
 
 export const nrf5xSerialSettings = {
     baudRate:115200,
+    deviceType:'USB',
+    deviceName:'nrf5x',
     buffering:{
         searchBytes:new Uint8Array([240,240])
     },
@@ -110,6 +114,8 @@ export const nrf5xSerialSettings = {
 }
 
 export const nrf5xBLESettings = {
+    deviceType:'BLE',
+    deviceName:'nrf5x'
     services:{
         '0000cafe-b0ba-8bad-f00d-deadbeef0000':{
             '0001cafe-b0ba-8bad-f00d-deadbeef0000':{
@@ -147,8 +153,7 @@ export const nrf5xBLESettings = {
 You can see the expected settings for each type of device here:
 ```ts
 
-//this goes into initDFevice
-type InitDeviceOptions = { //you can update ondecoded and ondisconnect at any time
+export type InitDeviceOptions = { //you can update ondecoded and ondisconnect at any time
     devices?:{
         [key:string]:{
             [key:string]:any
@@ -170,21 +175,10 @@ type InitDeviceOptions = { //you can update ondecoded and ondisconnect at any ti
     service?:WorkerService //can load up our own worker service, the library provides a default service
 }
 
-type CustomDeviceStream = {
-    workers:{
-        streamworker:WorkerInfo
-    },
-    device:any,
-    options:InitDeviceOptions,
-    disconnect:()=>void,
-    read:(command?:any)=>any,
-    write:(command?:any)=>any,
-    //FYI only works on time series data and on devices with a set sample rate:
-    setFilters:(filterSettings:FilterSettings, clearFilters?:boolean) => Promise<true>,
-    roots:{[key:string]:WorkerRoute}
-};
+//returned with the initDevice call, depending on the stream type:
 
-type SerialDeviceStream = {
+
+export type SerialDeviceStream = {
     workers:{
         serialworker:WorkerInfo,
         streamworker:WorkerInfo
@@ -206,7 +200,7 @@ type SerialDeviceStream = {
 };
     
 
-type BLEDeviceStream = {
+export type BLEDeviceStream = {
     workers:{
         streamworker:WorkerInfo
     },
@@ -222,7 +216,19 @@ type BLEDeviceStream = {
     roots:{[key:string]:WorkerRoute}
 };
 
-
+export type CustomDeviceStream = {
+    workers:{
+        streamworker:WorkerInfo
+    },
+    device:any,
+    options:InitDeviceOptions,
+    disconnect:()=>void,
+    read:(command?:any)=>any,
+    write:(command?:any)=>any,
+    //FYI only works on time series data and on devices with a set sample rate:
+    setFilters:(filterSettings:{[key:string]:FilterSettings}, clearFilters?:boolean) => Promise<true>,
+    roots:{[key:string]:WorkerRoute}
+};
 
 ```
 
@@ -230,21 +236,6 @@ type BLEDeviceStream = {
 You may also add filter settings to apply in the worker codecs automatically. There are additional controls to toggle them on the fly if you dig into the stream.worker's routes
 
 ```ts
-
-export const nrf5x_usbChartSettings:Partial<WebglLinePlotProps> = {
-    lines:{
-        '0':{nSec:10, sps:250},
-        '1':{nSec:10, sps:250},
-        '2':{nSec:10, sps:250},
-        '3':{nSec:10, sps:250},
-        '4':{nSec:10, sps:250},
-        '5':{nSec:10, sps:250},
-        '6':{nSec:10, sps:250},
-        '7':{nSec:10, sps:250}
-    },
-    generateNewLines:true,
-    cleanGeneration:false
-}
 
 
 let defaultsetting = {
@@ -275,6 +266,23 @@ export const nrf5x_usbFilterSettings:{[key:string]:FilterSettings} = {
     '15':JSON.parse(JSON.stringify(defaultsetting))
 }
 
+
+
+export const nrf5x_usbChartSettings:Partial<WebglLinePlotProps> = {
+    lines:{
+        '0':{nSec:10, sps:250},
+        '1':{nSec:10, sps:250},
+        '2':{nSec:10, sps:250},
+        '3':{nSec:10, sps:250},
+        '4':{nSec:10, sps:250},
+        '5':{nSec:10, sps:250},
+        '6':{nSec:10, sps:250},
+        '7':{nSec:10, sps:250}
+    },
+    generateNewLines:true,
+    cleanGeneration:false
+} //these are just settings for webgl-plot-utils, which we defined generically
+
 ```
 
 
@@ -287,35 +295,154 @@ Create an object like:
 
 ```ts
 
-export const customDevice = {
-    connect:(settings:{})=>{
-        //e.g.
-        let info = Object.assign(Object.assign({},customDevice),settings); //e.g. create a copy of this settings object for this connection instance
-        
-        let device = Device() //some driver
-        
-        device.ondata = info.ondata;
-        
-        device.connect();
+import { FilterSettings } from "../../util/BiquadFilters";
+import { ByteParser } from "../../util/ByteParser";
 
-        info.device = device;
+import {MuseClient} from './dependencies/muse.esm'
 
-        info.onconnect(info);
+const sps = 250;
 
-        return info;
+export const museSettings = { //include muse-js and import {MuseClient} from 'muse-js' for this to work
+    sps, //base eeg sps, accelerometer is something else I think, I dunno
+    deviceType:'USB_CUSTOM',
+    deviceName:'muse',
+    connect:(settings:any={}) => {
+        return new Promise(async (res,rej) => {
+            let _id = `muse${Math.floor(Math.random()*1000000000000000)}`;
+
+            //if(typeof MuseClient === 'undefined')  { document.head.insertAdjacentHTML('beforeend',`<script src="https://cdn.jsdelivr.net/npm/muse-js-tinybuild@1.0.0/dist/muse.min.js"></script>`) }
+
+            let client = new MuseClient();
+
+            let info = {
+                _id,
+                client,
+                settings:Object.assign(Object.assign({},museSettings),settings) //e.g. customize ondisconnect
+            }
+
+            client.enableAux = true;
+            await client.connect();
+            await client.start();
+
+            let eegts;
+
+            client.eegReadings.subscribe((reading:{
+                index: number;
+                electrode: number; // 0 to 4
+                timestamp: number; // milliseconds since epoch
+                samples: number[]; // 12 samples each time
+            }) => {
+                (reading as any).origin = 'eeg';
+                if(reading.electrode === 0) {
+                    eegts = ByteParser.genTimestamps(12,250);
+                }
+                if(!eegts) eegts = ByteParser.genTimestamps(12,250);
+                reading.timestamp = eegts; //sync timestamps across samples
+                info.settings.ondata(reading);
+            });
+
+            client.telemetryData.subscribe((reading:{
+                sequenceId: number;
+                batteryLevel: number;
+                fuelGaugeVoltage: number;
+                temperature: number;
+            }) => {
+                (reading as any).origin = 'telemetry';
+                info.settings.ondata(reading);
+            });
+
+            client.gyroscopeData.subscribe((reading:{
+                sequenceId: number;
+                samples: {x:number,y:number,z:number}[];
+            }) => {
+                (reading as any).origin = 'gyro';
+                info.settings.ondata(reading);
+            })
+            
+            client.accelerometerData.subscribe((reading:{
+                sequenceId: number;
+                samples: {x:number,y:number,z:number}[];
+            }) => {
+                (reading as any).origin = 'accelerometer';
+                info.settings.ondata(reading);
+            });
+
+            if(client.enablePPG) {
+                
+                client.ppgData.subscribe((reading:{
+                    index: number;
+                    ppgChannel: number; // 0 to 2
+                    timestamp: number; // milliseconds since epoch
+                    samples: number[]; // 6 samples each time
+                }) => {
+                    (reading as any).origin = 'ppg';
+                    info.settings.ondata(reading);
+                });
+            }
+
+            if(info.settings.onconnect) info.settings.onconnect(info);
+
+            res(info);
+        })
         
-    }, //-> init device and scripts
-    disconnect:(info)=>{
-        info.device.disconnect();
-        info.ondisconnect(info);
-    }, //-> close device connection
-    onconnect:(info)=>{ console.log('connected!', info) }, //-> onconnect callback you can customize
-    ondata:(data:any)=>{ return customDevice.codec(data); }, //-> ondata callback you can customize
-    ondisconnect:(info)=>{ console.log('disconnected!', info) }, //-> disconnect callback you can customize
-    codec:(data:any)=>{ return JSON.stringify(data); } //-> optionally used to transform data e.g. on a separate thread, libraries like muse-js already do some of this for us so we can customize ondata to pass slightly modified outputs to threads, and use the codec to do some kind of special math on a thread
-    read?:(command:any)=>{ return device.read(command);}
-    write?:(command:any)=>{ return device.write(command); }
+    },
+    codec:(reading:any) => { //remap outputs to more or less match the rest of our formatting
+
+        let origin = reading.origin;
+
+        if(origin === 'eeg') {
+            return {
+                [reading.electrode]:reading.samples,
+                timestamp:Date.now()
+            }
+        }
+        else if (origin === 'gyro') {
+            
+            let transformed = {gx:[] as any,gy:[] as any,gz:[] as any, timestamp:Date.now()};
+            reading.samples.forEach((s:any) => {
+                transformed.gx.push(s.x);
+                transformed.gy.push(s.y);
+                transformed.gz.push(s.z);
+            });
+            
+            return transformed;
+        }  
+        else if (origin === 'accelerometer') {
+            
+            let transformed = {ax:[] as any,ay:[] as any,az:[] as any, timestamp:Date.now()};
+            reading.samples.forEach((s:any) => {
+                transformed.ax.push(s.x);
+                transformed.ay.push(s.y);
+                transformed.az.push(s.z);
+            });
+            
+            return transformed;
+        } else if (origin === 'ppg') {
+            return {
+                [`ppg${reading.ppgChannel}`]:reading.samples,
+                timestamp:Date.now()
+            };
+        } else if (origin === 'telemetry') {
+            return reading;
+        }
+    },
+    disconnect:(info) => {
+        info.client.disconnect();
+    },
+    onconnect:(info)=>{
+        console.log('muse connected!', info);
+    }, 
+    beforedisconnect:(info) => {},
+    ondisconnect:(info)=>{
+        console.log('muse disconnected!', info);
+    },
+    ondata:(data:any)=>{
+        console.log(data); //direct from teh device output
+    },
+    //read:(info:any,command?:any)=>{},
+    //write:(info:any,command?:any)=>{}
 }
+
 
 ```
 
@@ -369,3 +496,33 @@ export const Devices = {
 //...decoders //decoders to transform any raw outputs not specified to a device
 
 ```
+
+
+### Stream Worker Template
+This is the required base template for our web worker system. You can update the Devices list yourself with your own custom list this way. Otherwise, there is a worker service baked into the library. You can copy that file and our dependencies and work from there, or use the following. Note this is required if you want to customize the device list to take advantage of the multithreaded codec and IIR filters.
+```ts
+import {  WorkerService, workerCanvasRoutes, subprocessRoutes } from 'graphscript'
+
+import { streamWorkerRoutes } from 'device-decoder/src/stream.routes' 
+
+import { Devices } from 'device-decoder/src/devices'
+
+declare var WorkerGlobalScope;
+
+if(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
+
+    globalThis.Devices = Devices;
+
+    const worker = new WorkerService({
+        roots:{
+            ...workerCanvasRoutes,
+            ...subprocessRoutes,
+            ...streamWorkerRoutes
+        }
+    });
+}
+
+export default self as any; //you can import this as a global in tinybuild to trigger bundling or just add it as an entrypoint to esbuild. 
+
+```
+
