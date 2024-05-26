@@ -1,4 +1,7 @@
 /node_modules
+
 examples/**/node_modules
+
 debugger/node_modules
+
 src/**/node_modules
