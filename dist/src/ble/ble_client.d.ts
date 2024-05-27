@@ -1,8 +1,6 @@
-/// <reference types="web-bluetooth" />
 import { ByteParser } from '../util/ByteParser';
 import { BleClientInterface, BleDevice, InitializeOptions, RequestBleDeviceOptions, ScanResult, TimeoutOptions } from '@capacitor-community/bluetooth-le';
 export type BLEDeviceOptions = {
-    filters?: BluetoothLEScanFilter[];
     namePrefix?: string;
     name?: string;
     deviceId?: string;

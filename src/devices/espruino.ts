@@ -4,11 +4,11 @@ export const NORDIC_SERVICE = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
 export const NORDIC_TX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
 export const NORDIC_RX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
 
-let defaultChunkSize = 250; //3 less than max chunk size. nrf52 buffer size is 250
+let defaultChunkSize = 128; //3 less than max chunk size. nrf52 buffer size is 250
 
 export const espruinocodec = (data:DataView) => { //utf8 buffer
     let decoded = new Uint8Array(data.buffer);    
-    defaultChunkSize = decoded.length;
+    if(decoded.length > defaultChunkSize) defaultChunkSize = decoded.length;
     return {
         output:decoded //use str2ab on output for string outputs
     };
@@ -27,7 +27,7 @@ export function str2ab(str:string) {
     for (var i=0, strLen=str.length; i<strLen; i++) {
       bufView[i] = str.charCodeAt(i);
     }
-    return buf;
+    return new DataView(buf);
 }
 
 //e.g. https://www.espruino.com/Bangle.js+Data+Streaming
@@ -37,40 +37,48 @@ export async function uploadCode(
     chunkSize:number=defaultChunkSize //default MTU on browser and android is 512, it's 20 on WebBLE for android but we aren't using that. 
 ) {
 
-    device.write({
+    console.log("Writing reset operation");
+
+    await device.write({
         service:NORDIC_SERVICE, 
         characteristic:NORDIC_TX, 
         data:str2ab("reset();\n"), 
         chunkSize
     }); 
     
-    const data = str2ab(`\x03\x10if(1){"${ESPRUINO_CODE}"}\n`);
-    device.write({
+    console.log("Writing program to device.");
+
+    await device.write({
         service:NORDIC_SERVICE, 
         characteristic:NORDIC_TX, 
-        data, 
+        data:str2ab(`\x03\x10if(1){"${ESPRUINO_CODE}"}\n`), 
         chunkSize
     });
+
+    return;
 }
 
+//you'll have to set the namePrefix since the filters don't do squat on capacitor
 export const espruinoBLESettings = {
     deviceType:'BLE',
     deviceName:'espruino',
-    filters:[
-        { namePrefix: 'Puck.js' },
-        { namePrefix: 'Pixl.js' },
-        { namePrefix: 'Jolt.js' },
-        { namePrefix: 'MDBT42Q' },
-        { namePrefix: 'Bangle.js' },
-        { namePrefix: 'Espruino' },
-        { services: [ NORDIC_SERVICE ] }
-    ],
+    namePrefix:'Bangle.js', //replace namePrefix with the device you wnat to isolate
+    // filters:[
+    //     { namePrefix: 'Puck.js' },
+    //     { namePrefix: 'Pixl.js' },
+    //     { namePrefix: 'Jolt.js' },
+    //     { namePrefix: 'MDBT42Q' },
+    //     { namePrefix: 'Bangle.js' },
+    //     { namePrefix: 'Espruino' },
+    //     { services: [ NORDIC_SERVICE ] }
+    // ],
     services:{
         [NORDIC_SERVICE]:{
             [NORDIC_TX]:{
                 write:undefined
             },
             [NORDIC_RX]:{
+                notify:true,
                 codec:espruinocodec
             }
         }

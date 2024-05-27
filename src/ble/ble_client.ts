@@ -12,9 +12,9 @@ import {
 
 
 export type BLEDeviceOptions = {
-    filters?:BluetoothLEScanFilter[],
     namePrefix?:string,
     name?:string,
+    //filters?:BluetoothLEScanFilter[],
     deviceId?:string,
     onconnect?:()=>void,
     beforedisconnect?:(client:BLEClient,device:BLEDeviceInfo)=>void,
@@ -98,7 +98,7 @@ export class BLEClient extends ByteParser {
                     
                     if(options.name) deviceRequest.name = options.name;
                     if(options.namePrefix) deviceRequest.namePrefix = options.namePrefix;
-                    if(options.filters) deviceRequest.filters = options.filters;
+                    //if(options.filters) deviceRequest.filters = options.filters; //not supported T_T
                     
                     this.client.requestDevice(deviceRequest)
                         .then((device) => {

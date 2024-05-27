@@ -6,6 +6,6 @@ export declare const espruinocodec: (data: DataView) => {
     output: Uint8Array;
 };
 export declare function ab2str(buf: ArrayBufferLike): string;
-export declare function str2ab(str: string): ArrayBuffer;
+export declare function str2ab(str: string): DataView;
 export declare function uploadCode(device: any, ESPRUINO_CODE: string, chunkSize?: number): Promise<void>;
 export declare const espruinoBLESettings: BLEDeviceSettings;
