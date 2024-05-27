@@ -30,8 +30,18 @@ export function str2ab(str:string) {
     return new DataView(buf);
 }
 
+export async function writeEspruinoCommand(device, command:string, chunkSize=defaultChunkSize, addEndline=true) {
+    
+    await device.write({
+        service:NORDIC_SERVICE, 
+        characteristic:NORDIC_TX, 
+        data:str2ab(`${command}${addEndline ? '\n' : ''}`), 
+        chunkSize
+    }); 
+}
+
 //e.g. https://www.espruino.com/Bangle.js+Data+Streaming
-export async function uploadCode(
+export async function uploadEspruinoCode(
     device, 
     ESPRUINO_CODE:string,
     chunkSize:number=defaultChunkSize //default MTU on browser and android is 512, it's 20 on WebBLE for android but we aren't using that. 
@@ -57,6 +67,17 @@ export async function uploadCode(
 
     return;
 }
+
+//make a selector with this and modify namePrefix to scan for the specific device
+export const espruinoNames = [
+    'Bangle.js',
+    'Puck.js',
+    'Pixi.js',
+    'Jolt.js',
+    'MDBT42Q',
+    'Espruino'
+];
+
 
 //you'll have to set the namePrefix since the filters don't do squat on capacitor
 export const espruinoBLESettings = {

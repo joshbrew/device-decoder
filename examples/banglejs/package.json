@@ -27,7 +27,7 @@
   "author": "",
   "license": "",
   "dependencies": {
-    "device-decoder": "^0.8.3"
+    "device-decoder": "^0.8.7"
   },
   "nodemonConfig": {
     "env": {

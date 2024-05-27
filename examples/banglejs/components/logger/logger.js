@@ -9,15 +9,23 @@ export class LoggerDiv extends HTMLElement {
     messagedivs=[];
     maxMessages=5; //max messages in div
     _scrollable=false;
-    div=undefined;
+    table=undefined;
 
     constructor() {
         super();
-        
     }
 
     connectedCallback() {
-        this.innerHTML = template;
+        this.innerHTML = template;  
+        if(!this.table) {     
+            this.table = this.querySelector('table');
+            if(!this._scrollable) this.table.style.overflow = 'hidden';
+        }
+  
+    }
+
+    get style() {
+        return this.table?.style || {};
     }
 
     get scrollable() {
@@ -39,9 +47,9 @@ export class LoggerDiv extends HTMLElement {
         t.innerHTML = templateString.replaceAll('{{message}}',message);
         const fragment = t.content;
 
-        if(!this.div) {     
-            this.div = this.querySelector('table');
-            if(!this._scrollable) this.div.style.overflow = 'hidden';
+        if(!this.table) {     
+            this.table = this.querySelector('table');
+            if(!this._scrollable) this.table.style.overflow = 'hidden';
         }
 
         if(this.messages.length >= this.maxMessages) {
@@ -52,7 +60,7 @@ export class LoggerDiv extends HTMLElement {
         
         this.messages.push(message);
 
-        this.div.appendChild(fragment);
+        this.table.appendChild(fragment);
 
         let children = this.querySelectorAll('tr');
         this.messagedivs.push(children[children.length-1]);

@@ -16,8 +16,10 @@ import {
     initDevice,
     Devices,
     ab2str,
-    uploadCode
-} from '../../src/device.frontend' //device-decoder
+    uploadEspruinoCode,
+    writeEspruinoCommand,
+    espruinoNames,
+} from 'device-decoder'//'../../src/device.frontend' //device-decoder
 
 const btn = document.createElement('button');
 btn.innerHTML = "Connect";
@@ -27,15 +29,49 @@ const logger = document.createElement('log-table');
 
 logger.maxMessages = 20;
 logger.scrollable = true;
-logger.style.width = '100%';
 
 
+const select = document.createElement('select');
+
+espruinoNames.forEach((name) => {
+    select.innerHTML += `<option value="${name}" ${name === 'Bangle.js' ? 'selected' : ''}>${name}</option>`;
+});
+
+select.onchange = () => {
+    Devices.BLE.espruino.namePrefix = select.value;
+}
+
+document.body.appendChild(select);
 document.body.appendChild(logger);
 
+logger.style.width = '100%';
+logger.style.height = '500px';
 
 logger.log(
-    "Connect your device to upload a test program"
+    "Connect your device to upload a test accelerometer program"
 );
+
+const input = document.createElement('textarea');
+const send = document.createElement('button');
+const rset = document.createElement('button');
+const opts = document.createElement('select');
+opts.innerHTML = `
+    <option value="a" selected>Command</option>
+    <option value="b">Program</option>
+`;
+
+send.innerHTML = `Send`;
+rset.innerHTML = `Reset`;
+
+input.placeholder = 'reset(); etc...'
+
+document.body.appendChild(opts);
+document.body.appendChild(send);
+document.body.appendChild(rset);
+document.body.insertAdjacentHTML('beforeend','</br>');
+document.body.appendChild(input);
+
+
 
 btn.onclick = () => {
 
@@ -43,12 +79,26 @@ btn.onclick = () => {
         Devices.BLE.espruino,
         {
             onconnect:(device)=>{
+
+                send.onclick = () => {
+                    if(input.value.length < 1) return;
+                    if(opts.value === 'a') {
+                        writeEspruinoCommand(device, input.value);
+                    }
+                    if(opts.value === 'b') {
+                        uploadEspruinoCode(device, input.value);
+                    }
+                }
+
+                rset.onclick = () => {
+                    writeEspruinoCommand(device,'reset();')
+                }
                 
                 logger.log(
                     "Connected!"
                 );
 
-uploadCode(device,`
+uploadEspruinoCode(device,`
 Bangle.on('accel',function(a) {
     var d = [
         "A",
