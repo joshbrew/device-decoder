@@ -1,4 +1,3 @@
-/// <reference types="dom-serial" />
 import { WorkerInfo, WorkerService, WorkerRoute } from 'graphscript-workers';
 import gsworker from './stream.worker';
 import { BLEClient, BLEDeviceInfo } from './ble/ble_client';

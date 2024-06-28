@@ -22,6 +22,7 @@ export type BLEDeviceOptions = {
                 notify?: boolean;
                 notifyCallback?: ((result: DataView) => void);
                 chunkSize?: number;
+                chunkDelay?: number;
                 [key: string]: any;
             };
         };
@@ -46,7 +47,8 @@ export declare class BLEClient extends ByteParser {
     connect(device: BleDevice, options?: BLEDeviceOptions): Promise<BleDevice>;
     reconnect(deviceId: string, options?: BLEDeviceOptions): Promise<BLEDeviceInfo>;
     disconnect(device: BleDevice | string): Promise<void>;
-    write(device: BleDevice | string, service: string, characteristic: string, value: string | number | ArrayBufferLike | DataView | number[], callback?: () => void, chunkSize?: number, options?: TimeoutOptions): Promise<unknown>;
+    write(device: BleDevice | string, service: string, characteristic: string, value: string | number | ArrayBufferLike | DataView | number[], callback?: () => void, chunkSize?: number, chunkDelay?: number, //ms delay between chunks
+    options?: TimeoutOptions): Promise<unknown>;
     read(device: BleDevice | string, service: string, characteristic: string, ondata?: (result: DataView) => void, options?: TimeoutOptions): Promise<void> | Promise<DataView>;
     subscribe(device: BleDevice | string, service: string, characteristic: string, ondata: (result: DataView) => void): Promise<void>;
     unsubscribe(device: BleDevice | string, service: string, characteristic: string): Promise<void>;

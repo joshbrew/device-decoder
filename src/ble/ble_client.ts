@@ -34,6 +34,7 @@ export type BLEDeviceOptions = {
                 notify?:boolean, //can this characteristic notify?
                 notifyCallback?:((result:DataView)=>void),
                 chunkSize?:number, //rate limit for writes?
+                chunkDelay?:number, //ms delay between sending chunks? default is 10ms;
                 [key:string]:any
             }
         }
@@ -159,7 +160,7 @@ export class BLEClient extends ByteParser {
 
                             //default commands
                             if(opt.write) {
-                                await this.write(device,service,characteristic,opt.write,opt.writeCallback,opt.chunkSize,opt.writeOptions);
+                                await this.write(device,service,characteristic,opt.write,opt.writeCallback,opt.chunkSize, opt.chunkDelay, opt.writeOptions);
                             }
                             if(opt.read) {
                                 await this.read(device,service,characteristic,opt.readCallback,opt.readOptions)
@@ -227,12 +228,15 @@ export class BLEClient extends ByteParser {
         value: string|number|ArrayBufferLike|DataView|number[], 
         callback?:()=>void,
         chunkSize?:number,
+        chunkDelay:number=10, //ms delay between chunks
         options?: TimeoutOptions
     ) {  
         if(typeof device === 'object') device = device.deviceId;
-        
+    
         if(chunkSize) {
             //break message into write chunks 
+
+            const wait = (delay=10) => {return new Promise((res)=>{ setTimeout(()=>{res(true);}, delay); })}
 
             return new Promise(async (res,rej) => {
                 const view = BLEClient.toDataView(value);
@@ -244,6 +248,8 @@ export class BLEClient extends ByteParser {
                     if(callback) {
                         await this.client.write(device,service,characteristic,slice).then(callback);
                     } else await this.client.writeWithoutResponse(device,service,characteristic,slice,options);
+
+                    if(chunkDelay) { await wait(chunkDelay); }
                 }
 
                 res(undefined); //finished, return void

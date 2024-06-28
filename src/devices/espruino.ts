@@ -30,13 +30,14 @@ export function str2ab(str:string) {
     return new DataView(buf);
 }
 
-export async function writeEspruinoCommand(device, command:string, chunkSize=defaultChunkSize, addEndline=true) {
+export async function writeEspruinoCommand(device, command:string, chunkSize=defaultChunkSize, chunkDelay=10, addEndline=true) {
     
     await device.write({
         service:NORDIC_SERVICE, 
         characteristic:NORDIC_TX, 
         data:str2ab(`${command}${addEndline ? '\n' : ''}`), 
-        chunkSize
+        chunkSize,
+        chunkDelay
     }); 
 }
 
