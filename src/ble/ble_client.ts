@@ -226,7 +226,7 @@ export class BLEClient extends ByteParser {
         service: string, 
         characteristic: string, 
         value: string|number|ArrayBufferLike|DataView|number[], 
-        callback?:()=>void,
+        callback?:(progress:number)=>void,
         chunkSize?:number,
         chunkDelay:number=10, //ms delay between chunks
         options?: TimeoutOptions
@@ -246,10 +246,12 @@ export class BLEClient extends ByteParser {
                     let endIdx = i+chunkSize; if (endIdx > len) endIdx = len;
                     const slice = new DataView(view.buffer.slice(i,endIdx));
                     if(callback) {
-                        await this.client.write(device,service,characteristic,slice).then(callback);
+                        await this.client.write(device,service,characteristic,slice).then(()=>{callback(endIdx/len);});
                     } else await this.client.writeWithoutResponse(device,service,characteristic,slice,options);
 
-                    if(chunkDelay) { await wait(chunkDelay); }
+                    if(chunkDelay) { 
+                        await wait(chunkDelay); 
+                    }
                 }
 
                 res(undefined); //finished, return void
@@ -257,7 +259,7 @@ export class BLEClient extends ByteParser {
         }
         
         if(callback) {
-            return this.client.write(device,service,characteristic,BLEClient.toDataView(value)).then(callback);
+            return this.client.write(device,service,characteristic,BLEClient.toDataView(value)).then(()=>{callback(1);});
         } else return this.client.writeWithoutResponse(device,service,characteristic,BLEClient.toDataView(value),options);
     }
 

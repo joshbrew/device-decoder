@@ -322,7 +322,7 @@ export function initDevice(
                         }
                     },
                     read:(command:{ service:string, characteristic:string, ondata?:(data:DataView)=>void, timeout?:TimeoutOptions }) => { return BLE.read(result.device, command.service, command.characteristic, command.ondata, command.timeout) },
-                    write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, chunkSize?:number, timeout?:TimeoutOptions}) => { return BLE.write(result.device, command.service, command.characteristic, command.data, command.callback, command.chunkSize, command.timeout) },
+                    write:(command:{ service:string, characteristic:string, data?:string|number|ArrayBufferLike|DataView|number[], callback?:()=>void, chunkSize?:number, chunkDelay?:number, timeout?:TimeoutOptions}) => { return BLE.write(result.device, command.service, command.characteristic, command.data, command.callback, command.chunkSize, command.chunkDelay, command.timeout) },
                     setFilters:(filterSettings:{[key:string]:FilterSettings}, clearFilters?:boolean) => {
                         return streamworker.run('setFilters', [filterSettings, clearFilters]);
                     },
