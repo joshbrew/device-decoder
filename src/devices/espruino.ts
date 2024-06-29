@@ -35,7 +35,7 @@ export async function writeEspruinoCommand(device, command:string, chunkSize=def
     await device.write({
         service:NORDIC_SERVICE, 
         characteristic:NORDIC_TX, 
-        data:str2ab(`${command}${addEndline ? '\n' : ''}`), 
+        data:str2ab(`\x10${command}${addEndline ? '\n' : ''}`), 
         chunkSize:chunkSize,
         chunkDelay:chunkDelay
     }); 
@@ -45,7 +45,7 @@ export async function writeEspruinoCommand(device, command:string, chunkSize=def
 
 
 export async function resetBangleJSSettings(device) {
-    return writeEspruinoCommand(device, `\x10require('Storage').erase('setting.json');load()\n`, undefined, undefined, false);
+    return writeEspruinoCommand(device, `require('Storage').erase('setting.json');load()`);
 }
 
 
@@ -81,13 +81,14 @@ function toJSONishString(txt) {
   }
 
 
-  export async function uploadEspruinoCodeFile(
+  export async function uploadEspruinoFile(
     device,
     ESPRUINO_CODE,
     chunkSize = defaultChunkSize, // Adjust chunk size as needed
     chunkDelay = 50,
     onProgress?,
     fileName = 'app.js', // Default filename
+    loadFile = false, //load after saving for a program
     progressPingback = false //have the ble device print an OK each time it gets a chunk
 ) {
     const NORDIC_SERVICE = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
@@ -139,7 +140,7 @@ function toJSONishString(txt) {
             i += chunk.length;
 
             if(progressPingback) command += `\nBluetooth.println("OK");\n`; //status message
-            if(i >= len) command += `\nload(${fName});\n`
+            if(loadFile && i >= len) command += `\nload(${fName});\n`
 
             const cmdBuffer = str2ab(command);
             await device.write({
