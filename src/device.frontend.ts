@@ -18,6 +18,7 @@ import { Devices } from './devices';
 import { TimeoutOptions } from '@capacitor-community/bluetooth-le/dist/plugin';
 import { filterPresets, chartSettings, decoders } from './devices/index';
 import { FilterSettings } from './util/BiquadFilters';
+import { streamWorkerRoutes } from './stream.routes';
 
 export * from './devices/index'
 export * from './stream.routes'
@@ -35,6 +36,10 @@ export const workers = new WorkerService({
         ...remoteGraphRoutes, //allows dynamic route loading
     }
 }); 
+
+//use these if making your own worker
+export { streamWorkerRoutes } 
+
 export { Devices, gsworker, filterPresets, chartSettings, decoders, FilterSettings }
 
 export type InitDeviceOptions = { //you can update ondecoded and ondisconnect at any time

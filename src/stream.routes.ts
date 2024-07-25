@@ -1,7 +1,8 @@
+import { parseFunctionFromText } from 'graphscript-core';
 import { 
     WorkerService,
     WorkerInfo
-} from 'graphscript' //'../../graphscript/services/worker/Worker.service'//
+} from 'graphscript-workers' //'../../graphscript/services/worker/Worker.service'//
 import { SerialPortOptions, WebSerial } from './serial/serialstream'; //extended classes need to be imported for compilation
 import { decoders, Devices } from './devices/index';
 //import { WebglLinePlotUtil } from '../../BrainsAtPlay_Libraries/webgl-plot-utils/webgl-plot-utils'//'webgl-plot-utils';
@@ -9,7 +10,6 @@ import { ByteParser } from "./util/ByteParser";
 import { BiquadChannelFilterer, FilterSettings } from './util/BiquadFilters';
 //import * as bfs from './storage/BFSUtils'
 import { ArrayManip } from './util/arraymanip';
-import { parseFunctionFromText } from 'graphscript/src/services/utils';
 
 
 //to load in a worker 

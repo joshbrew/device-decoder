@@ -1,4 +1,4 @@
-import { WorkerInfo } from 'graphscript';
+import { WorkerInfo } from 'graphscript-workers';
 import { FilterSettings } from './util/BiquadFilters';
 export declare function loadStreamWorkerGlobals(): void;
 export declare const streamWorkerRoutes: {

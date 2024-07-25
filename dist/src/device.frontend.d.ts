@@ -5,11 +5,13 @@ import { Devices } from './devices';
 import { TimeoutOptions } from '@capacitor-community/bluetooth-le/dist/plugin';
 import { filterPresets, chartSettings, decoders } from './devices/index';
 import { FilterSettings } from './util/BiquadFilters';
+import { streamWorkerRoutes } from './stream.routes';
 export * from './devices/index';
 export * from './stream.routes';
 export declare function isMobile(): boolean;
 export declare const BLE: BLEClient;
 export declare const workers: WorkerService;
+export { streamWorkerRoutes };
 export { Devices, gsworker, filterPresets, chartSettings, decoders, FilterSettings };
 export type InitDeviceOptions = {
     devices?: {
