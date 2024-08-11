@@ -277,6 +277,7 @@ export class ArrayManip {
         return data;// as {[key:string]:(number[]|{values:number[],[key:string]:any}|WebglLineProps)};
     }
 
+
     //pad an array based on a time interval between sample sets, averaging slope
     static padTime(
         data:number[], //new data, assumed to be sequential between a gap

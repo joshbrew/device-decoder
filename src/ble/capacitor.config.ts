@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.brainsatplay.bletest',
-  appName: 'tinybuildapp',
+  appId: 'com.company.bletest',
+  appName: 'myapp',
   webDir: 'dist',
   bundledWebRuntime: false,
   plugins:{

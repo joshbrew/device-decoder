@@ -99,8 +99,14 @@ export class ByteParser extends ArrayManip {
         return value as DataView;
     }
 
+    static genTimestamps(ct, sps, from?) {
+        let now = from ? from : Date.now();
+        let toInterp = [now - ct * 1000 / sps, now];
+        return ByteParser.upsample(toInterp, ct);
+    }
+
     //search a buffer for matching indices. Can limit the number of indices to find if the buffer is giant but this allows asynchronous number crunching between buffers and outputs to build buffers and then parse through them from the stream
-    static searchBuffer(buffer:number[]|ArrayBuffer, searchString:Uint8Array, limit?:number) {
+    static searchBuffer(buffer:number[]|ArrayBuffer, searchString:number[]|ArrayBuffer, limit?:number) {
         
 		var needle = searchString
 		var haystack = buffer;
