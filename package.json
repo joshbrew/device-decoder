@@ -1,6 +1,6 @@
 {
   "name": "device-decoder",
-  "version": "0.8.43",
+  "version": "0.8.44",
   "description": "Customizable multithreaded BLE and USB (or other) device connecting, sensor decoding, and (threaded) output rendering",
   "main": "dist/device.frontend.js",
   "module": "dist/device.frontend.esm.js",
@@ -30,8 +30,8 @@
     "@types/dom-serial": "~1.0.3",
     "@types/node": "~20.2.4",
     "brainsatplay-math": "~0.1.0",
-    "graphscript": "~0.3.0",
-    "graphscript-services": "~0.3.0",
+    "graphscript": "~0.3.12",
+    "graphscript-services": "~0.3.2",
     "graphscript-services.gpu": "~0.3.0",
     "graphscript-services.storage": "~0.3.0",
     "webgl-plot-utils": "~0.4.2"

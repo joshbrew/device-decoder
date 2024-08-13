@@ -4,7 +4,7 @@ import { FilterSettings } from "../util/BiquadFilters";
 export declare function hegduinocodec(value: any): string | {
     timestamp: number;
     red: number;
-    infrared: number;
+    ir: number;
     heg: number;
     ambient: number;
     temperature: number;

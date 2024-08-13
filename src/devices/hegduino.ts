@@ -6,11 +6,11 @@ let textdecoder = new TextDecoder();
 
 export function hegduinocodec(value:any) {
     //hegduino format is utf8
-    //Per line: timestamp, red, infrared, heg ratio, temperature
+    //Per line: timestamp, red, ir, heg ratio, temperature
     let output = { //https://github.com/joshbrew/HEG_ESP32_Delobotomizer/blob/main/Firmware/MAX86141_HEG/MAX86141_HEG.h
         timestamp: 0,
         red: 0,
-        infrared: 0,
+        ir: 0,
         heg: 0,
         ambient: 0,
         temperature: 0 //temp on v2, nonsense on v1
@@ -24,14 +24,14 @@ export function hegduinocodec(value:any) {
     if(line.length === 3) { //android web ble mode (20 byte packet lim)
         output.timestamp = Date.now();
         output.red = parseInt(line[0]);
-        output.infrared = parseInt(line[1]);
+        output.ir = parseInt(line[1]);
         output.heg = parseFloat(line[2]);
 
     } else if(line.length >= 2) {
         //output.timestamp = parseInt(line[0]);
         output.timestamp = Date.now();
         output.red = parseInt(line[1]);
-        output.infrared = parseInt(line[2]);
+        output.ir = parseInt(line[2]);
         output.heg = parseFloat(line[3]);
         if(line[4]) output.ambient = parseFloat(line[4]);
         if(line[5]) output.temperature = parseFloat(line[5]);
@@ -95,7 +95,7 @@ hegduinoV1BLESettings.sps = 19;
 export const hegduinoChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
         red:{nSec:60, sps},
-        infrared:{nSec:60, sps},
+        ir:{nSec:60, sps},
         heg:{nSec:60, ymin:0, sps},
         ambient:{nSec:60, sps},
         temperature:{nSec:60, sps, units:'C'},
@@ -105,13 +105,13 @@ export const hegduinoChartSettings:Partial<WebglLinePlotProps> = {
 let v1sps = 19;
 export const hegduinoV1FilterSettings:{[key:string]:FilterSettings} = {
     red:{sps:v1sps, lowpassHz:2, useLowpass:true},
-    infrared:{sps:v1sps, lowpassHz:2, useLowpass:true},
+    ir:{sps:v1sps, lowpassHz:2, useLowpass:true},
     heg:{sps:v1sps, lowpassHz:2, useLowpass:true},
 }
 
 export const hegduinoV2FilterSettings:{[key:string]:FilterSettings} = {
     red:{sps, lowpassHz:4, useLowpass:true},
-    infrared:{sps, lowpassHz:4, useLowpass:true},
+    ir:{sps, lowpassHz:4, useLowpass:true},
     heg:{sps, lowpassHz:4, useLowpass:true},
 }
 

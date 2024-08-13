@@ -3,14 +3,17 @@ import { BLEDeviceOptions } from "../ble/ble_client";
 export declare function statechangercodec(value: any): string | {
     timestamp: number;
     left_red: number;
-    left_infrared: number;
+    left_ir: number;
     left_heg: number;
     center_red: number;
-    center_infrared: number;
+    center_ir: number;
     center_heg: number;
     right_red: number;
-    right_infrared: number;
+    right_ir: number;
     right_heg: number;
+    red: number;
+    ir: number;
+    heg: number;
 };
 export declare const statechangerSerialSettings: {
     deviceType: string;

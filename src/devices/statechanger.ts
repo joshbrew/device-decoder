@@ -10,14 +10,17 @@ export function statechangercodec(value:any) {
     let output = { //https://github.com/joshbrew/HEG_ESP32_Delobotomizer/blob/main/Firmware/MAX86141_HEG/MAX86141_HEG.h
         timestamp: 0,
         left_red: 0,
-        left_infrared: 0,
+        left_ir: 0,
         left_heg: 0,
         center_red: 0,
-        center_infrared: 0,
+        center_ir: 0,
         center_heg: 0,
         right_red: 0,
-        right_infrared: 0,
-        right_heg: 0
+        right_ir: 0,
+        right_heg: 0,
+        red:0, //cumulative
+        ir:0,
+        heg:0
     }
 
     let txt = textdecoder.decode(value);
@@ -26,14 +29,18 @@ export function statechangercodec(value:any) {
         //output.timestamp = parseInt(line[0]);
         output.timestamp = Date.now();
         output.left_red = parseInt(line[1]);
-        output.left_infrared = parseInt(line[2]);
+        output.left_ir = parseInt(line[2]);
         output.left_heg = parseFloat(line[3]);
         output.center_red = parseInt(line[4]);
-        output.center_infrared = parseInt(line[5]);
+        output.center_ir = parseInt(line[5]);
         output.center_heg = parseFloat(line[6]);
         output.right_red = parseInt(line[7]);
-        output.right_infrared = parseInt(line[8]);
+        output.right_ir = parseInt(line[8]);
         output.right_heg = parseFloat(line[9]);
+
+        output.red = (output.left_red + output.right_red + output.center_red) / 3;
+        output.ir = (output.left_ir + output.right_ir + output.center_ir) / 3;
+        output.heg = (output.left_heg + output.right_heg + output.center_heg) / 3;
 
         return output;
 
@@ -83,13 +90,13 @@ export const statechangerBLESettings = {
 export const statechangerChartSettings:Partial<WebglLinePlotProps> = {
     lines:{
         left_red:{nSec:60, sps:20},
-        left_infrared:{nSec:60, sps:20},
+        left_ir:{nSec:60, sps:20},
         left_heg:{nSec:60, sps:20},
         center_red:{nSec:60, sps:20},
-        center_infrared:{nSec:60, sps:20},
+        center_ir:{nSec:60, sps:20},
         center_heg:{nSec:60, sps:20},
         right_red:{nSec:60, sps:20},
-        right_infrared:{nSec:60, sps:20},
+        right_ir:{nSec:60, sps:20},
         right_heg:{nSec:60, sps:20},
     }
 }

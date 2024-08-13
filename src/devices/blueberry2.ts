@@ -40,6 +40,7 @@ export const blueberry2BLESettings = {
             '1f1e1d1c-1b1a-1918-1716-151413121110':{
                 write:undefined //new Uint8Array([0xA0],[redValue], [greenValue], [blueValue]); //for rgb controller
             },
+            //long and short channel data
             '4f4e4d4c-4b6a-6968-6766-656463426160':{
                 notify:true,
                 notifyCallback:undefined,

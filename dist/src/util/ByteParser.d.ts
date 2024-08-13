@@ -10,7 +10,8 @@ export declare class ByteParser extends ArrayManip {
         '\\': number;
     };
     static toDataView(value: string | number | ArrayBufferLike | DataView | number[]): DataView;
-    static searchBuffer(buffer: number[] | ArrayBuffer, searchString: Uint8Array, limit?: number): any[];
+    static genTimestamps(ct: any, sps: any, from?: any): any[];
+    static searchBuffer(buffer: number[] | ArrayBuffer, searchString: number[] | ArrayBuffer, limit?: number): any[];
     static bytesToInt16(x0: number, x1: number): number;
     static bytesToUInt16(x0: number, x1: number): number;
     static Uint16ToBytes(y: number): number[];
